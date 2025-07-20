@@ -55,17 +55,9 @@ class QRController extends Controller
                 $itemId = $qrCodeRecord->item_id;
             }
             
-            // Get seller details
+            // Get seller details (UPDATED - no join needed)
             $seller = DB::table('sellers')
-                ->leftJoin('seller_locations', function($join) {
-                    $join->on('sellers.id', '=', 'seller_locations.seller_id')
-                         ->where('seller_locations.is_primary', true);
-                })
-                ->where('sellers.id', $sellerId)
-                ->select(
-                    'sellers.*',
-                    'seller_locations.address as location'
-                )
+                ->where('id', $sellerId)
                 ->first();
                 
             // Get item details
@@ -109,6 +101,11 @@ class QRController extends Controller
                 'created_at' => now(),
                 'updated_at' => now()
             ]);
+
+            // Update seller's total points (NEW - for ranking system)
+            DB::table('sellers')
+                ->where('id', $sellerId)
+                ->increment('total_points', $item->points_per_unit);
             
             DB::commit();
             
@@ -125,7 +122,7 @@ class QRController extends Controller
                 'seller' => [
                     'id' => $seller->id,
                     'business_name' => $seller->business_name,
-                    'location' => $seller->location,
+                    'location' => $seller->address, // UPDATED - direct field access
                     'description' => $seller->description
                 ],
                 'item' => [
@@ -160,23 +157,15 @@ class QRController extends Controller
     
     public function showSellerDetails($sellerId, Request $request)
     {
-        // Your existing showSellerDetails method
         $consumer = Auth::guard('consumer')->user();
         
         if (!$consumer) {
             return redirect()->route('login')->with('error', 'Please login to continue');
         }
         
+        // UPDATED - simplified seller query
         $seller = DB::table('sellers')
-            ->leftJoin('seller_locations', function($join) {
-                $join->on('sellers.id', '=', 'seller_locations.seller_id')
-                     ->where('seller_locations.is_primary', true);
-            })
-            ->where('sellers.id', $sellerId)
-            ->select(
-                'sellers.*',
-                'seller_locations.address as location'
-            )
+            ->where('id', $sellerId)
             ->first();
             
         if (!$seller) {
@@ -190,10 +179,22 @@ class QRController extends Controller
                 ->first();
         }
         
-        $photos = DB::table('seller_photos')
-            ->where('seller_id', $sellerId)
-            ->orderBy('is_featured', 'desc')
-            ->get();
+        // UPDATED - handle photos based on your choice:
+        // Option 1: If using single photo in sellers table
+        $photos = [];
+        if ($seller->photo_url) {
+            $photos[] = (object)[
+                'url' => $seller->photo_url,
+                'caption' => $seller->photo_caption,
+                'is_featured' => true
+            ];
+        }
+        
+        // Option 2: If keeping separate photos table for multiple photos
+        // $photos = DB::table('seller_photos')
+        //     ->where('seller_id', $sellerId)
+        //     ->orderBy('is_featured', 'desc')
+        //     ->get();
             
         $previousTransactions = DB::table('point_transactions')
             ->where('consumer_id', $consumer->id)

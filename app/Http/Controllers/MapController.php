@@ -181,39 +181,34 @@ class MapController extends Controller
     }
 
     /**
-     * Get all stores from database
+     * Get all stores from database - Updated for combined sellers table
      */
     private function getAllStores($search = null)
     {
         $query = DB::table('sellers')
-            ->join('seller_locations', function($join) {
-                $join->on('sellers.id', '=', 'seller_locations.seller_id')
-                     ->where('seller_locations.is_primary', true);
-            })
-            ->leftJoin('seller_photos', function($join) {
-                $join->on('sellers.id', '=', 'seller_photos.seller_id')
-                     ->where('seller_photos.is_featured', true);
-            })
             ->select([
                 'sellers.id',
                 'sellers.business_name as name',
                 'sellers.description',
                 'sellers.working_hours as hours',
                 'sellers.email',
-                'seller_locations.address',
-                'seller_locations.latitude',
-                'seller_locations.longitude',
-                'seller_photos.url as image',
-                DB::raw('COALESCE(seller_photos.url, NULL) as has_image')
+                'sellers.address',
+                'sellers.latitude',
+                'sellers.longitude',
+                'sellers.photo_url as image',
+                'sellers.phone',
+                'sellers.total_points',
+                'sellers.is_active'
             ])
-            ->whereNotNull('seller_locations.latitude')
-            ->whereNotNull('seller_locations.longitude');
+            ->where('sellers.is_active', true)
+            ->whereNotNull('sellers.latitude')
+            ->whereNotNull('sellers.longitude');
 
         // Add search functionality
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('sellers.business_name', 'LIKE', "%{$search}%")
-                  ->orWhere('seller_locations.address', 'LIKE', "%{$search}%")
+                  ->orWhere('sellers.address', 'LIKE', "%{$search}%")
                   ->orWhere('sellers.description', 'LIKE', "%{$search}%");
             });
         }
@@ -227,46 +222,47 @@ class MapController extends Controller
     }
 
     /**
-     * Get single store by ID
+     * Get single store by ID - Updated for combined sellers table
      */
     private function getStoreById($id)
     {
         return DB::table('sellers')
-            ->join('seller_locations', function($join) {
-                $join->on('sellers.id', '=', 'seller_locations.seller_id')
-                     ->where('seller_locations.is_primary', true);
-            })
-            ->leftJoin('seller_photos', function($join) {
-                $join->on('sellers.id', '=', 'seller_photos.seller_id')
-                     ->where('seller_photos.is_featured', true);
-            })
             ->select([
                 'sellers.id',
                 'sellers.business_name as name',
                 'sellers.description',
                 'sellers.working_hours as hours',
                 'sellers.email',
-                'seller_locations.address',
-                'seller_locations.latitude',
-                'seller_locations.longitude',
-                'seller_photos.url as image'
+                'sellers.address',
+                'sellers.latitude',
+                'sellers.longitude',
+                'sellers.photo_url as image',
+                'sellers.phone',
+                'sellers.total_points',
+                'sellers.is_active'
             ])
             ->where('sellers.id', $id)
-            ->whereNotNull('seller_locations.latitude')
-            ->whereNotNull('seller_locations.longitude')
+            ->where('sellers.is_active', true)
+            ->whereNotNull('sellers.latitude')
+            ->whereNotNull('sellers.longitude')
             ->first();
     }
 
     /**
-     * Enrich store data with computed fields
+     * Enrich store data with computed fields - Updated for points system
      */
     private function enrichStoreData($store)
     {
-        // Generate demo phone (replace with real phone field from database)
-        $store->phone = $this->generateDemoPhone();
+        // Use phone from database or generate demo if null
+        $store->phone = $store->phone ?: $this->generateDemoPhone();
         
-        // Generate demo rating (replace with real rating calculation)
-        $store->rating = $this->calculateStoreRating($store->id);
+        // Get total points given to consumers by this store
+        $store->points_reward = $this->getStorePointsGivenToConsumers($store->id);
+        
+        // Calculate rank based on points given to consumers
+        $store->rank_class = $this->getRankClass($store->points_reward);
+        $store->rank_text = $this->getRankText($store->points_reward);
+        $store->rank_icon = $this->getRankIcon($store->points_reward);
         
         // Get transaction count for this store
         $store->transaction_count = $this->getStoreTransactionCount($store->id);
@@ -274,10 +270,10 @@ class MapController extends Controller
         // Format working hours
         $store->hours_formatted = $this->formatWorkingHours($store->hours);
         
-        // Check if store is currently open
+        // Check if store is currently open (basic implementation)
         $store->is_open = $this->isStoreCurrentlyOpen($store->hours);
         
-        // Get all photos for this store
+        // Get store photos if using separate photos table
         $store->photos = $this->getStorePhotos($store->id);
         
         // Initialize distance (will be calculated by frontend)
@@ -287,35 +283,31 @@ class MapController extends Controller
     }
 
     /**
-     * Search stores by query with optional location filtering
+     * Search stores by query with optional location filtering - Updated
      */
     private function searchStoresByQuery($query, $userLat = null, $userLng = null, $radiusKm = 50)
     {
         $baseQuery = DB::table('sellers')
-            ->join('seller_locations', function($join) {
-                $join->on('sellers.id', '=', 'seller_locations.seller_id')
-                     ->where('seller_locations.is_primary', true);
-            })
-            ->leftJoin('seller_photos', function($join) {
-                $join->on('sellers.id', '=', 'seller_photos.seller_id')
-                     ->where('seller_photos.is_featured', true);
-            })
             ->select([
                 'sellers.id',
                 'sellers.business_name as name',
                 'sellers.description',
                 'sellers.working_hours as hours',
                 'sellers.email',
-                'seller_locations.address',
-                'seller_locations.latitude',
-                'seller_locations.longitude',
-                'seller_photos.url as image'
+                'sellers.address',
+                'sellers.latitude',
+                'sellers.longitude',
+                'sellers.photo_url as image',
+                'sellers.phone',
+                'sellers.total_points',
+                'sellers.is_active'
             ])
-            ->whereNotNull('seller_locations.latitude')
-            ->whereNotNull('seller_locations.longitude')
+            ->where('sellers.is_active', true)
+            ->whereNotNull('sellers.latitude')
+            ->whereNotNull('sellers.longitude')
             ->where(function($q) use ($query) {
                 $q->where('sellers.business_name', 'LIKE', "%{$query}%")
-                  ->orWhere('seller_locations.address', 'LIKE', "%{$query}%")
+                  ->orWhere('sellers.address', 'LIKE', "%{$query}%")
                   ->orWhere('sellers.description', 'LIKE', "%{$query}%");
             });
 
@@ -331,6 +323,53 @@ class MapController extends Controller
         return $stores->map(function($store) {
             return $this->enrichStoreData($store);
         });
+    }
+
+    /**
+     * Get total points given to consumers by this store
+     */
+    private function getStorePointsGivenToConsumers($storeId)
+    {
+        return DB::table('point_transactions')
+            ->where('seller_id', $storeId)
+            ->where('type', 'earn')
+            ->sum('points');
+    }
+
+    /**
+     * Rank calculation based on points given to consumers
+     */
+    private function getRankClass($points)
+    {
+        $numPoints = floatval($points);
+        
+        if ($numPoints >= 500) return 'platinum';   // 500+ points given
+        if ($numPoints >= 250) return 'gold';       // 250+ points given
+        if ($numPoints >= 100) return 'silver';     // 100+ points given
+        if ($numPoints >= 50) return 'bronze';      // 50+ points given
+        return 'standard';                          // Under 50 points
+    }
+
+    private function getRankText($points)
+    {
+        $numPoints = floatval($points);
+        
+        if ($numPoints >= 500) return 'Platinum';
+        if ($numPoints >= 250) return 'Gold';
+        if ($numPoints >= 100) return 'Silver';
+        if ($numPoints >= 50) return 'Bronze';
+        return 'Standard';
+    }
+
+    private function getRankIcon($points)
+    {
+        $numPoints = floatval($points);
+        
+        if ($numPoints >= 500) return '👑';
+        if ($numPoints >= 250) return '🥇';
+        if ($numPoints >= 100) return '🥈';
+        if ($numPoints >= 50) return '🥉';
+        return '⭐';
     }
 
     /**
@@ -353,37 +392,27 @@ class MapController extends Controller
     }
 
     /**
-     * Generate WHERE clause for distance-based filtering
+     * Generate WHERE clause for distance-based filtering - Updated for combined table
      */
     private function getDistanceWhereClause($userLat, $userLng, $radiusKm)
     {
         return "
             (6371 * acos(
                 cos(radians({$userLat})) * 
-                cos(radians(seller_locations.latitude)) * 
-                cos(radians(seller_locations.longitude) - radians({$userLng})) + 
+                cos(radians(sellers.latitude)) * 
+                cos(radians(sellers.longitude) - radians({$userLng})) + 
                 sin(radians({$userLat})) * 
-                sin(radians(seller_locations.latitude))
+                sin(radians(sellers.latitude))
             )) <= {$radiusKm}
         ";
     }
 
     /**
-     * Generate demo phone number (replace with real database field)
+     * Generate demo phone number (fallback if no phone in database)
      */
     private function generateDemoPhone()
     {
         return '+855 ' . rand(10, 99) . ' ' . rand(100, 999) . ' ' . rand(100, 999);
-    }
-
-    /**
-     * Calculate store rating based on transactions
-     */
-    private function calculateStoreRating($storeId)
-    {
-        // For now, return demo rating
-        // TODO: Implement real rating based on customer feedback
-        return round(rand(35, 50) / 10, 1); // 3.5 to 5.0
     }
 
     /**
@@ -410,25 +439,32 @@ class MapController extends Controller
     }
 
     /**
-     * Check if store is currently open
+     * Check if store is currently open - Basic implementation
      */
     private function isStoreCurrentlyOpen($hours)
     {
-        // For demo purposes, randomly return true/false
+        if (!$hours) {
+            return false;
+        }
+        
+        // For demo purposes, return true for stores with hours
         // TODO: Implement real opening hours logic
-        return rand(0, 1) === 1;
+        return true;
     }
 
     /**
-     * Get all photos for a store
+     * Get all photos for a store - Updated for combined approach
      */
     private function getStorePhotos($storeId)
     {
-        return DB::table('seller_photos')
+        // If using separate photos table
+        $photos = DB::table('seller_photos')
             ->where('seller_id', $storeId)
             ->select('url', 'caption', 'is_featured')
             ->orderBy('is_featured', 'desc')
             ->orderBy('created_at', 'desc')
             ->get();
+
+        return $photos;
     }
 }

@@ -382,11 +382,13 @@
             width: 60px;
             height: 60px;
             border-radius: 12px;
-            background: #f0f0f0;
+            background: linear-gradient(135deg, #2E8B57, #3CB371);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 24px;
+            color: white;
+            font-weight: bold;
         }
 
         .seller-details h4 {
@@ -401,6 +403,19 @@
             display: flex;
             align-items: center;
             gap: 5px;
+        }
+
+        .seller-rank {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #333;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 8px;
         }
 
         .item-info {
@@ -675,7 +690,11 @@
             document.getElementById('earned-points').textContent = data.points_earned.toLocaleString();
             document.getElementById('total-points').textContent = data.new_total_points.toLocaleString();
             
-            // Update seller info
+            // Calculate seller rank based on their total points (this would come from your backend)
+            const sellerTotalPoints = data.seller.total_points || 0;
+            const sellerRank = getRankInfo(sellerTotalPoints);
+            
+            // Update seller info with enhanced ranking display
             const sellerInfo = document.getElementById('seller-info');
             sellerInfo.innerHTML = `
                 <div class="seller-header">
@@ -688,17 +707,31 @@
                             <span>📍</span>
                             <span>${data.seller.location || 'Location not specified'}</span>
                         </div>
+                        <div class="seller-rank">
+                            <span>${sellerRank.icon}</span>
+                            <span>${sellerRank.name} Store</span>
+                        </div>
                     </div>
                 </div>
                 
                 <div class="item-info">
                     <strong>Item:</strong> ${data.item.name}<br>
-                    <strong>Points Earned:</strong> ${data.item.points_per_unit} pts
+                    <strong>Points Earned:</strong> ${data.item.points_per_unit} pts<br>
+                    <strong>Store Points:</strong> ${sellerTotalPoints.toLocaleString()} pts
                 </div>
             `;
             
             // Show modal
             successModal.style.display = 'flex';
+        }
+
+        function getRankInfo(totalPoints) {
+            if (totalPoints >= 10000) return { name: 'Diamond', icon: '💎' };
+            if (totalPoints >= 5000) return { name: 'Platinum', icon: '👑' };
+            if (totalPoints >= 2500) return { name: 'Gold', icon: '🥇' };
+            if (totalPoints >= 1000) return { name: 'Silver', icon: '🥈' };
+            if (totalPoints >= 500) return { name: 'Bronze', icon: '🥉' };
+            return { name: 'Standard', icon: '⭐' };
         }
 
         async function restartScanner() {

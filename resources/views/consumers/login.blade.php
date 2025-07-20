@@ -1,18 +1,3 @@
-/* Success/Error message animations */
-.alert-slide {
-animation: slideInAlert 0.5s ease-out;
-}
-
-@keyframes slideInAlert {
-from {
-opacity: 0;
-transform: translateX(-20px);
-}
-to {
-opacity: 1;
-transform: translateX(0);
-}
-}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -68,6 +53,23 @@ transform: translateX(0);
 
       100% {
         background-position: 0% 50%;
+      }
+    }
+
+    /* Success/Error message animations */
+    .alert-slide {
+      animation: slideInAlert 0.5s ease-out;
+    }
+
+    @keyframes slideInAlert {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
       }
     }
 

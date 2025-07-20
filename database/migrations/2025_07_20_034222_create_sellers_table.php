@@ -14,6 +14,21 @@ class CreateSellersTable extends Migration
             $table->text('description')->nullable();
             $table->string('working_hours')->nullable();
             $table->string('password');
+            
+            // Location fields (from seller_locations)
+            $table->string('address');
+            $table->decimal('latitude', 10, 7);
+            $table->decimal('longitude', 10, 7);
+            
+            // Photo fields (from seller_photos - for primary/featured photo)
+            $table->string('photo_url', 512)->nullable();
+            $table->string('photo_caption')->nullable();
+            
+            // Additional useful fields
+            $table->string('phone')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->integer('total_points')->default(0); // For ranking system
+            
             $table->timestamps();
         });
     }
