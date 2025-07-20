@@ -1758,22 +1758,22 @@
         function getRankIcon(points) {
             // Ensure points is a number
             const numPoints = parseFloat(points) || 0;
-            
-            if (numPoints >= 100) return '👑'; // Platinum - 100+ points
-            if (numPoints >= 50) return '🥇'; // Gold - 50-99 points
-            if (numPoints >= 25) return '🥈'; // Silver - 25-49 points
-            if (numPoints >= 10) return '🥉'; // Bronze - 10-24 points
-            return '⭐'; // Standard - under 10 points
+
+            if (numPoints >= 2000) return '👑'; // Platinum - 2000+ points
+            if (numPoints >= 1000) return '🥇'; // Gold - 1000-1999 points
+            if (numPoints >= 500) return '🥈'; // Silver - 500-999 points
+            if (numPoints >= 100) return '🥉'; // Bronze - 100-499 points
+            return '⭐'; // Standard - under 100 points
         }
 
         function getRankText(points) {
             // Ensure points is a number
             const numPoints = parseFloat(points) || 0;
-            
-            if (numPoints >= 100) return 'Platinum';
-            if (numPoints >= 50) return 'Gold';
-            if (numPoints >= 25) return 'Silver';
-            if (numPoints >= 10) return 'Bronze';
+
+            if (numPoints >= 2000) return 'Platinum';
+            if (numPoints >= 1000) return 'Gold';
+            if (numPoints >= 500) return 'Silver';
+            if (numPoints >= 100) return 'Bronze';
             return 'Standard';
         }
 
@@ -1781,10 +1781,10 @@
             // Ensure points is a number
             const numPoints = parseFloat(points) || 0;
             
-            if (numPoints >= 100) return 'platinum';
-            if (numPoints >= 50) return 'gold';
-            if (numPoints >= 25) return 'silver';
-            if (numPoints >= 10) return 'bronze';
+            if (numPoints >= 2000) return 'platinum';
+            if (numPoints >= 1000) return 'gold';
+            if (numPoints >= 500) return 'silver';
+            if (numPoints >= 100) return 'bronze';
             return 'standard';
         }
 

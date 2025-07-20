@@ -8,18 +8,15 @@ use App\Http\Controllers\{
     DashboardController,
     AccountController,
     QRController,
-    MapController
+    MapController,
+    SellerController,
+    GalleryController
 };
 
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group.
-|
 */
 
 // Root redirect
@@ -55,54 +52,42 @@ Route::middleware(['consumer.auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/account', [AccountController::class, 'index'])->name('account');
     
-    /*
-    |--------------------------------------------------------------------------
-    | QR Scanner Routes
-    |--------------------------------------------------------------------------
-    */
-    Route::prefix('scan')->name('scan.')->group(function () {
-        // QR Scanner page
-        Route::get('/', function () {
-            $consumer = Auth::guard('consumer')->user();
-            return view('scan.index', compact('consumer'));
-        })->name('index');
-        
-        // QR processing endpoints
-        Route::post('/process', [QRController::class, 'processAndConfirm'])->name('process');
-        Route::post('/confirm', [QRController::class, 'confirmTransaction'])->name('confirm');
-    });
+    // QR Scanner page
+    Route::get('/scan', function () {
+        $consumer = Auth::guard('consumer')->user();
+        return view('scan.index', compact('consumer'));
+    })->name('scan');
     
-    // Legacy QR routes for backward compatibility
-    Route::prefix('qr')->name('qr.')->group(function () {
-        Route::post('/process-and-confirm', [QRController::class, 'processAndConfirm'])->name('process.confirm');
-        Route::post('/process', [QRController::class, 'processScan'])->name('process');
-        Route::post('/confirm-transaction', [QRController::class, 'confirmTransaction'])->name('confirm');
-    });
+    // Gallery page (Product service)
+    Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery');
+    Route::get('/products', [GalleryController::class, 'index'])->name('products'); // Alternative name
     
-    /*
-    |--------------------------------------------------------------------------
-    | Store Locator Routes
-    |--------------------------------------------------------------------------
-    */
-    Route::prefix('map')->name('map.')->group(function () {
-        // Main map page
-        Route::get('/', [MapController::class, 'index'])->name('index');
-    });
-    
-    // Alternative map route for backward compatibility
+    // Map page
     Route::get('/map', [MapController::class, 'index'])->name('map');
     
+    // Seller/Store pages
+    Route::get('/seller/{id}', [SellerController::class, 'show'])->name('seller.show');
+    Route::get('/store/{id}', [SellerController::class, 'show'])->name('store.show');
+    
     /*
     |--------------------------------------------------------------------------
-    | Seller/Store Routes
+    | QR Processing Routes
     |--------------------------------------------------------------------------
     */
-    Route::prefix('store')->name('store.')->group(function () {
-        Route::get('/{id}', [QRController::class, 'showSellerDetails'])->name('details');
-    });
+    Route::post('/qr/process-and-confirm', [QRController::class, 'processAndConfirm'])->name('qr.process.confirm');
+    Route::post('/qr/process', [QRController::class, 'processScan'])->name('qr.process');
+    Route::post('/qr/confirm-transaction', [QRController::class, 'confirmTransaction'])->name('qr.confirm');
     
-    // Legacy seller route
-    Route::get('/seller/{id}', [QRController::class, 'showSellerDetails'])->name('seller.details');
+    /*
+    |--------------------------------------------------------------------------
+    | Consumer Profile Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('consumer')->name('consumer.')->group(function () {
+        Route::get('/qr', [ConsumerController::class, 'showQrCode'])->name('qr');
+    //     Route::get('/profile', [ConsumerController::class, 'showProfile'])->name('profile');
+    //     Route::put('/profile', [ConsumerController::class, 'updateProfile'])->name('profile.update');
+    });
     
     /*
     |--------------------------------------------------------------------------
@@ -110,24 +95,11 @@ Route::middleware(['consumer.auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::prefix('api')->name('api.')->group(function () {
-        
         // Store/Map APIs
-        Route::prefix('stores')->name('stores.')->group(function () {
-            Route::get('/', [MapController::class, 'getStores'])->name('list');
-            Route::post('/search', [MapController::class, 'searchStores'])->name('search');
-            Route::post('/distance', [MapController::class, 'calculateDistance'])->name('distance');
-        });
-        
-        // Individual store APIs
-        Route::prefix('store')->name('store.')->group(function () {
-            Route::get('/{id}/details', [MapController::class, 'getStoreDetails'])->name('details');
-        });
-        
-        // Legacy API routes for backward compatibility
-        Route::get('/stores', [MapController::class, 'getStores'])->name('stores.legacy');
-        Route::get('/store/{id}/details', [MapController::class, 'getStoreDetails'])->name('store.details.legacy');
-        Route::post('/calculate-distance', [MapController::class, 'calculateDistance'])->name('calculate.distance');
-        Route::post('/search-stores', [MapController::class, 'searchStores'])->name('search.stores');
+        Route::get('/stores', [MapController::class, 'getStores'])->name('stores');
+        Route::get('/store/{id}/details', [MapController::class, 'getStoreDetails'])->name('store.details');
+        Route::post('/stores/search', [MapController::class, 'searchStores'])->name('stores.search');
+        Route::post('/stores/distance', [MapController::class, 'calculateDistance'])->name('stores.distance');
     });
 });
 
@@ -136,7 +108,6 @@ Route::middleware(['consumer.auth'])->group(function () {
 | Authentication Control Routes
 |--------------------------------------------------------------------------
 */
-// Logout route
 Route::post('/logout', function () {
     Auth::guard('consumer')->logout();
     request()->session()->invalidate();
@@ -145,7 +116,6 @@ Route::post('/logout', function () {
     return redirect()->route('login')->with('success', 'Logged out successfully');
 })->middleware(['consumer.auth'])->name('logout');
 
-// Alternative logout for GET requests (for convenience)
 Route::get('/logout', function () {
     Auth::guard('consumer')->logout();
     request()->session()->invalidate();
@@ -159,7 +129,6 @@ Route::get('/logout', function () {
 | Error Handling Routes
 |--------------------------------------------------------------------------
 */
-// Handle 404 errors with authentication check
 Route::fallback(function () {
     if (!Auth::guard('consumer')->check()) {
         return redirect()->route('login')
@@ -175,7 +144,6 @@ Route::fallback(function () {
 |--------------------------------------------------------------------------
 */
 if (app()->environment(['local', 'testing'])) {
-    // Test routes for development
     Route::prefix('dev')->name('dev.')->group(function () {
         Route::get('/test-auth', function () {
             return [

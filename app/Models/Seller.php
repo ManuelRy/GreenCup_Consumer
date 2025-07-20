@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Seller extends Model
 {
@@ -16,29 +16,44 @@ class Seller extends Model
         'description',
         'working_hours',
         'password',
+        'address',
+        'latitude',
+        'longitude',
+        'photo_url',
+        'phone',
+        'is_active',
+        'total_points',
     ];
 
-    protected $hidden = [
-        'password',
+    protected $casts = [
+        'is_active' => 'boolean',
+        'latitude'  => 'decimal:7',
+        'longitude' => 'decimal:7',
     ];
 
-    public function pointTransactions(): HasMany
+    /**
+     * Scope: only active stores with valid coords.
+     */
+    public function scopeActive(Builder $query): Builder
     {
-        return $this->hasMany(PointTransaction::class);
+        return $query->where('is_active', true)
+                     ->whereNotNull('latitude')
+                     ->whereNotNull('longitude');
     }
 
-    public function qrCodes(): HasMany
+    /**
+     * Seller has many QR codes.
+     */
+    public function qrCodes()
     {
         return $this->hasMany(QrCode::class);
     }
 
-    public function locations(): HasMany
+    /**
+     * Seller has many point transactions.
+     */
+    public function pointTransactions()
     {
-        return $this->hasMany(SellerLocation::class);
-    }
-
-    public function photos(): HasMany
-    {
-        return $this->hasMany(SellerPhoto::class);
+        return $this->hasMany(PointTransaction::class, 'seller_id');
     }
 }

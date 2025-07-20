@@ -153,12 +153,14 @@
                 <div class="service-name">Account</div>
             </a>
             <div class="service-item">
-                <div class="service-icon">🛍️</div>
-                <div class="service-name">Product</div>
+                <a href="{{ route('gallery') }}" class="service-link">
+                    <div class="service-icon">🛍️</div>
+                    <div class="service-name">Product</div>
+                </a>
             </div>
-            <a href="{{ route('scan') }}" class="service-item">
+            <a href="{{ route('consumer.qr') }}" class="service-item">
                 <div class="service-icon">📱</div>
-                <div class="service-name">Scan</div>
+                <div class="service-name">QR</div>
             </a>
             <a href="{{ route('map') }}" class="service-item">
                 <div class="service-icon">🗺️</div>
@@ -166,7 +168,6 @@
             </a>
 
         </div>
-
 
 
 @endsection
