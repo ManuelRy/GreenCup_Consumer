@@ -416,21 +416,21 @@ class MapController extends Controller
     {
         $numPoints = floatval($points);
         
-        if ($numPoints >= 100) return 'platinum';   // 100+ points given
-        if ($numPoints >= 50) return 'gold';        // 50+ points given
-        if ($numPoints >= 25) return 'silver';      // 25+ points given
-        if ($numPoints >= 10) return 'bronze';      // 10+ points given
-        return 'standard';                          // Under 10 points
+        if ($numPoints >= 2000) return 'platinum';   // 2000+ points given
+        if ($numPoints >= 1000) return 'gold';       // 1000-1999 points given
+        if ($numPoints >= 500) return 'silver';      // 500-999 points given
+        if ($numPoints >= 100) return 'bronze';      // 100-499 points given
+        return 'standard';                           // Under 100 points
     }
 
     private function getRankText($points)
     {
         $numPoints = floatval($points);
         
-        if ($numPoints >= 100) return 'Platinum';
-        if ($numPoints >= 50) return 'Gold';
-        if ($numPoints >= 25) return 'Silver';
-        if ($numPoints >= 10) return 'Bronze';
+        if ($numPoints >= 2000) return 'Platinum';
+        if ($numPoints >= 1000) return 'Gold';
+        if ($numPoints >= 500) return 'Silver';
+        if ($numPoints >= 100) return 'Bronze';
         return 'Standard';
     }
 

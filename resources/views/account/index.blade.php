@@ -973,11 +973,11 @@
         }
     </style>
 
-    <script>
+<script>
         function showTransactionDetail(transaction) {
             // Populate modal with transaction data
             document.getElementById('modalPointsAmount').textContent = 
-                (transaction.type === 'earn' ? '+' : '-') + transaction.points;
+                (transaction.type === 'earn' ? '+' : '-') + (transaction.points || 0);
             document.getElementById('modalItemName').textContent = 
                 transaction.item_name || 'Unknown Item';
             document.getElementById('modalStoreName').textContent = 
@@ -985,22 +985,25 @@
             document.getElementById('modalStoreLocation').textContent = 
                 transaction.store_location || 'Location not specified';
             document.getElementById('modalDateTime').textContent = 
-                new Date(transaction.created_at).toLocaleString();
+                new Date(transaction.transaction_date || transaction.created_at).toLocaleString();
             document.getElementById('modalTransactionId').textContent = 
                 '#' + (transaction.id || '000').toString().padStart(6, '0');
+            
+            // FIXED: Handle units_scanned safely
             document.getElementById('modalUnitsScanned').textContent = 
                 transaction.units_scanned || '1';
             
-            // Handle QR code display - check multiple possible field names
-            let qrCode = transaction.qr_code || transaction.qr_data || transaction.code;
-            if (!qrCode) {
-                // Try to generate a meaningful QR code reference
-                qrCode = 'QR-' + (transaction.seller_id || 'X') + '-' + (transaction.item_id || 'X');
+            // FIXED: Handle QR code display - with fallback logic
+            let qrCode = transaction.qr_code || transaction.code || 'N/A';
+            if (qrCode === 'N/A') {
+                // Generate a meaningful QR code reference using available data
+                qrCode = 'QR-TXN-' + (transaction.id || 'X');
             }
             document.getElementById('modalQrCode').textContent = qrCode;
             
+            // FIXED: Handle points per unit with fallback
             document.getElementById('modalPointsPerUnit').textContent = 
-                (transaction.points_per_unit || transaction.points) + ' pts';
+                (transaction.points_per_unit || transaction.points || 0) + ' pts';
 
             // Show modal
             document.getElementById('transactionModal').style.display = 'flex';
@@ -1018,11 +1021,20 @@
                     title: 'Green Cup Transaction Receipt',
                     text: 'Check out my eco-friendly purchase!',
                     url: window.location.href
-                });
+                }).catch(console.error);
             } else {
                 // Fallback - copy to clipboard
-                navigator.clipboard.writeText('Green Cup Transaction Receipt: ' + window.location.href);
-                alert('Receipt link copied to clipboard!');
+                const receiptText = `Green Cup Transaction Receipt\nTransaction ID: #${document.getElementById('modalTransactionId').textContent}\nPoints: ${document.getElementById('modalPointsAmount').textContent}\nStore: ${document.getElementById('modalStoreName').textContent}`;
+                
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(receiptText).then(() => {
+                        alert('Receipt details copied to clipboard!');
+                    }).catch(() => {
+                        alert('Unable to copy to clipboard');
+                    });
+                } else {
+                    alert('Sharing not supported on this device');
+                }
             }
         }
 
@@ -1038,6 +1050,24 @@
             if (e.key === 'Escape') {
                 closeTransactionDetail();
             }
+        });
+
+        // OPTIONAL: Add loading state for slow connections
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add smooth scroll behavior
+            document.documentElement.style.scrollBehavior = 'smooth';
+            
+            // Add touch feedback for mobile
+            const cards = document.querySelectorAll('.account-card');
+            cards.forEach(card => {
+                card.addEventListener('touchstart', function() {
+                    this.style.transform = 'scale(0.98)';
+                }, { passive: true });
+                
+                card.addEventListener('touchend', function() {
+                    this.style.transform = '';
+                }, { passive: true });
+            });
         });
     </script>
 

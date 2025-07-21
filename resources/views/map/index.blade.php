@@ -27,7 +27,7 @@
         <div class="map-container">
             <!-- Top Spacing -->
             <div class="top-spacer"></div>
-            
+
             <!-- Header -->
             <div class="map-header">
                 <div class="header-nav">
@@ -108,7 +108,7 @@
                         🛰️
                     </button>
                 </div>
-                
+
                 <!-- Map Legend -->
                 <div class="map-legend">
                     <div class="legend-item">
@@ -132,7 +132,7 @@
                         <span>Your Location</span>
                     </div>
                 </div>
-                
+
                 <div id="map" class="mapbox-map"></div>
             </div>
 
@@ -167,7 +167,7 @@
                         <h3 id="storeName">Store Details</h3>
                         <button onclick="closeStoreModal()" class="modal-close">×</button>
                     </div>
-                    
+
                     <div class="modal-body">
                         <!-- Store Rank Display -->
                         <div class="store-rank-display">
@@ -188,7 +188,7 @@
                                         <span id="storeAddress" class="info-value">-</span>
                                     </div>
                                 </div>
-                                
+
                                 <div class="info-row">
                                     <span class="info-icon">📞</span>
                                     <div class="info-content">
@@ -196,7 +196,7 @@
                                         <span id="storePhone" class="info-value clickable" onclick="callStore()">-</span>
                                     </div>
                                 </div>
-                                
+
                                 <div class="info-row">
                                     <span class="info-icon">📏</span>
                                     <div class="info-content">
@@ -215,7 +215,7 @@
                                         <span id="storeHours" class="info-value">-</span>
                                     </div>
                                 </div>
-                                
+
                                 <div class="info-row">
                                     <span class="info-icon">📊</span>
                                     <div class="info-content">
@@ -256,7 +256,7 @@
                 <span id="errorMessage">An error occurred</span>
                 <button onclick="hideErrorToast()">×</button>
             </div>
-            
+
             <!-- Bottom Spacer -->
             <div class="bottom-spacer"></div>
         </div>
@@ -268,17 +268,17 @@
             height: 30px;
             background: transparent;
         }
-        
+
         .map-top-gap {
             height: 20px;
             background: transparent;
         }
-        
+
         .map-bottom-gap {
             height: 20px;
             background: transparent;
         }
-        
+
         .bottom-spacer {
             height: 40px;
             background: transparent;
@@ -394,7 +394,8 @@
             box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.1);
         }
 
-        .search-btn, .clear-btn {
+        .search-btn,
+        .clear-btn {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
@@ -490,7 +491,8 @@
             gap: 10px;
         }
 
-        .sort-select, .radius-select {
+        .sort-select,
+        .radius-select {
             padding: 8px 12px;
             border: 2px solid #e9ecef;
             border-radius: 20px;
@@ -501,7 +503,8 @@
             transition: all 0.3s ease;
         }
 
-        .sort-select:focus, .radius-select:focus {
+        .sort-select:focus,
+        .radius-select:focus {
             border-color: #2E8B57;
         }
 
@@ -514,7 +517,7 @@
             background: white;
             padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             gap: 15px;
@@ -531,8 +534,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         /* Map View */
@@ -543,7 +551,7 @@
             margin: 0 15px;
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
 
         .map-style-controls {
@@ -565,7 +573,7 @@
             font-size: 16px;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -580,7 +588,7 @@
 
         .style-btn:hover {
             transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         .map-legend {
@@ -590,7 +598,7 @@
             background: white;
             padding: 12px;
             border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             z-index: 1000;
             font-size: 12px;
         }
@@ -611,7 +619,7 @@
             height: 12px;
             border-radius: 50%;
             border: 2px solid white;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
         }
 
         .legend-marker.platinum {
@@ -648,7 +656,7 @@
             background: white;
             margin: 0 15px;
             border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
 
         .list-header {
@@ -686,7 +694,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
         .store-item.platinum {
@@ -711,7 +719,7 @@
 
         .store-item:hover {
             transform: translateY(-4px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
         }
 
         .store-item-header {
@@ -773,7 +781,7 @@
             justify-content: center;
             font-size: 12px;
             border: 2px solid white;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
         }
 
         .rank-crown.platinum {
@@ -951,6 +959,7 @@
                 opacity: 0;
                 transform: translateY(50px) scale(0.9);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0) scale(1);
@@ -1011,7 +1020,7 @@
             font-weight: 700;
             font-size: 16px;
             border: 3px solid;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
 
         .rank-badge-large.platinum {
@@ -1126,7 +1135,9 @@
             gap: 8px;
         }
 
-        .btn-directions, .btn-call, .btn-share {
+        .btn-directions,
+        .btn-call,
+        .btn-share {
             flex: 1;
             padding: 12px 8px;
             border: none;
@@ -1178,7 +1189,7 @@
             height: 50px;
             border-radius: 50%;
             border: 4px solid;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             cursor: pointer;
             transition: all 0.3s ease;
             overflow: hidden;
@@ -1209,7 +1220,7 @@
 
         .store-marker:hover {
             transform: scale(1.2);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
         }
 
         .marker-initial {
@@ -1237,7 +1248,7 @@
             justify-content: center;
             font-size: 12px;
             border: 2px solid white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .rank-crown-marker.platinum {
@@ -1266,7 +1277,7 @@
             border-radius: 50%;
             width: 20px;
             height: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
 
         /* Error Toast */
@@ -1291,6 +1302,7 @@
                 transform: translateX(100%);
                 opacity: 0;
             }
+
             to {
                 transform: translateX(0);
                 opacity: 1;
@@ -1324,8 +1336,9 @@
             .map-container {
                 height: 100vh;
             }
-            
-            .map-view, .list-view {
+
+            .map-view,
+            .list-view {
                 height: calc(100vh - 260px);
                 max-height: none;
                 margin: 0 10px;
@@ -1345,7 +1358,9 @@
                 flex-direction: column;
             }
 
-            .btn-directions, .btn-call, .btn-share {
+            .btn-directions,
+            .btn-call,
+            .btn-share {
                 flex-direction: row;
                 justify-content: center;
             }
@@ -1361,30 +1376,34 @@
             .top-spacer {
                 height: 15px;
             }
-            
-            .map-top-gap, .map-bottom-gap {
+
+            .map-top-gap,
+            .map-bottom-gap {
                 height: 15px;
             }
-            
+
             .bottom-spacer {
                 height: 25px;
             }
-            
+
             .map-header {
                 padding: 15px 15px 10px;
             }
 
-            .search-section, .toggle-controls {
+            .search-section,
+            .toggle-controls {
                 padding: 12px 15px;
             }
 
-            .map-view, .list-view {
+            .map-view,
+            .list-view {
                 height: 300px;
                 margin: 0 10px;
                 border-radius: 8px;
             }
 
-            .store-list, .list-header {
+            .store-list,
+            .list-header {
                 padding-left: 15px;
                 padding-right: 15px;
             }
@@ -1440,7 +1459,7 @@
         };
 
         // Initialize application
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             initializeApp();
         });
 
@@ -1449,40 +1468,40 @@
                 // Initialize map first
                 console.log('Initializing map...');
                 initializeMap();
-                
+
                 // Initialize event listeners
                 console.log('Setting up event listeners...');
                 initializeEventListeners();
-                
+
                 // Initialize stores data
                 console.log('Loading stores...');
                 initializeStores();
-                
+
                 // Set up initial view
                 console.log('Setting up initial view...');
                 setupInitialView();
-                
+
                 console.log('App initialized successfully!');
             } catch (error) {
                 console.error('App initialization failed:', error);
-                
+
                 // Show a more user-friendly error
                 const mapContainer = document.getElementById('map');
                 if (mapContainer) {
                     mapContainer.innerHTML = `
-                        <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f8f9fa; text-align: center; padding: 20px;">
-                            <div>
-                                <div style="font-size: 48px; margin-bottom: 15px;">🗺️</div>
-                                <h3 style="color: #333; margin-bottom: 10px;">Map Loading...</h3>
-                                <p style="color: #666; margin-bottom: 20px;">Please wait while we load the store locations.</p>
-                                <button onclick="location.reload()" style="background: #2E8B57; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
-                                    Refresh Page
-                                </button>
+                            <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f8f9fa; text-align: center; padding: 20px;">
+                                <div>
+                                    <div style="font-size: 48px; margin-bottom: 15px;">🗺️</div>
+                                    <h3 style="color: #333; margin-bottom: 10px;">Map Loading...</h3>
+                                    <p style="color: #666; margin-bottom: 20px;">Please wait while we load the store locations.</p>
+                                    <button onclick="location.reload()" style="background: #2E8B57; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                                        Refresh Page
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    `;
+                        `;
                 }
-                
+
                 // Try to still show the list view with sample data
                 setTimeout(() => {
                     try {
@@ -1499,7 +1518,7 @@
 
         function initializeMap() {
             mapboxgl.accessToken = CONFIG.mapboxToken;
-            
+
             app.map = new mapboxgl.Map({
                 container: 'map',
                 style: 'mapbox://styles/mapbox/streets-v12',
@@ -1511,7 +1530,7 @@
 
             // Add controls
             app.map.addControl(new mapboxgl.NavigationControl(), 'top-left');
-            
+
             // Add geolocate control
             const geolocate = new mapboxgl.GeolocateControl({
                 positionOptions: {
@@ -1520,11 +1539,11 @@
                 trackUserLocation: true,
                 showUserHeading: true
             });
-            
+
             app.map.addControl(geolocate, 'top-left');
 
             // Handle user location updates
-            geolocate.on('geolocate', function(e) {
+            geolocate.on('geolocate', function (e) {
                 updateUserLocation(e.coords.latitude, e.coords.longitude);
             });
         }
@@ -1553,7 +1572,7 @@
 
             searchBtn.addEventListener('click', handleSearch);
             clearBtn.addEventListener('click', clearSearch);
-            
+
             searchInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') handleSearch();
             });
@@ -1571,7 +1590,7 @@
 
             document.getElementById('radiusSelect').addEventListener('change', (e) => {
                 app.searchRadius = e.target.value;
-                document.getElementById('radiusText').textContent = 
+                document.getElementById('radiusText').textContent =
                     e.target.value === 'all' ? 'all areas' : e.target.value + 'km';
                 if (app.userLocation) {
                     filterStoresByRadius();
@@ -1590,11 +1609,11 @@
                 store.points_reward = parseFloat(store.points_reward) || 0;
                 console.log(`Store ${index}: ${store.name} - Points Reward: ${store.points_reward} (${typeof store.points_reward}) - Rank: ${getRankText(store.points_reward)}`);
             });
-            
+
             app.filteredStores = [...app.stores];
             addMarkersToMap();
             updateStoreDisplay();
-            
+
             // Try to get user location automatically on load
             getCurrentLocation();
         }
@@ -1608,7 +1627,7 @@
 
         function switchView(view) {
             app.currentView = view;
-            
+
             // Update view option buttons
             document.querySelectorAll('.view-option').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.view === view);
@@ -1617,13 +1636,13 @@
             // Update header toggle button
             const toggleIcon = document.getElementById('toggleIcon');
             const toggleText = document.getElementById('toggleText');
-            
+
             if (view === 'map') {
                 document.getElementById('mapView').style.display = 'block';
                 document.getElementById('listView').style.display = 'none';
                 toggleIcon.textContent = '📋';
                 toggleText.textContent = 'List';
-                
+
                 // Resize map after showing
                 setTimeout(() => app.map.resize(), 100);
             } else {
@@ -1637,9 +1656,9 @@
 
         function changeMapStyle(styleUrl, button) {
             showLoading();
-            
+
             app.map.setStyle(styleUrl);
-            
+
             // Update active button
             document.querySelectorAll('.style-btn').forEach(btn => {
                 btn.classList.remove('active');
@@ -1663,16 +1682,16 @@
                 const markerElement = document.createElement('div');
                 const rankClass = getRankClass(store.points_reward);
                 markerElement.className = `store-marker ${rankClass}`;
-                
+
                 // Add store initial
                 markerElement.innerHTML = `<div class="marker-initial">${store.name.charAt(0)}</div>`;
-                
+
                 // Add rank crown
                 const rankCrown = document.createElement('div');
                 rankCrown.className = `rank-crown-marker ${rankClass}`;
                 rankCrown.textContent = getRankIcon(store.points_reward);
                 markerElement.appendChild(rankCrown);
-                
+
                 markerElement.title = `${store.name} - ${getRankText(store.points_reward)} (${store.points_reward} points)`;
 
                 const marker = new mapboxgl.Marker(markerElement)
@@ -1692,7 +1711,7 @@
         function updateListView() {
             const storeList = document.getElementById('storeList');
             const noStoresMessage = document.getElementById('noStoresMessage');
-            
+
             storeList.innerHTML = '';
 
             if (app.filteredStores.length === 0) {
@@ -1704,9 +1723,12 @@
 
             app.filteredStores.forEach(store => {
                 const storeItem = document.createElement('div');
-                const rankClass = getRankClass(store.rating);
+                // ❌ CHANGE THIS LINE:
+                // const rankClass = getRankClass(store.rating);
+                // ✅ TO THIS:
+                const rankClass = getRankClass(store.points_reward);
                 storeItem.className = `store-item ${rankClass}`;
-                
+
                 // Better distance logic
                 let distanceText = 'Distance unknown';
                 if (app.userLocation && store.distance !== undefined) {
@@ -1718,33 +1740,37 @@
                 } else if (!app.userLocation) {
                     distanceText = 'Location needed';
                 }
-                
-                const rankIcon = getRankIcon(store.rating);
-                const rankText = getRankText(store.rating);
-                
+
+                // ❌ CHANGE THESE TWO LINES:
+                // const rankIcon = getRankIcon(store.rating);
+                // const rankText = getRankText(store.rating);
+                // ✅ TO THESE:
+                const rankIcon = getRankIcon(store.points_reward);
+                const rankText = getRankText(store.points_reward);
+
                 storeItem.innerHTML = `
-                    <div class="store-item-header">
-                        <div class="store-rank-indicator">
-                            <div class="store-card-avatar ${rankClass}">${store.name.charAt(0)}</div>
-                            <div class="rank-crown ${rankClass}">${rankIcon}</div>
-                        </div>
-                        <div class="store-main-info">
-                            <div class="store-name">${store.name}</div>
-                            <div class="store-address">${store.address}</div>
-                            <div class="store-meta">
-                                <div class="store-rank-text ${rankClass}">
-                                    <span>${rankIcon}</span>
-                                    <span>${rankText}</span>
+                        <div class="store-item-header">
+                            <div class="store-rank-indicator">
+                                <div class="store-card-avatar ${rankClass}">${store.name.charAt(0)}</div>
+                                <div class="rank-crown ${rankClass}">${rankIcon}</div>
+                            </div>
+                            <div class="store-main-info">
+                                <div class="store-name">${store.name}</div>
+                                <div class="store-address">${store.address}</div>
+                                <div class="store-meta">
+                                    <div class="store-rank-text ${rankClass}">
+                                        <span>${rankIcon}</span>
+                                        <span>${rankText}</span>
+                                    </div>
+                                    <span>📊 ${store.transaction_count} visits</span>
                                 </div>
-                                <span>📊 ${store.transaction_count} visits</span>
+                            </div>
+                            <div class="store-side-info">
+                                <div class="store-distance">${distanceText}</div>
+                                <div class="store-phone">📞 ${store.phone}</div>
                             </div>
                         </div>
-                        <div class="store-side-info">
-                            <div class="store-distance">${distanceText}</div>
-                            <div class="store-phone">📞 ${store.phone}</div>
-                        </div>
-                    </div>
-                `;
+                    `;
 
                 storeItem.addEventListener('click', () => {
                     showStoreDetail(store);
@@ -1780,7 +1806,7 @@
         function getRankClass(points) {
             // Ensure points is a number
             const numPoints = parseFloat(points) || 0;
-            
+
             if (numPoints >= 2000) return 'platinum';
             if (numPoints >= 1000) return 'gold';
             if (numPoints >= 500) return 'silver';
@@ -1806,10 +1832,10 @@
 
             try {
                 showLoading();
-                
+
                 const response = await fetch(`/api/stores?search=${encodeURIComponent(query)}`);
                 const data = await response.json();
-                
+
                 if (data.success) {
                     app.filteredStores = data.data;
                     updateStoreDisplay();
@@ -1828,13 +1854,13 @@
             document.getElementById('searchInput').value = '';
             document.getElementById('clearSearch').style.display = 'none';
             document.getElementById('searchBtn').style.right = '5px';
-            
+
             app.filteredStores = [...app.stores];
             updateStoreDisplay();
         }
 
         function sortStores(sortType) {
-            switch(sortType) {
+            switch (sortType) {
                 case 'nearest':
                     app.filteredStores.sort((a, b) => (a.distance || Infinity) - (b.distance || Infinity));
                     break;
@@ -1851,13 +1877,13 @@
                     app.filteredStores.sort((a, b) => b.transaction_count - a.transaction_count);
                     break;
             }
-            
+
             updateStoreDisplay();
         }
 
         async function getCurrentLocation() {
             const locationBtn = document.getElementById('locationBtn');
-            
+
             if (!navigator.geolocation) {
                 showError('Geolocation is not supported by this browser');
                 return;
@@ -1876,7 +1902,7 @@
                 });
 
                 updateUserLocation(position.coords.latitude, position.coords.longitude);
-                
+
             } catch (error) {
                 console.error('Geolocation error:', error);
                 showError('Unable to get your location. Please check your location settings.');
@@ -1888,15 +1914,15 @@
 
         function updateUserLocation(latitude, longitude) {
             app.userLocation = { latitude, longitude };
-            
+
             // Update user location marker
             if (app.userMarker) {
                 app.userMarker.remove();
             }
-            
+
             const userMarkerElement = document.createElement('div');
             userMarkerElement.className = 'user-marker';
-            
+
             app.userMarker = new mapboxgl.Marker(userMarkerElement)
                 .setLngLat([longitude, latitude])
                 .addTo(app.map);
@@ -1910,10 +1936,10 @@
             // Calculate distances and update display
             calculateDistances();
             filterStoresByRadius();
-            
+
             // Show user location text
             document.getElementById('userLocationText').style.display = 'inline';
-            
+
             // Update the display to show calculated distances
             updateStoreDisplay();
         }
@@ -1954,11 +1980,11 @@
                 app.filteredStores = [...app.stores];
             } else {
                 const radiusKm = parseFloat(app.searchRadius);
-                app.filteredStores = app.stores.filter(store => 
+                app.filteredStores = app.stores.filter(store =>
                     store.distance <= radiusKm
                 );
             }
-            
+
             updateStoreDisplay();
         }
 
@@ -1966,26 +1992,26 @@
             const R = 6371; // Earth's radius in kilometers
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLng = (lng2 - lng1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                      Math.sin(dLng/2) * Math.sin(dLng/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLng / 2) * Math.sin(dLng / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
             return R * c;
         }
 
         async function showStoreDetail(store) {
             // Create a deep copy to prevent any mutations
             app.selectedStore = JSON.parse(JSON.stringify(store));
-            
+
             console.log('Opening store detail for:', app.selectedStore.name);
             console.log('Store points_reward:', app.selectedStore.points_reward);
             console.log('Expected rank:', getRankText(app.selectedStore.points_reward));
-            
+
             try {
                 // Get detailed store information
                 const response = await fetch(`/api/store/${store.id}/details`);
                 const data = await response.json();
-                
+
                 if (data.success) {
                     // Preserve the original points_reward when merging with API data
                     const storeDetails = { ...data.data, points_reward: app.selectedStore.points_reward };
@@ -1997,7 +2023,7 @@
                 console.error('Error fetching store details:', error);
                 populateStoreModal(app.selectedStore);
             }
-            
+
             document.getElementById('storeModal').style.display = 'flex';
             document.body.style.overflow = 'hidden';
         }
@@ -2007,24 +2033,24 @@
             console.log('Store data received:', store);
             console.log('Store points_reward type:', typeof store.points_reward);
             console.log('Store points_reward value:', store.points_reward);
-            
+
             // Ensure we have a consistent points value
             const points = parseFloat(store.points_reward) || 0;
             const rankClass = getRankClass(points);
             const rankIcon = getRankIcon(points);
             const rankText = getRankText(points);
-            
+
             console.log('Calculated points:', points);
             console.log('Rank class:', rankClass);
             console.log('Rank text:', rankText);
             console.log('===================');
-            
+
             document.getElementById('storeName').textContent = store.name;
             document.getElementById('storeAddress').textContent = store.address;
             document.getElementById('storePhone').textContent = store.phone;
             document.getElementById('storeHours').textContent = store.hours || 'Hours not specified';
             document.getElementById('storeDesc').textContent = store.description || 'No description available';
-            
+
             // Better distance logic for modal
             let distanceText = 'Distance unknown';
             if (app.userLocation && store.distance !== undefined && store.distance !== null) {
@@ -2037,20 +2063,20 @@
                 distanceText = 'Enable location to see distance';
             }
             document.getElementById('storeDistance').textContent = distanceText;
-            
+
             // Popularity
-            document.getElementById('storePopularity').textContent = 
+            document.getElementById('storePopularity').textContent =
                 `${store.transaction_count || 0} customer visits`;
-            
+
             // Rank display - use the calculated values, not recalculate
             const rankBadge = document.getElementById('storeRankBadge');
             const rankIconElement = document.getElementById('rankIcon');
             const rankTextElement = document.getElementById('rankText');
-            
+
             rankBadge.className = `rank-badge-large ${rankClass}`;
             rankIconElement.textContent = rankIcon;
             rankTextElement.textContent = `${rankText} • ${points} pts`;
-            
+
             console.log('Modal updated with rank:', rankText, 'Points:', points);
         }
 
@@ -2062,7 +2088,7 @@
 
         function getDirections() {
             if (!app.selectedStore) return;
-            
+
             const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${app.selectedStore.latitude},${app.selectedStore.longitude}&travelmode=driving`;
             window.open(googleMapsUrl, '_blank');
         }
@@ -2077,13 +2103,13 @@
 
         function shareStore() {
             if (!app.selectedStore) return;
-            
+
             const shareData = {
                 title: app.selectedStore.name,
                 text: `Check out ${app.selectedStore.name} - ${app.selectedStore.address}`,
                 url: window.location.href
             };
-            
+
             if (navigator.share) {
                 navigator.share(shareData);
             } else {
@@ -2113,7 +2139,7 @@
         function showError(message) {
             document.getElementById('errorMessage').textContent = message;
             document.getElementById('errorToast').style.display = 'flex';
-            
+
             setTimeout(() => {
                 hideErrorToast();
             }, 5000);
@@ -2129,20 +2155,20 @@
         }
 
         // Handle modal closing
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             if (e.target.classList.contains('modal-overlay')) {
                 closeStoreModal();
             }
         });
 
-        document.addEventListener('keydown', function(e) {
+        document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') {
                 closeStoreModal();
             }
         });
 
         // Handle page visibility changes
-        document.addEventListener('visibilitychange', function() {
+        document.addEventListener('visibilitychange', function () {
             if (!document.hidden && app.map) {
                 app.map.resize();
             }
