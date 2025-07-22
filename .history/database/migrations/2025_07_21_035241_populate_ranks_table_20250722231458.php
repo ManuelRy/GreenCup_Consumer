@@ -11,7 +11,7 @@ class PopulateRanksTable extends Migration
     public function up(): void
     {
         // Clear existing ranks if any
-        DB::table('ranks')->delete();
+        DB::table('ranks')->truncate();
 
         // Insert your rank structure
         DB::table('ranks')->insert([
