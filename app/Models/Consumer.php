@@ -58,29 +58,29 @@ class Consumer extends Authenticatable
     /**
      * Generate QR code for this consumer
      */
-    public function generateQrCode()
-    {
-        // Check if consumer already has a QR code
-        if ($this->qrCode) {
-            return $this->qrCode;
-        }
-
-        // Generate unique secure token for this consumer
-        $token = 'GC_' . $this->id . '_' . strtoupper(substr(md5($this->email . time()), 0, 8));
-        
-        // Create URL that sellers will scan to award points to this consumer
-        $qrUrl = url('/award-points/' . $token);
-
-        return QrCode::create([
-            'consumer_id' => $this->id,
-            'seller_id' => null,
-            'item_id' => null,
-            'code' => $qrUrl, // Now contains a functional URL that identifies this consumer
-            'type' => 'consumer_profile',
-            'active' => true,
-            'expires_at' => null, // Consumer QR codes don't expire
-        ]);
+public function generateQrCode()
+{
+    // Check if consumer already has a QR code
+    if ($this->qrCode) {
+        return $this->qrCode;
     }
+
+    // Generate unique secure token for this consumer
+    $token = 'GC_' . $this->id . '_' . strtoupper(substr(md5($this->email . time()), 0, 8));
+    
+    // Use Laravel's url() helper instead of hardcoded URL
+    $fullUrl = url('/award-points/' . $token);
+    
+    return QrCode::create([
+        'consumer_id' => $this->id,
+        'seller_id' => null,
+        'item_id' => null,
+        'code' => $fullUrl, // Store the full URL
+        'type' => 'consumer_profile',
+        'active' => true,
+        'expires_at' => null,
+    ]);
+}
 
     /**
      * Get consumer's total available points
@@ -109,7 +109,6 @@ class Consumer extends Authenticatable
                     ->take($limit)
                     ->get();
     }
-
     /**
      * Boot method to auto-generate QR code when consumer is created
      */

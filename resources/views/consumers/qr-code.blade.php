@@ -35,23 +35,25 @@
         </div>
 
         <div class="qr-main-card">
+
             <div class="qr-code-display">
                 <div class="qr-code-frame">
-                    <!-- Real QR Code -->
-                    <img id="qr-code-img" 
-                         src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={{ urlencode($consumer->qrCode->code ?? 'GC_1_ABC12345') }}" 
-                         alt="QR Code" 
-                         class="qr-code-image"
-                         onload="hideQRFallback()"
-                         onerror="showQRFallback()">
-                    
-                    <!-- Fallback if QR code fails to load -->
+                    @php
+                        $qrToken = $consumer->qrCode->code ?? 'GC_1_ABC12345';
+                        // Use Laravel's url() helper - automatically uses APP_URL from .env
+                        $fullQrUrl = url('/award-points/' . $qrToken);
+                    @endphp
+
+                    <img id="qr-code-img"
+                        src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={{ urlencode($fullQrUrl) }}"
+                        alt="QR Code" class="qr-code-image" onload="hideQRFallback()" onerror="showQRFallback()">
+
                     <div id="qr-fallback" class="qr-fallback" style="display: none;">
                         <div class="qr-center-icon">📱</div>
                     </div>
                 </div>
                 <div class="qr-code-text">
-                    {{ $consumer->qrCode->code ?? 'GC_1_ABC12345' }}
+                    {{ $qrToken }}
                 </div>
             </div>
 
@@ -100,17 +102,17 @@
 
         <div class="qr-actions-grid">
             <!-- <div class="qr-action-item share-action" onclick="shareQR()">
-                <div class="qr-action-icon">📤</div>
-                <div class="qr-action-name">Share QR</div>
-            </div> -->
+                        <div class="qr-action-icon">📤</div>
+                        <div class="qr-action-name">Share QR</div>
+                    </div> -->
             <div class="qr-action-item download-action" onclick="downloadQR()">
                 <div class="qr-action-icon">💾</div>
                 <div class="qr-action-name">Save Image</div>
             </div>
             <!-- <div class="qr-action-item refresh-action" onclick="refreshQR()">
-                <div class="qr-action-icon">🔄</div>
-                <div class="qr-action-name">Refresh</div>
-            </div> -->
+                        <div class="qr-action-icon">🔄</div>
+                        <div class="qr-action-name">Refresh</div>
+                    </div> -->
             <a href="{{ route('dashboard') }}" class="qr-action-item dashboard-action">
                 <div class="qr-action-icon">🏠</div>
                 <div class="qr-action-name">Dashboard</div>
@@ -155,7 +157,8 @@
             flex: 1;
             margin: 0 2rem;
         }
-            .container {
+
+        .container {
             background: rgba(255, 255, 255, 0.95);
             min-height: 100vh;
             position: relative;
@@ -425,12 +428,12 @@
                 grid-template-columns: repeat(2, 1fr);
                 gap: 0.75rem;
             }
-            
+
             .qr-main-card {
                 padding: 1.5rem;
                 margin: 1rem 0;
             }
-            
+
             .header {
                 flex-direction: column;
                 gap: 1rem;
@@ -513,7 +516,17 @@
         }
     </style>
 
+
     <script>
+        // Get the QR data with dynamic URL
+        @php
+            $qrToken = $consumer->qrCode->code ?? 'GC_1_ABC12345';
+            $fullQrUrl = url('/award-points/' . $qrToken);
+        @endphp
+
+        const qrCodeData = '{{ $fullQrUrl }}';
+        const qrToken = '{{ $qrToken }}';
+
         function showQRFallback() {
             document.getElementById('qr-code-img').style.display = 'none';
             document.getElementById('qr-fallback').style.display = 'flex';
@@ -525,16 +538,13 @@
         }
 
         function shareQR() {
-            const qrCodeData = '{{ $consumer->qrCode->code ?? "GC_1_ABC12345" }}';
-            
             if (navigator.share) {
                 navigator.share({
                     title: 'My Green Cup QR Code',
-                    text: `My Green Cup QR Code: ${qrCodeData}`,
+                    text: `My Green Cup QR Code: ${qrToken}`,
                     url: window.location.href
                 }).catch(console.error);
             } else {
-                // Fallback - copy QR code data to clipboard
                 navigator.clipboard.writeText(qrCodeData).then(() => {
                     showNotification('QR code copied to clipboard!');
                 }).catch(() => {
@@ -544,54 +554,44 @@
         }
 
         function downloadQR() {
-            // Create a download link for the QR code image
-            const qrCodeData = '{{ $consumer->qrCode->code ?? "GC_1_ABC12345" }}';
             const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(qrCodeData)}`;
-            
-            // Create temporary link and trigger download
+
             const link = document.createElement('a');
             link.href = qrUrl;
             link.download = `green-cup-qr-${Date.now()}.png`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            
+
             showNotification('QR code download started!');
         }
 
         function refreshQR() {
             const qrImg = document.getElementById('qr-code-img');
-            const qrCodeData = '{{ $consumer->qrCode->code ?? "GC_1_ABC12345" }}';
-            
-            // Show loading state
+
             showNotification('Refreshing QR code...');
-            
-            // Reset the image
+
             qrImg.style.display = 'none';
             document.getElementById('qr-fallback').style.display = 'none';
-            
-            // Create new image URL with cache buster
+
             const newUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrCodeData)}&t=${Date.now()}`;
-            
-            // Set up the image load handlers before changing src
-            qrImg.onload = function() {
+
+            qrImg.onload = function () {
                 hideQRFallback();
                 showNotification('QR code refreshed successfully!');
             };
-            
-            qrImg.onerror = function() {
+
+            qrImg.onerror = function () {
                 showQRFallback();
                 showNotification('Failed to load QR code');
             };
-            
-            // Load the new image
+
             setTimeout(() => {
                 qrImg.src = newUrl;
             }, 500);
         }
 
         function showNotification(message) {
-            // Create a notification
             const notification = document.createElement('div');
             notification.style.cssText = `
                 position: fixed;
@@ -610,7 +610,7 @@
             `;
             notification.textContent = message;
             document.body.appendChild(notification);
-            
+
             setTimeout(() => {
                 if (notification.parentNode) {
                     notification.parentNode.removeChild(notification);
