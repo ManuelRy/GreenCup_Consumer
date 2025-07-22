@@ -99,18 +99,18 @@
         </div>
 
         <div class="qr-actions-grid">
-            <div class="qr-action-item share-action" onclick="shareQR()">
+            <!-- <div class="qr-action-item share-action" onclick="shareQR()">
                 <div class="qr-action-icon">📤</div>
                 <div class="qr-action-name">Share QR</div>
-            </div>
+            </div> -->
             <div class="qr-action-item download-action" onclick="downloadQR()">
                 <div class="qr-action-icon">💾</div>
                 <div class="qr-action-name">Save Image</div>
             </div>
-            <div class="qr-action-item refresh-action" onclick="refreshQR()">
+            <!-- <div class="qr-action-item refresh-action" onclick="refreshQR()">
                 <div class="qr-action-icon">🔄</div>
                 <div class="qr-action-name">Refresh</div>
-            </div>
+            </div> -->
             <a href="{{ route('dashboard') }}" class="qr-action-item dashboard-action">
                 <div class="qr-action-icon">🏠</div>
                 <div class="qr-action-name">Dashboard</div>

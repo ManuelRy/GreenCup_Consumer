@@ -30,116 +30,86 @@
                 <a href="{{ route('dashboard') }}" class="back-btn">
                     ←
                 </a>
-                <div class="app-title">Store Gallery</div>
+                <div class="app-title">Store Feed</div>
                 <button class="search-btn" onclick="toggleSearch()">
                     🔍
                 </button>
             </div>
         </div>
 
-        <!-- Gallery Content -->
-        <div class="gallery-content">
-            @if($stores && count($stores) > 0)
-                <div class="stores-gallery">
-                    @foreach($stores as $store)
-                    <div class="store-gallery-section">
-                        <!-- Store Header with Rank Badge -->
-                        <div class="store-header" onclick="viewStore({{ $store->id }})">
-                            <div class="store-profile">
-                                <div class="store-avatar {{ $store->rank_class }}">
-                                    {{ substr($store->business_name, 0, 1) }}
+        <!-- Search Bar (Hidden by default) -->
+        <div id="searchBar" class="search-container" style="display: none;">
+            <input type="text" id="searchInput" placeholder="Search stores, products, or locations..." class="search-input">
+            <div id="searchResults" class="search-results"></div>
+        </div>
+
+        <!-- Feed Content -->
+        <div class="feed-content">
+            @php
+                // Use posts if available, otherwise empty collection
+                $feedPosts = $posts ?? collect();
+            @endphp
+            
+            @if($feedPosts && $feedPosts->count() > 0)
+                <div class="posts-feed">
+                    @foreach($feedPosts as $post)
+                    <div class="post-card">
+                        <!-- Post Header -->
+                        <div class="post-header">
+                            <div class="seller-profile" onclick="viewStore({{ $post->seller_id }})">
+                                <div class="seller-avatar {{ $post->rank_class }}">
+                                    {{ substr($post->business_name, 0, 1) }}
                                 </div>
-                                <div class="store-info">
-                                    <h3 class="store-name">{{ $store->business_name }}</h3>
-                                    <p class="store-location">📍 {{ $store->address }}</p>
-                                    <div class="store-rank-info">
-                                        <span class="rank-badge {{ $store->rank_class }}">
-                                            {{ $store->rank_icon }} {{ $store->rank_text }}
-                                        </span>
-                                        <span class="post-count">{{ count($store->photos) }} photos</span>
-                                    </div>
+                                <div class="seller-info">
+                                    <h3 class="seller-name">{{ $post->business_name }}</h3>
+                                    <p class="post-time">{{ $post->time_ago }}</p>
                                 </div>
+                            </div>
+                            <div class="post-options">
+                                <button class="options-btn">⋯</button>
                             </div>
                         </div>
 
-                        <!-- Store Description -->
-                        <div class="store-description">
-                            <p>{{ $store->description }}</p>
-                        </div>
+                        <!-- Post Caption (if any) -->
+                        @if($post->caption)
+                            <div class="post-caption">
+                                <p>{{ $post->caption }}</p>
+                            </div>
+                        @endif
 
-                        <!-- Photo Gallery for this Store -->
-                        <div class="photo-gallery">
-                            @if(count($store->photos) == 1)
-                                <!-- Single Photo Layout -->
-                                <div class="single-photo">
-                                    <img src="{{ $store->photos[0]->url }}" alt="{{ $store->business_name }}" 
-                                         onclick="openPhotoModal('{{ $store->photos[0]->url }}', '{{ $store->business_name }}')"
-                                         onerror="this.src='https://via.placeholder.com/800x600/2E8B57/FFFFFF?text={{ urlencode(substr($store->business_name, 0, 1)) }}'">
-                                </div>
-                            @elseif(count($store->photos) == 2)
-                                <!-- Two Photos Layout -->
-                                <div class="two-photos">
-                                    <img src="{{ $store->photos[0]->url }}" alt="{{ $store->business_name }}" 
-                                         onclick="openPhotoModal('{{ $store->photos[0]->url }}', '{{ $store->business_name }}')"
-                                         onerror="this.src='https://via.placeholder.com/400x300/2E8B57/FFFFFF?text={{ urlencode(substr($store->business_name, 0, 1)) }}'">
-                                    <img src="{{ $store->photos[1]->url }}" alt="{{ $store->business_name }}" 
-                                         onclick="openPhotoModal('{{ $store->photos[1]->url }}', '{{ $store->business_name }}')"
-                                         onerror="this.src='https://via.placeholder.com/400x300/3CB371/FFFFFF?text={{ urlencode(substr($store->business_name, 0, 1)) }}'">
-                                </div>
-                            @elseif(count($store->photos) == 3)
-                                <!-- Three Photos Layout -->
-                                <div class="three-photos">
-                                    <div class="main-photo">
-                                        <img src="{{ $store->photos[0]->url }}" alt="{{ $store->business_name }}" 
-                                             onclick="openPhotoModal('{{ $store->photos[0]->url }}', '{{ $store->business_name }}')"
-                                             onerror="this.src='https://via.placeholder.com/600x300/2E8B57/FFFFFF?text={{ urlencode(substr($store->business_name, 0, 1)) }}'">
-                                    </div>
-                                    <div class="side-photos">
-                                        <img src="{{ $store->photos[1]->url }}" alt="{{ $store->business_name }}" 
-                                             onclick="openPhotoModal('{{ $store->photos[1]->url }}', '{{ $store->business_name }}')"
-                                             onerror="this.src='https://via.placeholder.com/300x150/3CB371/FFFFFF?text={{ urlencode(substr($store->business_name, 0, 1)) }}'">
-                                        <img src="{{ $store->photos[2]->url }}" alt="{{ $store->business_name }}" 
-                                             onclick="openPhotoModal('{{ $store->photos[2]->url }}', '{{ $store->business_name }}')"
-                                             onerror="this.src='https://via.placeholder.com/300x150/228B22/FFFFFF?text={{ urlencode(substr($store->business_name, 0, 1)) }}'">
-                                    </div>
-                                </div>
-                            @else
-                                <!-- Four+ Photos Layout (Facebook style) -->
-                                <div class="multiple-photos">
-                                    <div class="main-photo">
-                                        <img src="{{ $store->photos[0]->url }}" alt="{{ $store->business_name }}" 
-                                             onclick="openPhotoModal('{{ $store->photos[0]->url }}', '{{ $store->business_name }}')"
-                                             onerror="this.src='https://via.placeholder.com/600x400/2E8B57/FFFFFF?text={{ urlencode(substr($store->business_name, 0, 1)) }}'">
-                                    </div>
-                                    <div class="grid-photos">
-                                        @for($i = 1; $i < min(4, count($store->photos)); $i++)
-                                            <div class="grid-photo {{ $i == 3 && count($store->photos) > 4 ? 'more-photos' : '' }}">
-                                                <img src="{{ $store->photos[$i]->url }}" alt="{{ $store->business_name }}" 
-                                                     onclick="openPhotoModal('{{ $store->photos[$i]->url }}', '{{ $store->business_name }}')"
-                                                     onerror="this.src='https://via.placeholder.com/200x133/3CB371/FFFFFF?text={{ urlencode(substr($store->business_name, 0, 1)) }}'">
-                                                @if($i == 3 && count($store->photos) > 4)
-                                                    <div class="photo-overlay">
-                                                        <span>+{{ count($store->photos) - 4 }}</span>
-                                                    </div>
-                                                @endif
-                                            </div>
-                                        @endfor
-                                    </div>
-                                </div>
+                        <!-- Post Image -->
+                        <div class="post-image" onclick="openPhotoModal('{{ $post->photo_url }}', '{{ addslashes($post->caption ?: $post->business_name) }}', {{ $post->id }})">
+                            <img src="{{ $post->photo_url }}" 
+                                 alt="{{ $post->caption ?: $post->business_name }}" 
+                                 onerror="handleImageError(this, '{{ $post->business_name }}')"
+                                 loading="lazy">
+                            @if($post->is_featured)
+                                <div class="featured-badge">⭐ Featured</div>
                             @endif
                         </div>
 
-                        <!-- Store Actions -->
-                        <div class="store-actions">
-                            <button class="action-btn location-btn" onclick="openLocation('{{ $store->address }}')">
+                        <!-- Post Stats -->
+                        <div class="post-stats">
+                            <div class="stats-row">
+                                <span class="stat-item">
+                                    <span class="rank-badge-mini {{ $post->rank_class }}">{{ $post->rank_icon }}</span>
+                                    {{ $post->rank_text }} Seller
+                                </span>
+                                <span class="stat-item">{{ $post->total_points }} points</span>
+                            </div>
+                        </div>
+
+                        <!-- Post Actions -->
+                        <div class="post-actions">
+                            <button class="action-btn" onclick="openLocation('{{ addslashes($post->address) }}')">
                                 <span>📍</span>
-                                <span>View Location</span>
+                                <span>Location</span>
                             </button>
-                            <button class="action-btn share-btn" onclick="shareStore({{ $store->id }})">
+                            <button class="action-btn" onclick="sharePost({{ $post->id }}, '{{ addslashes($post->business_name) }}')">
                                 <span>📤</span>
-                                <span>Share Store</span>
+                                <span>Share</span>
                             </button>
-                            <button class="action-btn visit-btn" onclick="viewStore({{ $store->id }})">
+                            <button class="action-btn" onclick="viewStore({{ $post->seller_id }})">
                                 <span>🏪</span>
                                 <span>Visit Store</span>
                             </button>
@@ -147,11 +117,21 @@
                     </div>
                     @endforeach
                 </div>
+
+                <!-- Load More Button -->
+                @if(isset($hasMore) && $hasMore)
+                <div class="load-more-container">
+                    <button class="load-more-btn" onclick="loadMorePosts()">
+                        Load More Posts
+                    </button>
+                </div>
+                @endif
             @else
+                <!-- No Posts Found -->
                 <div class="no-posts">
-                    <div class="no-posts-icon">🏪</div>
-                    <h3>No stores found</h3>
-                    <p>There are no stores with photos in the database yet. Add some stores with photos to see the gallery!</p>
+                    <div class="no-posts-icon">📱</div>
+                    <h3>No posts yet</h3>
+                    <p>Be the first to share your store photos!</p>
                     <div style="margin-top: 20px;">
                         <a href="{{ route('dashboard') }}" style="color: #2E8B57; text-decoration: none; font-weight: 600;">
                             ← Back to Dashboard
@@ -167,13 +147,20 @@
         <div class="modal-overlay" onclick="closePhotoModal()"></div>
         <div class="modal-content">
             <button class="modal-close" onclick="closePhotoModal()">×</button>
-            <img id="modalImage" src="" alt="">
-            <div class="modal-caption" id="modalCaption"></div>
+            <div class="modal-inner">
+                <img id="modalImage" src="" alt="" loading="lazy">
+                <div class="modal-info">
+                    <div class="modal-header">
+                        <div id="modalSellerInfo" class="modal-seller-info"></div>
+                    </div>
+                    <div class="modal-caption" id="modalCaption"></div>
+                </div>
+            </div>
         </div>
     </div>
 
     <style>
-        /* Gallery Header */
+        /* Feed Styles - Facebook Style */
         .gallery-nav {
             display: flex;
             align-items: center;
@@ -201,286 +188,266 @@
 
         .back-btn:hover, .search-btn:hover {
             background: rgba(255, 255, 255, 0.3);
-            color: white;
-            text-decoration: none;
             transform: translateY(-2px);
         }
 
-        /* Gallery Content */
-        .gallery-content {
+        /* Search Container */
+        .search-container {
             background: white;
-            margin: -30px 30px 30px;
-            padding: 0;
-            border-radius: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            min-height: 500px;
-            overflow: hidden;
+            margin: -10px 30px 20px;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
         }
 
-        .stores-gallery {
-            max-width: 600px;
+        .search-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-input:focus {
+            border-color: #2E8B57;
+        }
+
+        /* Feed Content */
+        .feed-content {
+            background: #f0f2f5;
+            margin: -30px 30px 30px;
+            padding: 20px 0;
+            border-radius: 25px;
+            min-height: 500px;
+        }
+
+        .posts-feed {
+            max-width: 680px;
             margin: 0 auto;
         }
 
-        /* Store Gallery Section */
-        .store-gallery-section {
+        /* Post Card - Facebook Style */
+        .post-card {
             background: white;
-            border-bottom: 8px solid #f0f2f5;
-            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
 
-        .store-gallery-section:last-child {
-            border-bottom: none;
-        }
-
-        /* Store Header */
-        .store-header {
+        .post-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 15px;
-            cursor: pointer;
+            padding: 12px 16px;
         }
 
-        .store-profile {
+        .seller-profile {
             display: flex;
             align-items: center;
             gap: 12px;
+            cursor: pointer;
         }
 
-        .store-avatar {
-            width: 50px;
-            height: 50px;
+        .seller-avatar {
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: bold;
-            border: 3px solid;
+            border: 2px solid;
         }
 
-        .store-avatar.platinum { 
+        /* Rank Colors */
+        .seller-avatar.platinum, .rank-badge-mini.platinum { 
             background: linear-gradient(135deg, #9B59B6, #8E44AD); 
             border-color: #7D3C98;
         }
-        .store-avatar.gold { 
+        .seller-avatar.gold, .rank-badge-mini.gold { 
             background: linear-gradient(135deg, #FFD700, #FFA500); 
             border-color: #E67E22;
             color: #333;
         }
-        .store-avatar.silver { 
+        .seller-avatar.silver, .rank-badge-mini.silver { 
             background: linear-gradient(135deg, #C0C0C0, #A8A8A8); 
             border-color: #95A5A6;
             color: #333;
         }
-        .store-avatar.bronze { 
+        .seller-avatar.bronze, .rank-badge-mini.bronze { 
             background: linear-gradient(135deg, #CD7F32, #B87333); 
             border-color: #A0522D;
         }
-        .store-avatar.standard { 
+        .seller-avatar.standard, .rank-badge-mini.standard { 
             background: linear-gradient(135deg, #2E8B57, #3CB371); 
             border-color: #228B22;
         }
 
-        .store-info {
+        .seller-info {
             flex: 1;
         }
 
-        .store-name {
-            margin: 0 0 4px 0;
-            font-size: 16px;
+        .seller-name {
+            margin: 0;
+            font-size: 15px;
             font-weight: 600;
-            color: #333;
+            color: #1c1e21;
         }
 
-        .store-location {
-            margin: 0 0 8px 0;
+        .post-time {
+            margin: 0;
             font-size: 13px;
-            color: #666;
+            color: #65676b;
         }
 
-        .store-rank-info {
+        .options-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #65676b;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .options-btn:hover {
+            background: #f0f2f5;
+        }
+
+        /* Post Caption */
+        .post-caption {
+            padding: 0 16px 12px;
+        }
+
+        .post-caption p {
+            margin: 0;
+            font-size: 15px;
+            line-height: 1.4;
+            color: #1c1e21;
+        }
+
+        /* Post Image */
+        .post-image {
+            position: relative;
+            cursor: pointer;
+            background: #000;
+            line-height: 0;
+        }
+
+        .post-image img {
+            width: 100%;
+            height: auto;
+            max-height: 600px;
+            object-fit: contain;
+        }
+
+        .featured-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #333;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* Post Stats */
+        .post-stats {
+            padding: 12px 16px;
+            border-top: 1px solid #ced0d4;
+            border-bottom: 1px solid #ced0d4;
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-        }
-
-        .rank-badge {
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-            color: white;
-        }
-
-        .rank-badge.platinum { background: linear-gradient(135deg, #9B59B6, #8E44AD); }
-        .rank-badge.gold { background: linear-gradient(135deg, #FFD700, #FFA500); color: #333; }
-        .rank-badge.silver { background: linear-gradient(135deg, #C0C0C0, #A8A8A8); color: #333; }
-        .rank-badge.bronze { background: linear-gradient(135deg, #CD7F32, #B87333); }
-        .rank-badge.standard { background: linear-gradient(135deg, #2E8B57, #3CB371); }
-
-        .post-count {
-            font-size: 12px;
-            color: #999;
-        }
-
-        /* Store Description */
-        .store-description {
-            margin-bottom: 15px;
-        }
-
-        .store-description p {
-            margin: 0;
+            gap: 6px;
             font-size: 14px;
-            line-height: 1.5;
-            color: #333;
+            color: #65676b;
         }
 
-        /* Photo Gallery Layouts */
-        .photo-gallery {
-            margin-bottom: 15px;
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        .photo-gallery img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-            background: #f0f2f5;
-            border-radius: 4px;
-        }
-
-        .photo-gallery img:hover {
-            transform: scale(1.02);
-        }
-
-        /* Image loading state */
-        .photo-gallery img[src=""] {
-            background: linear-gradient(45deg, #f0f2f5 25%, transparent 25%), 
-                        linear-gradient(-45deg, #f0f2f5 25%, transparent 25%), 
-                        linear-gradient(45deg, transparent 75%, #f0f2f5 75%), 
-                        linear-gradient(-45deg, transparent 75%, #f0f2f5 75%);
-            background-size: 20px 20px;
-            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
-            animation: loading 1s linear infinite;
-        }
-
-        @keyframes loading {
-            0% { background-position: 0 0, 0 10px, 10px -10px, -10px 0px; }
-            100% { background-position: 20px 20px, 20px 30px, 30px 10px, 10px 20px; }
-        }
-
-        /* Single Photo */
-        .single-photo {
-            height: 400px;
-        }
-
-        /* Two Photos */
-        .two-photos {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 3px;
-            height: 300px;
-        }
-
-        /* Three Photos */
-        .three-photos {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 3px;
-            height: 300px;
-        }
-
-        .three-photos .side-photos {
-            display: grid;
-            grid-template-rows: 1fr 1fr;
-            gap: 3px;
-        }
-
-        /* Multiple Photos (Facebook style) */
-        .multiple-photos {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 3px;
-            height: 400px;
-        }
-
-        .multiple-photos .grid-photos {
-            display: grid;
-            grid-template-rows: 1fr 1fr 1fr;
-            gap: 3px;
-        }
-
-        .grid-photo {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .grid-photo.more-photos {
-            position: relative;
-        }
-
-        .photo-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.6);
-            display: flex;
+        .rank-badge-mini {
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-size: 24px;
-            font-weight: bold;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            font-size: 10px;
         }
 
-        /* Store Actions */
-        .store-actions {
+        /* Post Actions */
+        .post-actions {
             display: flex;
-            justify-content: space-around;
-            padding: 12px 0;
-            border-top: 1px solid #e9ecef;
-            gap: 8px;
+            padding: 8px 16px;
         }
 
-        .action-btn {
+        .post-actions .action-btn {
+            flex: 1;
             background: none;
             border: none;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 6px;
-            padding: 8px 12px;
-            border-radius: 20px;
+            padding: 8px;
             font-size: 14px;
             font-weight: 600;
-            color: #666;
+            color: #65676b;
             cursor: pointer;
-            transition: all 0.3s ease;
+            border-radius: 8px;
+            transition: background 0.2s;
         }
 
-        .action-btn:hover {
+        .post-actions .action-btn:hover {
             background: #f0f2f5;
-            transform: translateY(-1px);
         }
 
-        .location-btn:hover { color: #2E8B57; }
-        .share-btn:hover { color: #45b7d1; }
-        .visit-btn:hover { color: #9B59B6; }
+        /* Load More */
+        .load-more-container {
+            text-align: center;
+            padding: 20px;
+        }
 
-        /* Photo Modal */
+        .load-more-btn {
+            background: white;
+            border: 1px solid #dadde1;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #1877f2;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .load-more-btn:hover {
+            background: #f0f2f5;
+        }
+
+        /* Enhanced Photo Modal */
         .photo-modal {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.95);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -497,39 +464,78 @@
 
         .modal-content {
             position: relative;
-            max-width: 90%;
-            max-height: 90%;
+            max-width: 95%;
+            max-height: 95%;
+            display: flex;
+            background: #000;
         }
 
-        .modal-content img {
-            max-width: 100%;
-            max-height: 80vh;
+        .modal-inner {
+            display: flex;
+            background: #000;
+            max-height: 90vh;
+        }
+
+        .modal-inner img {
+            max-width: 70vw;
+            max-height: 90vh;
             object-fit: contain;
+        }
+
+        .modal-info {
+            background: #242526;
+            width: 360px;
+            display: flex;
+            flex-direction: column;
+            color: #e4e6eb;
+        }
+
+        .modal-header {
+            padding: 16px;
+            border-bottom: 1px solid #3e4042;
+        }
+
+        .modal-seller-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .modal-close {
             position: absolute;
-            top: -40px;
-            right: 0;
-            background: none;
+            top: 16px;
+            right: 16px;
+            background: rgba(255,255,255,0.1);
             border: none;
             color: white;
-            font-size: 30px;
+            font-size: 24px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .modal-close:hover {
+            background: rgba(255,255,255,0.2);
         }
 
         .modal-caption {
-            color: white;
-            text-align: center;
-            padding: 10px;
-            font-size: 16px;
+            padding: 16px;
+            font-size: 15px;
+            line-height: 1.4;
         }
 
         /* No Posts */
         .no-posts {
             text-align: center;
             padding: 80px 20px;
-            color: #666;
+            background: white;
+            margin: 20px;
+            border-radius: 12px;
         }
 
         .no-posts-icon {
@@ -537,149 +543,304 @@
             margin-bottom: 20px;
         }
 
-        .no-posts h3 {
-            margin: 0 0 12px 0;
-            font-size: 24px;
-            color: #2E8B57;
-            font-weight: 600;
-        }
-
-        .no-posts p {
-            margin: 0;
-            font-size: 16px;
-            line-height: 1.5;
-            color: #666;
-        }
-
         /* Mobile Responsive */
         @media (max-width: 768px) {
-            .gallery-content {
-                margin: -30px 20px 20px;
+            .feed-content {
+                margin: -30px 15px 15px;
+                padding: 15px 0;
             }
             
-            .store-gallery-section {
-                padding: 15px;
+            .posts-feed {
+                max-width: 100%;
             }
             
-            .back-btn, .search-btn {
-                width: 45px;
-                height: 45px;
-                font-size: 18px;
+            .modal-inner {
+                flex-direction: column;
             }
             
-            .app-title {
-                font-size: 28px;
+            .modal-inner img {
+                max-width: 100vw;
+                max-height: 60vh;
             }
-
-            .multiple-photos, .three-photos {
-                height: 250px;
-            }
-
-            .single-photo {
-                height: 250px;
-            }
-
-            .two-photos {
-                height: 200px;
+            
+            .modal-info {
+                width: 100%;
+                max-height: 30vh;
+                overflow-y: auto;
             }
         }
 
         @media (max-width: 480px) {
-            .gallery-content {
-                margin: -30px 15px 15px;
+            .feed-content {
+                margin: -30px 10px 10px;
             }
             
-            .store-gallery-section {
-                padding: 12px;
+            .post-card {
+                border-radius: 0;
+                margin-bottom: 8px;
             }
             
             .app-title {
                 font-size: 24px;
             }
-            
-            .back-btn, .search-btn {
-                width: 40px;
-                height: 40px;
-                font-size: 16px;
-            }
-
-            .store-actions {
-                flex-wrap: wrap;
-                gap: 8px;
-            }
-
-            .action-btn {
-                font-size: 12px;
-                padding: 6px 10px;
-            }
         }
     </style>
 
     <script>
-        function viewStore(storeId) {
-            window.location.href = `/seller/${storeId}`;
+        let currentPage = 1;
+        let loading = false;
+
+        // View store profile
+        function viewStore(sellerId) {
+            window.location.href = `/seller/${sellerId}`;
         }
 
+        // Open location in maps
         function openLocation(address) {
             const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
             window.open(googleMapsUrl, '_blank');
         }
 
-        function shareStore(storeId) {
+        // Share post
+        function sharePost(postId, storeName) {
+            const url = `${window.location.origin}/gallery/post/${postId}`;
             if (navigator.share) {
                 navigator.share({
-                    title: 'Check out this store!',
-                    url: window.location.href
+                    title: `Check out this post from ${storeName}!`,
+                    url: url
                 });
             } else {
-                navigator.clipboard.writeText(window.location.href);
-                alert('Link copied to clipboard!');
+                navigator.clipboard.writeText(url).then(() => {
+                    alert(`Link copied to clipboard!`);
+                }).catch(() => {
+                    prompt('Copy this link:', url);
+                });
             }
         }
 
-        function openPhotoModal(imageUrl, storeName) {
+        // Open photo modal with seller info
+        function openPhotoModal(imageUrl, caption, postId) {
             document.getElementById('modalImage').src = imageUrl;
-            document.getElementById('modalCaption').textContent = storeName;
+            document.getElementById('modalCaption').textContent = caption;
+            
+            // Get seller info for this post
+            const postCard = document.querySelector(`[onclick*="openPhotoModal"][onclick*="${postId}"]`).closest('.post-card');
+            const sellerAvatar = postCard.querySelector('.seller-avatar').cloneNode(true);
+            const sellerName = postCard.querySelector('.seller-name').textContent;
+            const postTime = postCard.querySelector('.post-time').textContent;
+            
+            // Update modal seller info
+            const modalSellerInfo = document.getElementById('modalSellerInfo');
+            modalSellerInfo.innerHTML = `
+                ${sellerAvatar.outerHTML}
+                <div>
+                    <div style="font-weight: 600; font-size: 15px;">${sellerName}</div>
+                    <div style="font-size: 13px; color: #b0b3b8;">${postTime}</div>
+                </div>
+            `;
+            
             document.getElementById('photoModal').style.display = 'flex';
             document.body.style.overflow = 'hidden';
         }
 
+        // Close photo modal
         function closePhotoModal() {
             document.getElementById('photoModal').style.display = 'none';
             document.body.style.overflow = 'auto';
         }
 
+        // Toggle search
         function toggleSearch() {
-            // Implement search functionality
-            alert('Search functionality coming soon!');
+            const searchBar = document.getElementById('searchBar');
+            if (searchBar.style.display === 'none') {
+                searchBar.style.display = 'block';
+                document.getElementById('searchInput').focus();
+            } else {
+                searchBar.style.display = 'none';
+            }
         }
 
-        // Handle image loading errors gracefully
+        // Load more posts
+        function loadMorePosts() {
+            if (loading) return;
+            loading = true;
+            
+            const btn = document.querySelector('.load-more-btn');
+            btn.textContent = 'Loading...';
+            btn.disabled = true;
+            
+            fetch(`/gallery/feed?page=${currentPage + 1}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.posts.length > 0) {
+                        currentPage++;
+                        appendPosts(data.posts);
+                        
+                        if (!data.hasMore) {
+                            btn.style.display = 'none';
+                        } else {
+                            btn.textContent = 'Load More Posts';
+                            btn.disabled = false;
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading posts:', error);
+                    btn.textContent = 'Load More Posts';
+                    btn.disabled = false;
+                })
+                .finally(() => {
+                    loading = false;
+                });
+        }
+
+        // Append new posts to feed
+        function appendPosts(posts) {
+            const feed = document.querySelector('.posts-feed');
+            posts.forEach(post => {
+                const postHtml = createPostHtml(post);
+                feed.insertAdjacentHTML('beforeend', postHtml);
+            });
+        }
+
+        // Create post HTML
+        function createPostHtml(post) {
+            const featuredBadge = post.is_featured ? '<div class="featured-badge">⭐ Featured</div>' : '';
+            const caption = post.caption ? `<div class="post-caption"><p>${post.caption}</p></div>` : '';
+            
+            return `
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="seller-profile" onclick="viewStore(${post.seller_id})">
+                            <div class="seller-avatar ${post.rank_class}">
+                                ${post.business_name.charAt(0)}
+                            </div>
+                            <div class="seller-info">
+                                <h3 class="seller-name">${post.business_name}</h3>
+                                <p class="post-time">${post.time_ago}</p>
+                            </div>
+                        </div>
+                        <div class="post-options">
+                            <button class="options-btn">⋯</button>
+                        </div>
+                    </div>
+                    ${caption}
+                    <div class="post-image" onclick="openPhotoModal('${post.photo_url}', '${post.caption || post.business_name}', ${post.id})">
+                        <img src="${post.photo_url}" alt="${post.caption || post.business_name}" onerror="handleImageError(this, '${post.business_name}')" loading="lazy">
+                        ${featuredBadge}
+                    </div>
+                    <div class="post-stats">
+                        <div class="stats-row">
+                            <span class="stat-item">
+                                <span class="rank-badge-mini ${post.rank_class}">${post.rank_icon}</span>
+                                ${post.rank_text} Seller
+                            </span>
+                            <span class="stat-item">${post.total_points} points</span>
+                        </div>
+                    </div>
+                    <div class="post-actions">
+                        <button class="action-btn" onclick="openLocation('${post.address}')">
+                            <span>📍</span>
+                            <span>Location</span>
+                        </button>
+                        <button class="action-btn" onclick="sharePost(${post.id}, '${post.business_name}')">
+                            <span>📤</span>
+                            <span>Share</span>
+                        </button>
+                        <button class="action-btn" onclick="viewStore(${post.seller_id})">
+                            <span>🏪</span>
+                            <span>Visit Store</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Real-time search
+        let searchTimeout;
+        document.getElementById('searchInput')?.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+            
+            if (query.length < 2) {
+                document.getElementById('searchResults').innerHTML = '';
+                return;
+            }
+            
+            searchTimeout = setTimeout(() => {
+                fetch('/gallery/search?q=' + encodeURIComponent(query))
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            displaySearchResults(data.sellers);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Search error:', error);
+                    });
+            }, 300);
+        });
+
+        // Display search results
+        function displaySearchResults(sellers) {
+            const resultsContainer = document.getElementById('searchResults');
+            if (sellers.length === 0) {
+                resultsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">No stores found</div>';
+                return;
+            }
+            
+            const html = sellers.map(seller => `
+                <div onclick="viewStore(${seller.id})" style="padding: 15px; border-bottom: 1px solid #f0f2f5; cursor: pointer; display: flex; align-items: center; gap: 12px;">
+                    <div class="seller-avatar ${seller.rank_class}" style="width: 40px; height: 40px; font-size: 16px;">
+                        ${seller.business_name.charAt(0)}
+                    </div>
+                    <div>
+                        <div style="font-weight: 600; color: #333;">${seller.business_name}</div>
+                        <div style="font-size: 12px; color: #666;">${seller.address}</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            resultsContainer.innerHTML = html;
+        }
+
+        // Handle image errors
         function handleImageError(img, storeName) {
             const initial = storeName.charAt(0).toUpperCase();
-            const colors = ['FF6B6B', '4ECDC4', '45B7D1', 'FFA726', '66BB6A', 'AB47BC'];
+            const colors = ['2E8B57', '3CB371', '228B22', '32CD32', '98FB98'];
             const color = colors[storeName.length % colors.length];
             img.src = `https://via.placeholder.com/800x600/${color}/FFFFFF?text=${encodeURIComponent(initial)}`;
         }
 
-        // Add loading states for images
-        document.addEventListener('DOMContentLoaded', function() {
-            const images = document.querySelectorAll('.photo-gallery img');
-            images.forEach(img => {
-                img.addEventListener('load', function() {
-                    this.style.opacity = '1';
-                });
-                img.addEventListener('error', function() {
-                    console.log('Image failed to load:', this.src);
-                });
-            });
-        });
-
-        // Close modal with Escape key
+        // Close modal with Escape
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 closePhotoModal();
             }
+        });
+
+        // Auto-hide search when clicking outside
+        document.addEventListener('click', function(e) {
+            const searchContainer = document.getElementById('searchBar');
+            const searchBtn = document.querySelector('.search-btn');
+            
+            if (!searchContainer?.contains(e.target) && !searchBtn?.contains(e.target)) {
+                if (searchContainer) {
+                    searchContainer.style.display = 'none';
+                }
+            }
+        });
+
+        // Loading animation for images
+        document.addEventListener('DOMContentLoaded', function() {
+            const images = document.querySelectorAll('.post-image img');
+            images.forEach(img => {
+                img.style.opacity = '0';
+                img.addEventListener('load', function() {
+                    this.style.transition = 'opacity 0.3s ease';
+                    this.style.opacity = '1';
+                });
+            });
         });
     </script>
 @endsection

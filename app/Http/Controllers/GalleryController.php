@@ -5,182 +5,476 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class GalleryController extends Controller
 {
     /**
-     * Show what sellers are posting - Instagram/Facebook style feed
+     * Show Facebook-style feed of seller photos
      */
     public function index()
     {
-        $consumer = Auth::guard('consumer')->user();
-        
-        if (!$consumer) {
-            return redirect()->route('login')
-                ->with('error', 'Please login to view posts');
-        }
-
-        // Get all stores with photos
-        $stores = DB::table('sellers')
-            ->select([
-                'id',
-                'business_name',
-                'description', 
-                'address',
-                'total_points'
-            ])
-            ->where('is_active', true)
-            ->orderBy('updated_at', 'desc')
-            ->get();
-
-        // Enrich each store with photos and ranking data
-        $stores = $stores->map(function($store) {
-            return $this->enrichStoreData($store);
-        })->filter(function($store) {
-            // Only show stores that have photos
-            return count($store->photos) > 0;
-        });
-
-        return view('gallery.index', [
-            'stores' => $stores,
-            'consumer' => $consumer
-        ]);
-    }
-
-    /**
-     * Enrich store data with photos and ranking information
-     */
-    private function enrichStoreData($store)
-    {
-        // Get photos for this store
-        $store->photos = $this->getStorePhotos($store->id);
-        
-        // Get total points given to consumers by this store
-        $store->points_reward = $this->getStorePointsGivenToConsumers($store->id);
-        
-        // Calculate rank based on points given to consumers
-        $store->rank_class = $this->getRankClass($store->points_reward);
-        $store->rank_text = $this->getRankText($store->points_reward);
-        $store->rank_icon = $this->getRankIcon($store->points_reward);
-        
-        return $store;
-    }
-
-    /**
-     * Get photos for a store - supports multiple sources
-     */
-    private function getStorePhotos($storeId)
-    {
-        $photos = collect([]);
-        
         try {
-            // Method 1: Get from seller_photos table (if you create one)
+            $consumer = Auth::guard('consumer')->user();
+            
+            if (!$consumer) {
+                return redirect()->route('login')
+                    ->with('error', 'Please login to view the gallery');
+            }
+
+            // Get posts for the feed (each photo as individual post)
+            $postsData = $this->getFeedPosts(1, 20);
+
+            return view('gallery.index', [
+                'posts' => $postsData['posts'],
+                'consumer' => $consumer,
+                'hasMore' => $postsData['hasMore']
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Gallery index error: ' . $e->getMessage());
+            return redirect()->route('dashboard')
+                ->with('error', 'Unable to load gallery. Please try again.');
+        }
+    }
+
+    /**
+     * Get feed posts (AJAX endpoint for pagination)
+     */
+    public function getFeed(Request $request)
+    {
+        try {
+            $page = $request->get('page', 1);
+            $perPage = 20;
+            
+            $postsData = $this->getFeedPosts($page, $perPage);
+            
+            return response()->json([
+                'success' => true,
+                'posts' => $postsData['posts'],
+                'hasMore' => $postsData['hasMore']
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error loading feed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Unable to load posts'
+            ]);
+        }
+    }
+
+    /**
+     * Get stores with photos - For backward compatibility
+     */
+    private function getStoresWithPhotos()
+    {
+        try {
+            $sellers = DB::table('sellers')
+                ->where('is_active', true)
+                ->select([
+                    'id',
+                    'business_name',
+                    'description',
+                    'address',
+                    'phone',
+                    'working_hours',
+                    'photo_url as main_photo_url',
+                    'photo_caption as main_photo_caption',
+                    'total_points',
+                    'created_at',
+                    'updated_at'
+                ])
+                ->orderByDesc('total_points')
+                ->get();
+
+            $storesWithPhotos = collect();
+
+            foreach ($sellers as $seller) {
+                $photos = $this->getSellerPhotos($seller->id);
+                
+                if (count($photos) > 0) {
+                    $seller->photos = $photos;
+                    $seller = $this->addRankingData($seller);
+                    $storesWithPhotos->push($seller);
+                }
+            }
+
+            return $storesWithPhotos;
+
+        } catch (\Exception $e) {
+            \Log::error('Error getting stores with photos: ' . $e->getMessage());
+            return collect();
+        }
+    }
+
+    /**
+     * Get posts for the feed in chronological order
+     */
+    private function getFeedPosts($page = 1, $perPage = 20)
+    {
+        try {
+            $offset = ($page - 1) * $perPage;
+            
+            // Build the query for seller photos
+            $query = DB::table('seller_photos as sp')
+                ->join('sellers as s', 's.id', '=', 'sp.seller_id')
+                ->where('s.is_active', true)
+                ->select([
+                    'sp.id',
+                    'sp.photo_url',
+                    'sp.caption',
+                    'sp.category',
+                    'sp.is_featured',
+                    'sp.created_at',
+                    's.id as seller_id',
+                    's.business_name',
+                    's.address',
+                    's.phone',
+                    's.total_points',
+                    's.description'
+                ])
+                ->orderByDesc('sp.created_at');
+
+            // Get total count for pagination
+            $total = $query->count();
+            
+            // Get posts for current page
+            $posts = $query->offset($offset)
+                          ->limit($perPage)
+                          ->get();
+
+            \Log::info('Feed posts query result', [
+                'total' => $total,
+                'posts_count' => $posts->count(),
+                'page' => $page,
+                'offset' => $offset
+            ]);
+
+            // Process posts
+            $processedPosts = collect();
+            
+            foreach ($posts as $post) {
+                // Format photo URL
+                $photoUrl = $post->photo_url;
+                if (!str_starts_with($photoUrl, 'http') && !str_starts_with($photoUrl, '/')) {
+                    $photoUrl = '/storage/seller_photos/' . $photoUrl;
+                }
+                if (str_starts_with($photoUrl, '/storage/')) {
+                    $photoUrl = asset($photoUrl);
+                }
+                
+                // Calculate time ago
+                $timeAgo = $this->getTimeAgo($post->created_at);
+                
+                // Add ranking data
+                $points = $post->total_points ?? 0;
+                
+                $processedPost = (object)[
+                    'id' => $post->id,
+                    'seller_id' => $post->seller_id,
+                    'business_name' => $post->business_name,
+                    'address' => $post->address,
+                    'phone' => $post->phone,
+                    'photo_url' => $photoUrl,
+                    'caption' => $post->caption,
+                    'category' => $post->category,
+                    'is_featured' => $post->is_featured,
+                    'created_at' => $post->created_at,
+                    'time_ago' => $timeAgo,
+                    'total_points' => $points,
+                    'rank_class' => $this->getRankClass($points),
+                    'rank_text' => $this->getRankText($points),
+                    'rank_icon' => $this->getRankIcon($points)
+                ];
+                
+                $processedPosts->push($processedPost);
+            }
+
+            // Check if there are more posts
+            $hasMore = ($offset + $perPage) < $total;
+
+            return [
+                'posts' => $processedPosts,
+                'hasMore' => $hasMore
+            ];
+
+        } catch (\Exception $e) {
+            \Log::error('Error getting feed posts: ' . $e->getMessage());
+            return [
+                'posts' => collect(),
+                'hasMore' => false
+            ];
+        }
+    }
+
+    /**
+     * Calculate time ago string
+     */
+    private function getTimeAgo($datetime)
+    {
+        try {
+            $created = Carbon::parse($datetime);
+            $now = Carbon::now();
+            
+            $diff = $created->diff($now);
+            
+            if ($diff->y > 0) {
+                return $diff->y . ' year' . ($diff->y > 1 ? 's' : '') . ' ago';
+            } elseif ($diff->m > 0) {
+                return $diff->m . ' month' . ($diff->m > 1 ? 's' : '') . ' ago';
+            } elseif ($diff->d > 0) {
+                if ($diff->d == 1) {
+                    return 'Yesterday';
+                }
+                return $diff->d . ' day' . ($diff->d > 1 ? 's' : '') . ' ago';
+            } elseif ($diff->h > 0) {
+                return $diff->h . ' hour' . ($diff->h > 1 ? 's' : '') . ' ago';
+            } elseif ($diff->i > 0) {
+                return $diff->i . ' minute' . ($diff->i > 1 ? 's' : '') . ' ago';
+            } else {
+                return 'Just now';
+            }
+        } catch (\Exception $e) {
+            return 'Recently';
+        }
+    }
+
+    /**
+     * Show individual seller/store page
+     */
+    public function show($id)
+    {
+        try {
+            // Get seller information
+            $seller = DB::table('sellers')
+                ->where('id', $id)
+                ->where('is_active', true)
+                ->first([
+                    'id',
+                    'business_name',
+                    'description', 
+                    'address',
+                    'phone',
+                    'working_hours',
+                    'photo_url',
+                    'photo_caption',
+                    'total_points',
+                    'created_at'
+                ]);
+
+            if (!$seller) {
+                abort(404, 'Store not found');
+            }
+
+            // Get all seller's photos
+            $photos = $this->getSellerPhotos($id);
+            $seller->photos = $photos;
+            
+            // Add ranking data
+            $seller = $this->addRankingData($seller);
+
+            return view('sellers.show', compact('seller'));
+
+        } catch (\Exception $e) {
+            \Log::error('Error loading seller profile: ' . $e->getMessage());
+            abort(404, 'Store not found');
+        }
+    }
+
+    /**
+     * Get photos for a seller
+     */
+    private function getSellerPhotos($sellerId)
+    {
+        try {
+            $photos = collect();
+
+            // Get from seller_photos table
             if (DB::getSchemaBuilder()->hasTable('seller_photos')) {
                 $dbPhotos = DB::table('seller_photos')
-                    ->where('seller_id', $storeId)
-                    ->where('is_active', true)
-                    ->orderBy('is_featured', 'desc')
-                    ->orderBy('created_at', 'desc')
-                    ->get(['url', 'caption']);
-                
+                    ->where('seller_id', $sellerId)
+                    ->orderByDesc('is_featured')
+                    ->orderBy('sort_order')
+                    ->orderByDesc('created_at')
+                    ->get([
+                        'id',
+                        'photo_url',
+                        'caption',
+                        'category',
+                        'is_featured',
+                        'sort_order',
+                        'created_at'
+                    ]);
+
                 foreach ($dbPhotos as $photo) {
+                    $photoUrl = $photo->photo_url;
+                    
+                    if (!str_starts_with($photoUrl, 'http') && !str_starts_with($photoUrl, '/')) {
+                        $photoUrl = '/storage/seller_photos/' . $photoUrl;
+                    }
+                    
+                    if (str_starts_with($photoUrl, '/storage/')) {
+                        $photoUrl = asset($photoUrl);
+                    }
+
                     $photos->push((object)[
-                        'url' => $photo->url,
-                        'caption' => $photo->caption ?? ''
+                        'id' => $photo->id,
+                        'url' => $photoUrl,
+                        'caption' => $photo->caption ?? '',
+                        'category' => $photo->category ?? 'store',
+                        'is_featured' => (bool)$photo->is_featured,
+                        'sort_order' => $photo->sort_order ?? 0,
+                        'created_at' => $photo->created_at
                     ]);
                 }
             }
+
+            // Fallback to seller's main photo if no gallery photos
+            if ($photos->isEmpty()) {
+                $seller = DB::table('sellers')
+                    ->where('id', $sellerId)
+                    ->whereNotNull('photo_url')
+                    ->first(['photo_url', 'photo_caption']);
+
+                if ($seller && $seller->photo_url) {
+                    $photoUrl = $seller->photo_url;
+                    if (str_starts_with($photoUrl, '/storage/')) {
+                        $photoUrl = asset($photoUrl);
+                    }
+                    
+                    $photos->push((object)[
+                        'id' => 0,
+                        'url' => $photoUrl,
+                        'caption' => $seller->photo_caption ?? '',
+                        'category' => 'store',
+                        'is_featured' => true,
+                        'sort_order' => 0,
+                        'created_at' => now()
+                    ]);
+                }
+            }
+
+            return $photos->toArray();
+
+        } catch (\Exception $e) {
+            \Log::error('Error loading seller photos for seller ' . $sellerId . ': ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Add ranking data to seller object
+     */
+    private function addRankingData($seller)
+    {
+        $points = $seller->total_points ?? 0;
+        
+        $seller->rank_class = $this->getRankClass($points);
+        $seller->rank_text = $this->getRankText($points);
+        $seller->rank_icon = $this->getRankIcon($points);
+        $seller->points_reward = $points;
+        
+        return $seller;
+    }
+
+    /**
+     * Search sellers
+     */
+    public function search(Request $request)
+    {
+        try {
+            $query = $request->get('q', '');
             
-            // Method 2: Get single photo from sellers table
-            $seller = DB::table('sellers')
-                ->where('id', $storeId)
-                ->whereNotNull('photo_url')
-                ->first(['photo_url', 'photo_caption']);
-            
-            if ($seller && $seller->photo_url) {
-                $photos->push((object)[
-                    'url' => $seller->photo_url,
-                    'caption' => $seller->photo_caption ?? ''
+            if (empty(trim($query))) {
+                return response()->json([
+                    'success' => true,
+                    'sellers' => []
                 ]);
             }
             
-            // Method 3: Generate demo photos if no real photos exist
-            if ($photos->isEmpty()) {
-                $photos = $this->generateDemoPhotos($storeId);
-            }
-            
+            $sellers = DB::table('sellers')
+                ->where('is_active', true)
+                ->where(function($queryBuilder) use ($query) {
+                    $queryBuilder->where('business_name', 'like', "%{$query}%")
+                               ->orWhere('description', 'like', "%{$query}%")
+                               ->orWhere('address', 'like', "%{$query}%");
+                })
+                ->select([
+                    'id',
+                    'business_name',
+                    'description',
+                    'address',
+                    'photo_url',
+                    'total_points'
+                ])
+                ->orderByDesc('total_points')
+                ->limit(20)
+                ->get();
+
+            // Add rank information to each seller
+            $sellers = $sellers->map(function($seller) {
+                $seller = $this->addRankingData($seller);
+                return $seller;
+            });
+
+            return response()->json([
+                'success' => true,
+                'sellers' => $sellers
+            ]);
+
         } catch (\Exception $e) {
-            // Fallback to demo photos
-            $photos = $this->generateDemoPhotos($storeId);
+            \Log::error('Search error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Search failed'
+            ]);
         }
-        
-        return $photos->toArray();
     }
 
     /**
-     * Generate demo photos for stores (for demonstration)
+     * Get photo statistics
      */
-    private function generateDemoPhotos($storeId)
-    {
-        // Demo photos based on store ID
-        $demoSets = [
-            [
-                'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800',
-                'https://images.unsplash.com/photo-1559925393-8be0ec4767c8?w=800',
-                'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800',
-                'https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=800'
-            ],
-            [
-                'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800',
-                'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=800',
-                'https://images.unsplash.com/photo-1556909075-f3e64d6761b4?w=800'
-            ],
-            [
-                'https://images.unsplash.com/photo-1515003197210-e0cd71810b5f?w=800',
-                'https://images.unsplash.com/photo-1571091655789-405eb7a3a3a8?w=800',
-                'https://images.unsplash.com/photo-1548940740-204726a19be3?w=800',
-                'https://images.unsplash.com/photo-1567027394268-a3cbb207fa8f?w=800',
-                'https://images.unsplash.com/photo-1571091656363-dea7acb24f42?w=800'
-            ],
-            [
-                'https://images.unsplash.com/photo-1593560704563-f176a2eb61db?w=800',
-                'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800'
-            ]
-        ];
-        
-        $photoSet = $demoSets[$storeId % count($demoSets)];
-        
-        return collect($photoSet)->map(function($url, $index) {
-            return (object)[
-                'url' => $url,
-                'caption' => 'Beautiful store interior ' . ($index + 1)
-            ];
-        });
-    }
-
-    /**
-     * Get total points given to consumers by this store
-     */
-    private function getStorePointsGivenToConsumers($storeId)
+    public function getPhotoStats()
     {
         try {
-            // Check if point_transactions table exists
-            $exists = DB::select("SHOW TABLES LIKE 'point_transactions'");
-            if (empty($exists)) {
-                return rand(50, 2500); // Demo points for ranking demonstration
+            $stats = [
+                'total_sellers' => DB::table('sellers')->where('is_active', true)->count(),
+                'sellers_with_main_photo' => DB::table('sellers')
+                    ->where('is_active', true)
+                    ->whereNotNull('photo_url')
+                    ->count(),
+                'total_seller_photos' => 0,
+                'sellers_with_gallery_photos' => 0,
+                'total_posts' => 0
+            ];
+
+            if (DB::getSchemaBuilder()->hasTable('seller_photos')) {
+                $stats['total_seller_photos'] = DB::table('seller_photos')->count();
+                $stats['sellers_with_gallery_photos'] = DB::table('seller_photos')
+                    ->distinct('seller_id')
+                    ->count('seller_id');
+                $stats['total_posts'] = DB::table('seller_photos as sp')
+                    ->join('sellers as s', 's.id', '=', 'sp.seller_id')
+                    ->where('s.is_active', true)
+                    ->count();
             }
-            
-            return DB::table('point_transactions')
-                ->where('seller_id', $storeId)
-                ->where('type', 'earn')
-                ->sum('points') ?: rand(50, 2500);
+
+            return response()->json([
+                'success' => true,
+                'stats' => $stats
+            ]);
+
         } catch (\Exception $e) {
-            return rand(50, 2500); // Demo points
+            return response()->json([
+                'success' => false,
+                'message' => 'Unable to get stats'
+            ]);
         }
     }
 
     /**
-     * Rank calculation - CONSISTENT with MapController (2000+ = Platinum)
+     * Rank calculation helpers
      */
     private function getRankClass($points)
     {
