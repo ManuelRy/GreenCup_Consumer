@@ -40,14 +40,6 @@ class Consumer extends Authenticatable
     }
 
     /**
-     * Relationship: Consumer has one QR code
-     */
-    public function qrCode()
-    {
-        return $this->hasOne(QrCode::class, 'consumer_id');
-    }
-
-    /**
      * Relationship: Consumer has many point transactions
      */
     public function pointTransactions()
@@ -56,31 +48,12 @@ class Consumer extends Authenticatable
     }
 
     /**
-     * Generate QR code for this consumer
+     * Relationship: Consumer has claimed many QR codes
      */
-public function generateQrCode()
-{
-    // Check if consumer already has a QR code
-    if ($this->qrCode) {
-        return $this->qrCode;
+    public function claimedQrCodes()
+    {
+        return $this->hasMany(QrCode::class, 'claimed_by_consumer_id');
     }
-
-    // Generate unique secure token for this consumer
-    $token = 'GC_' . $this->id . '_' . strtoupper(substr(md5($this->email . time()), 0, 8));
-    
-    // Use Laravel's url() helper instead of hardcoded URL
-    $fullUrl = url('/award-points/' . $token);
-    
-    return QrCode::create([
-        'consumer_id' => $this->id,
-        'seller_id' => null,
-        'item_id' => null,
-        'code' => $fullUrl, // Store the full URL
-        'type' => 'consumer_profile',
-        'active' => true,
-        'expires_at' => null,
-    ]);
-}
 
     /**
      * Get consumer's total available points
@@ -109,17 +82,52 @@ public function generateQrCode()
                     ->take($limit)
                     ->get();
     }
-    /**
-     * Boot method to auto-generate QR code when consumer is created
-     */
-    protected static function boot()
-    {
-        parent::boot();
 
-        static::created(function ($consumer) {
-            // Generate QR code after consumer is created
-            $consumer->generateQrCode();
-        });
+    /**
+     * Get recent transactions
+     */
+    public function getRecentTransactions($days = 30)
+    {
+        return $this->pointTransactions()
+                    ->with(['seller', 'qrCode'])
+                    ->where('created_at', '>=', now()->subDays($days))
+                    ->latest('scanned_at')
+                    ->get();
+    }
+
+    /**
+     * Get transactions by seller
+     */
+    public function getTransactionsBySeller($sellerId)
+    {
+        return $this->pointTransactions()
+                    ->where('seller_id', $sellerId)
+                    ->with(['qrCode'])
+                    ->latest('scanned_at')
+                    ->get();
+    }
+
+    /**
+     * Check if consumer can claim a QR code
+     */
+    public function canClaimQrCode(QrCode $qrCode)
+    {
+        // Check if QR code is valid
+        if (!$qrCode->isValid()) {
+            return false;
+        }
+
+        // Check if already claimed
+        if ($qrCode->status === 'claimed') {
+            return false;
+        }
+
+        // Check if it's a transaction type QR code
+        if ($qrCode->type !== 'transaction') {
+            return false;
+        }
+
+        return true;
     }
 
     /**

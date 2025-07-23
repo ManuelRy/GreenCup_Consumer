@@ -1,21 +1,11 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\{
-    LoginController,
-    ConsumerController,
-    DashboardController,
-    AccountController,
-    QRController,
-    MapController,
-    SellerController,
-    GalleryController
-};
+use App\Http\Controllers\{ConsumerController, StoreController, ReceiptController};
 
 /*
 |--------------------------------------------------------------------------
-| GreenCup Consumer Web Routes
+| GreenCup Consumer Web Routes - SIMPLIFIED VERSION
 |--------------------------------------------------------------------------
 */
 
@@ -24,21 +14,21 @@ Route::get('/', fn() => redirect()->route('login'))->name('home');
 
 /*
 |--------------------------------------------------------------------------
-| Public Routes (Guest Only)
+| Public Routes (Guest Only) - Authentication & Registration
 |--------------------------------------------------------------------------
 */
 Route::middleware(['guest:consumer'])->group(function () {
-    // Authentication routes
-    Route::get('/login', [LoginController::class, 'create'])->name('login');
-    Route::post('/login', [LoginController::class, 'store'])->name('login.store');
-    
-    // Consumer registration routes
-    Route::get('/register', [ConsumerController::class, 'create'])->name('register');
-    Route::post('/register', [ConsumerController::class, 'store'])->name('register.store');
-    
+    // Authentication
+    Route::get('/login', [ConsumerController::class, 'showLogin'])->name('login');
+    Route::post('/login', [ConsumerController::class, 'login'])->name('login.store');
+
+    // Registration
+    Route::get('/register', [ConsumerController::class, 'showRegister'])->name('register');
+    Route::post('/register', [ConsumerController::class, 'register'])->name('register.store');
+
     // Legacy routes for backward compatibility
-    Route::get('/consumers/create', [ConsumerController::class, 'create'])->name('consumers.create');
-    Route::post('/consumers', [ConsumerController::class, 'store'])->name('consumers.store');
+    Route::get('/consumers/create', [ConsumerController::class, 'showRegister'])->name('consumers.create');
+    Route::post('/consumers', [ConsumerController::class, 'register'])->name('consumers.store');
 });
 
 /*
@@ -47,305 +37,92 @@ Route::middleware(['guest:consumer'])->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['consumer.auth'])->group(function () {
-    
-    // Core application pages
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/account', [AccountController::class, 'index'])->name('account');
-    
-    // QR Scanner page
-    Route::get('/scan', function () {
-        $consumer = Auth::guard('consumer')->user();
-        return view('scan.index', compact('consumer'));
-    })->name('scan');
-    
+
     /*
     |--------------------------------------------------------------------------
-    | Enhanced Gallery Routes - Instagram/Facebook Style
+    | Consumer Pages - Dashboard, Account, Profile, QR Code
     |--------------------------------------------------------------------------
     */
-    // Main gallery pages
-    Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery');
-    Route::get('/products', [GalleryController::class, 'index'])->name('products'); // Alternative name
+    // Core consumer pages
+    Route::get('/dashboard', [ConsumerController::class, 'dashboard'])->name('dashboard');
+    Route::get('/account', [ConsumerController::class, 'account'])->name('account');
+    Route::get('/account/edit', [ConsumerController::class, 'showEditAccount'])->name('account.edit');
     
-    Route::get('/gallery/feed', [App\Http\Controllers\GalleryController::class, 'getFeed'])->name('gallery.feed');
-    Route::get('/gallery/search', [GalleryController::class, 'search'])->name('gallery.search');
-    Route::get('/gallery/stats', [GalleryController::class, 'getPhotoStats'])->name('gallery.stats');
+    // Profile management
+    Route::put('/account/profile', [ConsumerController::class, 'updateProfile'])->name('account.profile.update');
+    Route::put('/account/password', [ConsumerController::class, 'updatePassword'])->name('account.password.update');
+    Route::get('/account/transactions', [ConsumerController::class, 'transactionHistory'])->name('account.transactions');
     
-    // Individual seller/store viewing (for consumers)
-    Route::get('/seller/{id}', [GalleryController::class, 'show'])->name('seller.show');
-    Route::get('/store/{id}', [GalleryController::class, 'show'])->name('store.show');
+    // QR Code
+    Route::get('/qr-code', [ConsumerController::class, 'showQrCode'])->name('consumer.qr-code');
     
-    // Post modal functionality - view all photos from a post
-    Route::get('/seller/{sellerId}/post/{postIndex}', [GalleryController::class, 'showPost'])->name('seller.post');
-    
-    // Store transactions for consumers to view
-    Route::get('/seller/{id}/transactions', [GalleryController::class, 'getTransactions'])->name('seller.transactions');
-    
+    // Receipt scanning
+    Route::get('/scan-receipt', [ConsumerController::class, 'showScanReceipt'])->name('scan.receipt');
+    Route::get('/scan', [ConsumerController::class, 'showScanReceipt'])->name('scan'); // Alternative
+
     /*
     |--------------------------------------------------------------------------
-    | Map and Location Routes
+    | Store Pages - Gallery, Map, Profiles, Search
     |--------------------------------------------------------------------------
     */
-    Route::get('/map', [MapController::class, 'index'])->name('map');
+    // Gallery & Feed
+    Route::get('/gallery', [StoreController::class, 'gallery'])->name('gallery');
+    Route::get('/products', [StoreController::class, 'gallery'])->name('products'); // Alternative name
     
+    // Map & Store Locator
+    Route::get('/map', [StoreController::class, 'map'])->name('map');
+    
+    // Individual store profiles
+    Route::get('/seller/{id}', [StoreController::class, 'show'])->name('seller.show');
+    Route::get('/store/{id}', [StoreController::class, 'show'])->name('store.show');
+
     /*
     |--------------------------------------------------------------------------
-    | QR Processing Routes
-    |--------------------------------------------------------------------------
-    */
-    Route::post('/qr/process-and-confirm', [QRController::class, 'processAndConfirm'])->name('qr.process.confirm');
-    Route::post('/qr/process', [QRController::class, 'processScan'])->name('qr.process');
-    Route::post('/qr/confirm-transaction', [QRController::class, 'confirmTransaction'])->name('qr.confirm');
-    
-    /*
-    |--------------------------------------------------------------------------
-    | Consumer Profile Routes
-    |--------------------------------------------------------------------------
-    */
-    Route::prefix('consumer')->name('consumer.')->group(function () {
-        Route::get('/qr', [ConsumerController::class, 'showQrCode'])->name('qr');
-        // Ready for future profile management
-        // Route::get('/profile', [ConsumerController::class, 'showProfile'])->name('profile');
-        // Route::put('/profile', [ConsumerController::class, 'updateProfile'])->name('profile.update');
-    });
-    
-    /*
-    |--------------------------------------------------------------------------
-    | API Routes for Frontend AJAX
+    | API Routes for AJAX/Frontend
     |--------------------------------------------------------------------------
     */
     Route::prefix('api')->name('api.')->group(function () {
-        // Map/Store APIs
-        Route::get('/stores', [MapController::class, 'getStores'])->name('stores');
-        Route::get('/store/{id}/details', [MapController::class, 'getStoreDetails'])->name('store.details');
-        Route::post('/stores/search', [MapController::class, 'searchStores'])->name('stores.search');
-        Route::post('/stores/distance', [MapController::class, 'calculateDistance'])->name('stores.distance');
         
-        // Gallery APIs for AJAX functionality
-        Route::get('/gallery/stores', [GalleryController::class, 'index'])->name('gallery.api.stores');
-        Route::post('/gallery/stores/search', [GalleryController::class, 'search'])->name('gallery.api.search');
+        // Consumer APIs
+        Route::get('/consumer/points', [ConsumerController::class, 'getPoints'])->name('consumer.points');
         
-        // Post interaction APIs (ready for future features)
-        Route::post('/post/{sellerId}/{postIndex}/like', function($sellerId, $postIndex) {
-            // Like post functionality
-            return response()->json(['success' => true, 'likes' => rand(1, 50)]);
-        })->name('post.like');
+        // Store APIs
+        Route::get('/stores', [StoreController::class, 'getStores'])->name('stores');
+        Route::get('/store/{id}/details', [StoreController::class, 'getStoreDetails'])->name('store.details');
+        Route::get('/store/{id}/transactions', [StoreController::class, 'getTransactions'])->name('store.transactions');
+        Route::post('/stores/search', [StoreController::class, 'search'])->name('stores.search');
+        Route::post('/stores/distance', [StoreController::class, 'calculateDistance'])->name('stores.distance');
         
-        Route::post('/post/{sellerId}/{postIndex}/comment', function($sellerId, $postIndex) {
-            // Comment functionality
-            return response()->json(['success' => true, 'message' => 'Comment feature coming soon!']);
-        })->name('post.comment');
+        // Gallery APIs
+        Route::get('/gallery/feed', [StoreController::class, 'getFeed'])->name('gallery.feed');
+        Route::get('/gallery/search', [StoreController::class, 'gallerySearch'])->name('gallery.search');
+        Route::get('/gallery/stats', [StoreController::class, 'getPhotoStats'])->name('gallery.stats');
         
-        Route::get('/seller/{id}/follow', function($id) {
-            // Follow store functionality
-            return response()->json(['success' => true, 'following' => true]);
-        })->name('seller.follow');
+        // Receipt APIs (kept separate as specialized functionality)
+        Route::prefix('receipt')->name('receipt.')->group(function () {
+            Route::post('/check', [ReceiptController::class, 'check'])->name('check');
+            Route::post('/claim', [ReceiptController::class, 'claim'])->name('claim');
+            Route::get('/history', [ReceiptController::class, 'history'])->name('history');
+        });
     });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Logout Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::post('/logout', [ConsumerController::class, 'logout'])->name('logout');
+    Route::get('/logout', [ConsumerController::class, 'logout'])->name('logout.get');
 });
 
 /*
 |--------------------------------------------------------------------------
-| Authentication Control Routes
-|--------------------------------------------------------------------------
-*/
-Route::post('/logout', function () {
-    Auth::guard('consumer')->logout();
-    request()->session()->invalidate();
-    request()->session()->regenerateToken();
-    
-    return redirect()->route('login')->with('success', 'Logged out successfully');
-})->middleware(['consumer.auth'])->name('logout');
-
-Route::get('/logout', function () {
-    Auth::guard('consumer')->logout();
-    request()->session()->invalidate();
-    request()->session()->regenerateToken();
-    
-    return redirect()->route('login')->with('success', 'Logged out successfully');
-})->middleware(['consumer.auth'])->name('logout.get');
-
-/*
-|--------------------------------------------------------------------------
-| Error Handling Routes
+| Error Handling
 |--------------------------------------------------------------------------
 */
 Route::fallback(function () {
     if (!Auth::guard('consumer')->check()) {
-        return redirect()->route('login')
-            ->with('error', 'Please log in to access this page.');
+        return redirect()->route('login')->with('error', 'Please log in to access this page.');
     }
-    
     return response()->view('errors.404', [], 404);
 });
-
-/*
-|--------------------------------------------------------------------------
-| Development/Testing Routes (Remove in Production)
-|--------------------------------------------------------------------------
-*/
-if (app()->environment(['local', 'testing'])) {
-    Route::prefix('dev')->name('dev.')->group(function () {
-        
-        // Authentication testing
-        Route::get('/test-auth', function () {
-            return [
-                'authenticated' => Auth::guard('consumer')->check(),
-                'user' => Auth::guard('consumer')->user(),
-                'session' => session()->all()
-            ];
-        })->name('test.auth');
-        
-        // Session management
-        Route::get('/clear-session', function () {
-            session()->flush();
-            return redirect()->route('login')->with('success', 'Session cleared');
-        })->name('clear.session');
-        
-        // Gallery testing
-        Route::get('/test-gallery', function () {
-            try {
-                $galleryController = new \App\Http\Controllers\GalleryController();
-                $stats = $galleryController->getPhotoStats();
-                return $stats->getData();
-            } catch (Exception $e) {
-                return ['error' => $e->getMessage()];
-            }
-        })->name('test.gallery');
-        
-        // Database and storage testing
-        Route::get('/test-db', function () {
-            try {
-                $results = [
-                    'database' => [
-                        'sellers_count' => \DB::table('sellers')->where('is_active', true)->count(),
-                        'photos_count' => \DB::getSchemaBuilder()->hasTable('seller_photos') 
-                            ? \DB::table('seller_photos')->count() 
-                            : 0,
-                        'consumers_count' => \DB::table('consumers')->count(),
-                    ],
-                    'tables_exist' => [
-                        'sellers' => \DB::getSchemaBuilder()->hasTable('sellers'),
-                        'seller_photos' => \DB::getSchemaBuilder()->hasTable('seller_photos'),
-                        'consumers' => \DB::getSchemaBuilder()->hasTable('consumers'),
-                        'point_transactions' => \DB::getSchemaBuilder()->hasTable('point_transactions'),
-                        'qr_codes' => \DB::getSchemaBuilder()->hasTable('qr_codes'),
-                    ],
-                    'storage' => [
-                        'storage_link_exists' => is_link(public_path('storage')) || is_dir(public_path('storage')),
-                        'seller_photos_accessible' => is_dir(storage_path('app/public/seller_photos')),
-                    ]
-                ];
-                
-                return response()->json($results, 200, [], JSON_PRETTY_PRINT);
-            } catch (\Exception $e) {
-                return response()->json([
-                    'success' => false,
-                    'error' => $e->getMessage()
-                ], 500);
-            }
-        })->name('test.db');
-        
-        // Storage testing (for your symbolic link issue)
-        Route::get('/debug-storage', function() {
-            $results = [];
-            
-            // Check if storage link exists
-            $publicStoragePath = public_path('storage');
-            $results['storage_link_exists'] = is_link($publicStoragePath) || is_dir($publicStoragePath);
-            $results['public_storage_path'] = $publicStoragePath;
-            
-            // Check actual storage path
-            $storagePath = storage_path('app/public/seller_photos');
-            $results['storage_folder_exists'] = is_dir($storagePath);
-            $results['storage_folder_path'] = $storagePath;
-            
-            // List files in storage
-            if (is_dir($storagePath)) {
-                $files = scandir($storagePath);
-                $results['files_in_storage'] = array_slice(array_diff($files, ['.', '..']), 0, 10);
-                $results['total_files'] = count(array_diff($files, ['.', '..']));
-            }
-            
-            // Check sample photo from database
-            if (\DB::getSchemaBuilder()->hasTable('seller_photos')) {
-                $samplePhoto = \DB::table('seller_photos')->first();
-                if ($samplePhoto) {
-                    $results['sample_photo'] = [
-                        'database_url' => $samplePhoto->photo_url,
-                        'asset_url' => asset($samplePhoto->photo_url),
-                        'file_exists' => file_exists(public_path($samplePhoto->photo_url)),
-                        'storage_file_exists' => file_exists(storage_path('app/public/seller_photos/' . basename($samplePhoto->photo_url))),
-                    ];
-                }
-            }
-            
-            // Test URLs
-            $results['test_urls'] = [
-                'gallery' => url('/gallery'),
-                'sample_image' => url('/storage/seller_photos/test.jpg'),
-                'direct_public' => url('/public/storage/seller_photos/test.jpg'),
-            ];
-            
-            return response()->json($results, 200, [], JSON_PRETTY_PRINT);
-        })->name('debug.storage');
-        
-        // Quick photo upload test for sellers (if needed)
-        Route::get('/test-photo-urls', function() {
-            if (!\DB::getSchemaBuilder()->hasTable('seller_photos')) {
-                return ['error' => 'seller_photos table does not exist'];
-            }
-            
-            $photos = \DB::table('seller_photos')->limit(5)->get(['id', 'photo_url', 'seller_id']);
-            
-            $testResults = [];
-            foreach ($photos as $photo) {
-                $testResults[] = [
-                    'id' => $photo->id,
-                    'original_url' => $photo->photo_url,
-                    'asset_url' => asset($photo->photo_url),
-                    'direct_url' => url($photo->photo_url),
-                    'file_exists' => file_exists(public_path($photo->photo_url)),
-                ];
-            }
-            
-            return response()->json($testResults, 200, [], JSON_PRETTY_PRINT);
-        })->name('test.photo.urls');
-    });
-    
-    // Quick test page to verify everything is working
-    Route::get('/test', function() {
-        $consumer = Auth::guard('consumer')->user();
-        
-        return response()->json([
-            'app_name' => config('app.name'),
-            'environment' => app()->environment(),
-            'consumer_authenticated' => Auth::guard('consumer')->check(),
-            'consumer_info' => $consumer ? [
-                'id' => $consumer->id,
-                'name' => $consumer->full_name ?? $consumer->name,
-                'email' => $consumer->email,
-            ] : null,
-            'available_routes' => [
-                'gallery' => route('gallery'),
-                'dashboard' => route('dashboard'),
-                'scan' => route('scan'),
-                'map' => route('map'),
-            ],
-            'timestamp' => now()->toDateTimeString(),
-        ]);
-    });
-}
-
-/*
-|--------------------------------------------------------------------------
-| Health Check Route
-|--------------------------------------------------------------------------
-*/
-Route::get('/health', function () {
-    return response()->json([
-        'status' => 'ok',
-        'timestamp' => now()->toDateTimeString(),
-        'environment' => app()->environment(),
-        'database' => \DB::connection()->getPdo() ? 'connected' : 'disconnected',
-    ]);
-})->name('health');
