@@ -2,15 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\DB;
 
 class Consumer extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory;
 
     protected $fillable = [
         'full_name',
@@ -27,146 +25,78 @@ class Consumer extends Authenticatable
     ];
 
     protected $casts = [
-        'date_of_birth' => 'date',
         'email_verified_at' => 'datetime',
+        'date_of_birth' => 'date',
+        'password' => 'hashed',
     ];
 
     /**
-     * Automatically hash password when setting it
+     * Get consumer's available points (earned - spent)
      */
-    public function setPasswordAttribute($value)
+    public function getAvailablePoints()
     {
-        $this->attributes['password'] = Hash::make($value);
+        $totalEarned = DB::table('point_transactions')
+            ->where('consumer_id', $this->id)
+            ->where('type', 'earn')
+            ->sum('points');
+            
+        $totalSpent = DB::table('point_transactions')
+            ->where('consumer_id', $this->id)
+            ->where('type', 'spend')
+            ->sum('points');
+            
+        return $totalEarned - $totalSpent;
     }
 
     /**
-     * Relationship: Consumer has one QR code
+     * Get consumer's total earned points
      */
-    public function qrCode()
+    public function getTotalEarnedPoints()
     {
-        return $this->hasOne(QrCode::class, 'consumer_id');
+        return DB::table('point_transactions')
+            ->where('consumer_id', $this->id)
+            ->where('type', 'earn')
+            ->sum('points');
     }
 
     /**
-     * Relationship: Consumer has many point transactions
+     * Get consumer's total spent points
+     */
+    public function getTotalSpentPoints()
+    {
+        return DB::table('point_transactions')
+            ->where('consumer_id', $this->id)
+            ->where('type', 'spend')
+            ->sum('points');
+    }
+
+    /**
+     * Get consumer's recent transactions
+     */
+    public function getRecentTransactions($limit = 5)
+    {
+        return DB::table('point_transactions as pt')
+            ->leftJoin('sellers as s', 's.id', '=', 'pt.seller_id')
+            ->where('pt.consumer_id', $this->id)
+            ->select([
+                'pt.id',
+                'pt.points',
+                'pt.type',
+                'pt.description',
+                'pt.receipt_code',
+                'pt.scanned_at',
+                's.business_name as store_name'
+            ])
+            ->orderBy('pt.scanned_at', 'desc')
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * Relationship with point transactions
      */
     public function pointTransactions()
     {
         return $this->hasMany(PointTransaction::class);
-    }
-
-    /**
-     * Generate QR code for this consumer
-     */
-public function generateQrCode()
-{
-    // Check if consumer already has a QR code
-    if ($this->qrCode) {
-        return $this->qrCode;
-    }
-
-    // Generate unique secure token for this consumer
-    $token = 'GC_' . $this->id . '_' . strtoupper(substr(md5($this->email . time()), 0, 8));
-    
-    // Use Laravel's url() helper instead of hardcoded URL
-    $fullUrl = url('/award-points/' . $token);
-    
-    return QrCode::create([
-        'consumer_id' => $this->id,
-        'seller_id' => null,
-        'item_id' => null,
-        'code' => $fullUrl, // Store the full URL
-        'type' => 'consumer_profile',
-        'active' => true,
-        'expires_at' => null,
-    ]);
-}
-
-    /**
-     * Get consumer's total available points
-     */
-    public function getAvailablePoints()
-    {
-        // Return 0 if no transactions exist yet
-        if (!$this->pointTransactions()->exists()) {
-            return 0;
-        }
-        
-        $earned = $this->pointTransactions()->where('type', 'earn')->sum('points');
-        $spent = $this->pointTransactions()->where('type', 'spend')->sum('points');
-        
-        return $earned - $spent;
-    }
-
-    /**
-     * Get consumer's point transaction history
-     */
-    public function getPointHistory($limit = 10)
-    {
-        return $this->pointTransactions()
-                    ->with(['seller'])
-                    ->latest('scanned_at')
-                    ->take($limit)
-                    ->get();
-    }
-    /**
-     * Boot method to auto-generate QR code when consumer is created
-     */
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::created(function ($consumer) {
-            // Generate QR code after consumer is created
-            $consumer->generateQrCode();
-        });
-    }
-
-    /**
-     * Get the name of the unique identifier for the user.
-     */
-    public function getAuthIdentifierName()
-    {
-        return 'id';
-    }
-
-    /**
-     * Get the unique identifier for the user.
-     */
-    public function getAuthIdentifier()
-    {
-        return $this->getKey();
-    }
-
-    /**
-     * Get the password for the user.
-     */
-    public function getAuthPassword()
-    {
-        return $this->password;
-    }
-
-    /**
-     * Get the token value for the "remember me" session.
-     */
-    public function getRememberToken()
-    {
-        return $this->remember_token;
-    }
-
-    /**
-     * Set the token value for the "remember me" session.
-     */
-    public function setRememberToken($value)
-    {
-        $this->remember_token = $value;
-    }
-
-    /**
-     * Get the column name for the "remember me" token.
-     */
-    public function getRememberTokenName()
-    {
-        return 'remember_token';
     }
 }
