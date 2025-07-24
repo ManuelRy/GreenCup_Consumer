@@ -253,7 +253,7 @@ body {
 
 /* Header */
 .scan-header {
-    background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+    background: #1a1a1a;
     color: white;
     padding: 1.5rem 1rem;
     position: relative;
@@ -267,14 +267,9 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
-    animation: backgroundMove 20s linear infinite;
+    
 }
 
-@keyframes backgroundMove {
-    0% { transform: translate(0, 0); }
-    100% { transform: translate(60px, 60px); }
-}
 
 .header-content {
     position: relative;
@@ -358,7 +353,7 @@ body {
 }
 
 .scanner-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-color: #1a1a1a;
     color: white;
     padding: 1.25rem;
     text-align: center;

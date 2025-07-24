@@ -65,18 +65,6 @@
             <span>Loading stores...</span>
         </div>
 
-        <!-- Location Debug Info (Temporary) -->
-        <div id="locationDebug" class="location-debug" style="display: none;">
-            <div class="debug-info">
-                <h4>🐛 Location Debug</h4>
-                <p>Latitude: <span id="debugLat">-</span></p>
-                <p>Longitude: <span id="debugLng">-</span></p>
-                <p>Accuracy: <span id="debugAccuracy">-</span>m</p>
-                <p>Timestamp: <span id="debugTime">-</span></p>
-                <button onclick="hideLocationDebug()">Hide</button>
-            </div>
-        </div>
-
         <!-- Full Screen Map View -->
         <div id="mapView" class="fullscreen-map-view">
             <!-- Map Style Controls -->
@@ -114,12 +102,11 @@
                     <div class="legend-marker user"></div>
                     <span>Your Location</span>
                 </div>
+                <div id="sortLegend" class="legend-item sort-legend" style="display: none;">
+                    <div class="legend-marker sort-number">1</div>
+                    <span id="sortLegendText">Top Results</span>
+                </div>
             </div>
-
-            <!-- Debug Location Button -->
-            <button id="debugLocationBtn" class="debug-location-btn" onclick="showLocationDebug()">
-                🐛 Debug Location
-            </button>
 
             <div id="map" class="fullscreen-mapbox-map"></div>
         </div>
@@ -263,7 +250,7 @@
             top: 0;
             left: 0;
             right: 0;
-            background: linear-gradient(135deg, #2E8B57, #3CB371);
+            background-color: #1a1a1a;
             padding: 15px 20px;
             color: white;
             z-index: 1001;
@@ -623,57 +610,32 @@
             background: #FF6B35;
         }
 
-        /* DEBUG LOCATION STYLES */
-        .debug-location-btn {
-            position: absolute;
-            bottom: 15px;
-            right: 15px;
-            background: #dc3545;
+        .legend-marker.sort-number {
+            background: linear-gradient(135deg, #007bff, #0056b3);
             color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 8px 12px;
-            font-size: 12px;
-            cursor: pointer;
-            z-index: 1000;
-            transition: all 0.3s ease;
+            font-size: 8px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .debug-location-btn:hover {
-            background: #c82333;
+        .sort-legend {
+            border-top: 1px solid #e0e0e0;
+            margin-top: 4px;
+            padding-top: 4px;
+            animation: legendFadeIn 0.3s ease-out;
         }
 
-        .location-debug {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            border: 2px solid #dc3545;
-            border-radius: 8px;
-            padding: 20px;
-            z-index: 2000;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        }
-
-        .debug-info h4 {
-            margin: 0 0 10px 0;
-            color: #dc3545;
-        }
-
-        .debug-info p {
-            margin: 5px 0;
-            font-size: 13px;
-        }
-
-        .debug-info button {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-top: 10px;
+        @keyframes legendFadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Enhanced User Marker */
@@ -926,17 +888,17 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Store Markers - Enhanced */
+        /* Store Markers - Enhanced with better positioning */
         .store-marker {
             position: relative;
-            width: 44px;
-            height: 44px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            border: 4px solid;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            border: 3px solid;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
             cursor: pointer;
             transition: all 0.3s ease;
-            overflow: hidden;
+            overflow: visible;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -944,27 +906,33 @@
 
         .store-marker.platinum {
             border-color: #9B59B6;
-            box-shadow: 0 4px 12px rgba(155, 89, 182, 0.6);
+            box-shadow: 0 3px 10px rgba(155, 89, 182, 0.6);
         }
 
         .store-marker.gold {
             border-color: #FFD700;
-            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.6);
+            box-shadow: 0 3px 10px rgba(255, 215, 0, 0.6);
         }
 
         .store-marker.silver {
             border-color: #C0C0C0;
-            box-shadow: 0 4px 12px rgba(192, 192, 192, 0.6);
+            box-shadow: 0 3px 10px rgba(192, 192, 192, 0.6);
         }
 
         .store-marker.bronze {
             border-color: #CD7F32;
-            box-shadow: 0 4px 12px rgba(205, 127, 50, 0.6);
+            box-shadow: 0 3px 10px rgba(205, 127, 50, 0.6);
+        }
+
+        .store-marker.standard {
+            border-color: #2E8B57;
+            box-shadow: 0 3px 10px rgba(46, 139, 87, 0.6);
         }
 
         .store-marker:hover {
-            transform: scale(1.2);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            transform: scale(1.15);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            z-index: 100;
         }
 
         .marker-initial {
@@ -972,27 +940,31 @@
             height: 100%;
             background: linear-gradient(135deg, #2E8B57, #3CB371);
             color: white;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: bold;
             display: flex;
             align-items: center;
             justify-content: center;
             text-transform: uppercase;
+            border-radius: 50%;
+            position: relative;
+            z-index: 1;
         }
 
         .rank-crown-marker {
             position: absolute;
-            top: -6px;
-            right: -6px;
-            width: 18px;
-            height: 18px;
+            top: -4px;
+            right: -4px;
+            width: 16px;
+            height: 16px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 10px;
+            font-size: 9px;
             border: 2px solid white;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            z-index: 2;
         }
 
         .rank-crown-marker.platinum {
@@ -1013,6 +985,58 @@
         .rank-crown-marker.bronze {
             background: linear-gradient(135deg, #CD7F32, #B87333);
             color: white;
+        }
+
+        .rank-crown-marker.standard {
+            background: linear-gradient(135deg, #2E8B57, #3CB371);
+            color: white;
+        }
+
+        /* Sort Order Indicators on Map - Better positioning */
+        .sort-indicator {
+            position: absolute;
+            top: -6px;
+            left: -6px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            color: white;
+            border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            z-index: 3;
+            animation: sortIndicatorAppear 0.4s ease-out;
+        }
+
+        @keyframes sortIndicatorAppear {
+            0% {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .sort-indicator.distance-sort {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+        }
+
+        .sort-indicator.rank-sort {
+            background: linear-gradient(135deg, #ffc107, #e0a800);
+            color: #333;
+        }
+
+        .sort-indicator.popular-sort {
+            background: linear-gradient(135deg, #dc3545, #c82333);
         }
 
         /* Modal Styles */
@@ -1312,21 +1336,23 @@
             background: #228B22;
         }
 
-        /* Error Toast */
+        /* Error Toast - Less Prominent */
         .error-toast {
             position: fixed;
-            top: 20px;
+            top: 200px;
             right: 20px;
-            background: #dc3545;
+            background: #6c757d;
             color: white;
-            padding: 12px 16px;
+            padding: 10px 14px;
             border-radius: 8px;
             display: flex;
             align-items: center;
             gap: 10px;
             z-index: 10001;
-            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
             animation: slideInRight 0.3s ease;
+            font-size: 13px;
+            max-width: 280px;
         }
 
         @keyframes slideInRight {
@@ -1444,8 +1470,7 @@
             selectedStore: null,
             isLoading: false,
             searchRadius: 25,
-            locationRequested: false,
-            debugMode: false
+            locationRequested: false
         };
 
         // Initialize application
@@ -1461,12 +1486,12 @@
                 initializeStores();
                 setupInitialView();
 
-                // Auto-request location after a short delay
+                // Try to get location automatically after a short delay
                 setTimeout(() => {
-                    if (!app.userLocation) {
+                    if (!app.userLocation && !app.locationRequested) {
                         getCurrentLocationSilently();
                     }
-                }, 1500);
+                }, 800);
 
                 console.log('Full screen map initialized successfully!');
             } catch (error) {
@@ -1507,15 +1532,14 @@
             // Handle successful geolocation
             geolocate.on('geolocate', function (e) {
                 console.log('✅ Mapbox geolocation success:', e.coords);
-                updateLocationDebugInfo(e.coords);
                 updateUserLocation(e.coords.latitude, e.coords.longitude, true);
                 app.locationRequested = true;
             });
 
-            // Handle geolocation errors
+            // Handle geolocation errors (silently)
             geolocate.on('error', function (e) {
-                console.error('❌ Mapbox geolocation error:', e);
-                showError('Unable to get your location from map controls. Try the location button.');
+                console.log('Mapbox geolocation not available, will use manual location button');
+                // Don't show error - user can still use location button
             });
 
             // Map load event
@@ -1561,15 +1585,29 @@
 
             // Sort and filter controls
             document.getElementById('sortSelect').addEventListener('change', (e) => {
+                console.log('Sort selection changed to:', e.target.value);
+                
+                // Add visual feedback
+                e.target.style.background = '#e3f2fd';
+                setTimeout(() => {
+                    e.target.style.background = 'white';
+                }, 300);
+                
                 sortStores(e.target.value);
             });
 
             document.getElementById('radiusSelect').addEventListener('change', (e) => {
+                console.log('Radius selection changed to:', e.target.value);
+                
                 app.searchRadius = e.target.value;
                 document.getElementById('radiusText').textContent =
                     e.target.value === 'all' ? 'all areas' : e.target.value + 'km';
+                    
                 if (app.userLocation) {
                     filterStoresByRadius();
+                } else {
+                    // If no user location, just update the text
+                    updateStoreDisplay();
                 }
             });
 
@@ -1580,16 +1618,18 @@
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     closeStoreModal();
-                    hideLocationDebug();
                 }
             });
         }
 
         function initializeStores() {
             app.stores.forEach((store, index) => {
+                // Ensure all required properties exist
                 store.distance = null;
-                store.points_reward = parseFloat(store.points_reward) || 0;
-                console.log(`Store ${index}: ${store.name} - Points: ${store.points_reward} - Rank: ${getRankText(store.points_reward)}`);
+                store.points_reward = parseFloat(store.points_reward) || parseFloat(store.total_points) || 0;
+                store.transaction_count = parseInt(store.transaction_count) || 0;
+                
+                console.log(`Store ${index}: ${store.name} - Points: ${store.points_reward} - Transactions: ${store.transaction_count} - Rank: ${getRankText(store.points_reward)}`);
             });
 
             app.filteredStores = [...app.stores];
@@ -1599,8 +1639,19 @@
 
         function setupInitialView() {
             switchView('map');
+            
+            // Hide sort legend initially
+            updateSortLegend(null);
+            
             if (app.stores.length === 0) {
-                showError('No stores found in the database');
+                console.log('No stores found in the database');
+            } else {
+                console.log(`Loaded ${app.stores.length} stores successfully`);
+                
+                // Debug first few stores
+                app.stores.slice(0, 3).forEach((store, i) => {
+                    console.log(`Store ${i + 1}: "${store.name}" - Initial: "${store.name.charAt(0).toUpperCase()}" - Rank: ${getRankText(store.points_reward)}`);
+                });
             }
         }
 
@@ -1609,7 +1660,6 @@
         // Silent location request (no user feedback)
         async function getCurrentLocationSilently() {
             if (!navigator.geolocation) {
-                console.log('Geolocation not supported');
                 return;
             }
 
@@ -1620,18 +1670,25 @@
                         reject, 
                         {
                             enableHighAccuracy: false,
-                            timeout: 5000,
-                            maximumAge: 600000 // 10 minutes
+                            timeout: 8000,
+                            maximumAge: 300000 // 5 minutes cache
                         }
                     );
                 });
 
-                console.log('📍 Silent location success:', position.coords);
-                updateLocationDebugInfo(position.coords);
+                console.log('📍 Silent location success');
                 updateUserLocation(position.coords.latitude, position.coords.longitude, false);
+                
+                // Show subtle success indicator
+                const locationBtn = document.getElementById('locationBtn');
+                locationBtn.style.background = '#28a745';
+                setTimeout(() => {
+                    locationBtn.style.background = '#2E8B57';
+                }, 2000);
 
             } catch (error) {
-                console.log('Silent location failed (this is normal):', error.message);
+                // Silent failure - this is normal and expected
+                console.log('Silent location not available (normal)');
             }
         }
 
@@ -1675,7 +1732,6 @@
                     console.log('📍 Standard accuracy location success:', position.coords);
                 }
 
-                updateLocationDebugInfo(position.coords);
                 updateUserLocation(position.coords.latitude, position.coords.longitude, true);
                 app.locationRequested = true;
 
@@ -1686,31 +1742,34 @@
                 }, 2000);
 
             } catch (error) {
-                console.error('❌ All location attempts failed:', error);
+                console.error('Location request failed:', error);
                 
-                let errorMessage = 'Unable to get your location. ';
+                let errorMessage = 'Location access is currently unavailable. ';
                 
                 switch(error.code) {
                     case error.PERMISSION_DENIED:
-                        errorMessage += 'Please allow location access in your browser.';
+                        errorMessage = 'Location access was denied. You can enable it in your browser settings or search for stores manually.';
                         break;
                     case error.POSITION_UNAVAILABLE:
-                        errorMessage += 'Location services are unavailable.';
+                        errorMessage = 'Your location could not be determined. You can still search for stores manually.';
                         break;
                     case error.TIMEOUT:
-                        errorMessage += 'Location request timed out. Please try again.';
+                        errorMessage = 'Location request took too long. You can try again or search manually.';
                         break;
                     default:
-                        errorMessage += 'An unknown error occurred.';
+                        errorMessage = 'Unable to get your location. You can still search and browse stores manually.';
                         break;
                 }
                 
+                // Show less intrusive error
                 showError(errorMessage);
                 
-                locationBtn.innerHTML = '<span>❌</span><span>Location Failed</span>';
+                locationBtn.innerHTML = '<span>📍</span><span>Try Again</span>';
+                locationBtn.style.background = '#6c757d';
                 setTimeout(() => {
-                    locationBtn.innerHTML = '<span>📍</span><span>Try Again</span>';
-                }, 3000);
+                    locationBtn.innerHTML = '<span>📍</span><span>My Location</span>';
+                    locationBtn.style.background = '#2E8B57';
+                }, 4000);
             } finally {
                 locationBtn.disabled = false;
             }
@@ -1771,48 +1830,6 @@
             console.log('✅ User location updated successfully');
         }
 
-        // DEBUG FUNCTIONS
-        function updateLocationDebugInfo(coords) {
-            if (!app.debugMode) return;
-            
-            document.getElementById('debugLat').textContent = coords.latitude.toFixed(6);
-            document.getElementById('debugLng').textContent = coords.longitude.toFixed(6);
-            document.getElementById('debugAccuracy').textContent = coords.accuracy.toFixed(0);
-            document.getElementById('debugTime').textContent = new Date().toLocaleTimeString();
-        }
-
-        function showLocationDebug() {
-            app.debugMode = true;
-            document.getElementById('locationDebug').style.display = 'block';
-            
-            // Trigger a fresh location request for debugging
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        updateLocationDebugInfo(position.coords);
-                        console.log('🐛 Debug location:', position.coords);
-                    },
-                    (error) => {
-                        console.error('🐛 Debug location error:', error);
-                    },
-                    {
-                        enableHighAccuracy: true,
-                        timeout: 10000,
-                        maximumAge: 0
-                    }
-                );
-            }
-        }
-
-        function hideLocationDebug() {
-            app.debugMode = false;
-            document.getElementById('locationDebug').style.display = 'none';
-        }
-
-        // Continue with the rest of your existing functions...
-        // (switchView, addMarkersToMap, updateListView, etc.)
-        // Copy all the remaining functions from your previous JavaScript code
-
         function switchView(view) {
             app.currentView = view;
 
@@ -1852,32 +1869,88 @@
         }
 
         function addMarkersToMap() {
-            app.markers.forEach(marker => marker.remove());
+            // Remove existing markers cleanly
+            app.markers.forEach(marker => {
+                marker.remove();
+            });
             app.markers = [];
 
-            app.filteredStores.forEach(store => {
-                const markerElement = document.createElement('div');
-                const rankClass = getRankClass(store.points_reward);
-                markerElement.className = `store-marker ${rankClass}`;
-                markerElement.innerHTML = `<div class="marker-initial">${store.name.charAt(0)}</div>`;
+            // Get current sort type for visual indicators
+            const currentSort = document.getElementById('sortSelect').value;
 
-                const rankCrown = document.createElement('div');
-                rankCrown.className = `rank-crown-marker ${rankClass}`;
-                rankCrown.textContent = getRankIcon(store.points_reward);
-                markerElement.appendChild(rankCrown);
+            app.filteredStores.forEach((store, index) => {
+                try {
+                    const markerElement = document.createElement('div');
+                    const rankClass = getRankClass(store.points_reward);
+                    markerElement.className = `store-marker ${rankClass}`;
+                    
+                    // Create main marker content with store initial
+                    const markerContent = document.createElement('div');
+                    markerContent.className = 'marker-initial';
+                    const storeInitial = (store.name || 'S').charAt(0).toUpperCase();
+                    markerContent.textContent = storeInitial;
+                    markerElement.appendChild(markerContent);
 
-                markerElement.title = `${store.name} - ${getRankText(store.points_reward)} (${store.points_reward} points)`;
+                    // Add rank crown in top-right corner
+                    const rankCrown = document.createElement('div');
+                    rankCrown.className = `rank-crown-marker ${rankClass}`;
+                    rankCrown.textContent = getRankIcon(store.points_reward);
+                    markerElement.appendChild(rankCrown);
 
-                const marker = new mapboxgl.Marker(markerElement)
-                    .setLngLat([store.longitude, store.latitude])
-                    .addTo(app.map);
+                    // Add sort order indicator ONLY for top 5 stores when actively sorting
+                    if (index < 5 && currentSort && currentSort !== 'name' && currentSort !== 'nearest') {
+                        const sortIndicator = document.createElement('div');
+                        sortIndicator.className = 'sort-indicator';
+                        sortIndicator.textContent = index + 1;
+                        
+                        // Different colors for different sort types
+                        if (currentSort === 'farthest') {
+                            sortIndicator.classList.add('distance-sort');
+                        } else if (currentSort === 'rank') {
+                            sortIndicator.classList.add('rank-sort');
+                        } else if (currentSort === 'popular') {
+                            sortIndicator.classList.add('popular-sort');
+                        }
+                        
+                        markerElement.appendChild(sortIndicator);
+                    }
 
-                markerElement.addEventListener('click', () => {
-                    showStoreDetail({ ...store });
-                });
+                    // Enhanced title with sort info
+                    let titleText = `${store.name || 'Unknown Store'} - ${getRankText(store.points_reward)}`;
+                    if (store.distance !== null && store.distance !== undefined) {
+                        titleText += ` - ${store.distance.toFixed(1)}km away`;
+                    }
+                    if (index < 5 && currentSort && currentSort !== 'name') {
+                        titleText = `#${index + 1}: ${titleText}`;
+                    }
+                    markerElement.title = titleText;
 
-                app.markers.push(marker);
+                    // Validate coordinates before creating marker
+                    if (!store.longitude || !store.latitude || 
+                        Math.abs(store.longitude) > 180 || Math.abs(store.latitude) > 90) {
+                        console.warn(`Invalid coordinates for store: ${store.name}`, store);
+                        return;
+                    }
+
+                    // Create Mapbox marker
+                    const marker = new mapboxgl.Marker(markerElement)
+                        .setLngLat([store.longitude, store.latitude])
+                        .addTo(app.map);
+
+                    // Add click handler
+                    markerElement.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        showStoreDetail({ ...store });
+                    });
+
+                    app.markers.push(marker);
+                    
+                } catch (error) {
+                    console.error(`Error creating marker for store ${store.name}:`, error);
+                }
             });
+
+            console.log(`Successfully added ${app.markers.length} markers to map with sort: ${currentSort}`);
         }
 
         function updateListView() {
@@ -1944,7 +2017,15 @@
             });
         }
 
-        // Ranking helper functions
+        function getRankClass(points) {
+            const numPoints = parseFloat(points) || 0;
+            if (numPoints >= 2000) return 'platinum';
+            if (numPoints >= 1000) return 'gold';
+            if (numPoints >= 500) return 'silver';
+            if (numPoints >= 100) return 'bronze';
+            return 'standard';
+        }
+
         function getRankIcon(points) {
             const numPoints = parseFloat(points) || 0;
             if (numPoints >= 2000) return '👑';
@@ -1963,21 +2044,16 @@
             return 'Standard';
         }
 
-        function getRankClass(points) {
-            const numPoints = parseFloat(points) || 0;
-            if (numPoints >= 2000) return 'platinum';
-            if (numPoints >= 1000) return 'gold';
-            if (numPoints >= 500) return 'silver';
-            if (numPoints >= 100) return 'bronze';
-            return 'standard';
-        }
-
         function updateStoreDisplay() {
             updateStoreCount();
+            
+            // Always update markers regardless of current view
+            addMarkersToMap();
+            
+            // Update list view if currently visible
             if (app.currentView === 'list') {
                 updateListView();
             }
-            addMarkersToMap();
         }
 
         function updateStoreCount() {
@@ -1995,7 +2071,33 @@
 
                 if (data.success) {
                     app.filteredStores = data.data;
-                    updateStoreDisplay();
+                    
+                    // Ensure new search results have all required properties
+                    app.filteredStores.forEach(store => {
+                        store.distance = null;
+                        store.points_reward = parseFloat(store.points_reward) || parseFloat(store.total_points) || 0;
+                        store.transaction_count = parseInt(store.transaction_count) || 0;
+                    });
+                    
+                    // Recalculate distances if user location is available
+                    if (app.userLocation) {
+                        app.filteredStores.forEach(store => {
+                            store.distance = calculateHaversineDistance(
+                                app.userLocation.latitude,
+                                app.userLocation.longitude,
+                                store.latitude,
+                                store.longitude
+                            );
+                        });
+                    }
+                    
+                    // Re-apply current sort
+                    const currentSort = document.getElementById('sortSelect').value;
+                    if (currentSort && currentSort !== 'nearest') {
+                        sortStores(currentSort);
+                    } else {
+                        updateStoreDisplay();
+                    }
                 } else {
                     throw new Error(data.message || 'Search failed');
                 }
@@ -2008,36 +2110,119 @@
         }
 
         function clearSearch() {
+            console.log('Clearing search and resetting to all stores');
+            
             document.getElementById('searchInput').value = '';
             document.getElementById('clearSearch').style.display = 'none';
             document.getElementById('searchBtn').style.right = '5px';
+            
+            // Reset to all stores
             app.filteredStores = [...app.stores];
-            updateStoreDisplay();
+            
+            // Recalculate distances if needed
+            if (app.userLocation) {
+                calculateDistances();
+            } else {
+                // Re-apply current sort without distances
+                const currentSort = document.getElementById('sortSelect').value;
+                if (currentSort && currentSort !== 'nearest') {
+                    sortStores(currentSort);
+                } else {
+                    updateStoreDisplay();
+                    updateSortLegend(currentSort);
+                }
+            }
         }
 
         function sortStores(sortType) {
-            switch (sortType) {
-                case 'nearest':
-                    app.filteredStores.sort((a, b) => (a.distance || Infinity) - (b.distance || Infinity));
-                    break;
-                case 'farthest':
-                    app.filteredStores.sort((a, b) => (b.distance || 0) - (a.distance || 0));
-                    break;
-                case 'name':
-                    app.filteredStores.sort((a, b) => a.name.localeCompare(b.name));
-                    break;
-                case 'rank':
-                    app.filteredStores.sort((a, b) => (b.points_reward || 0) - (a.points_reward || 0));
-                    break;
-                case 'popular':
-                    app.filteredStores.sort((a, b) => b.transaction_count - a.transaction_count);
-                    break;
-            }
-            updateStoreDisplay();
+            console.log(`Sorting stores by: ${sortType}`);
+            
+            // Show loading briefly for visual feedback
+            showLoading();
+            
+            setTimeout(() => {
+                try {
+                    switch (sortType) {
+                        case 'nearest':
+                            if (!app.userLocation) {
+                                showError('Enable location to sort by distance');
+                                hideLoading();
+                                return;
+                            }
+                            app.filteredStores.sort((a, b) => {
+                                const distanceA = a.distance !== null ? a.distance : Infinity;
+                                const distanceB = b.distance !== null ? b.distance : Infinity;
+                                return distanceA - distanceB;
+                            });
+                            break;
+                            
+                        case 'farthest':
+                            if (!app.userLocation) {
+                                showError('Enable location to sort by distance');
+                                hideLoading();
+                                return;
+                            }
+                            app.filteredStores.sort((a, b) => {
+                                const distanceA = a.distance !== null ? a.distance : 0;
+                                const distanceB = b.distance !== null ? b.distance : 0;
+                                return distanceB - distanceA;
+                            });
+                            break;
+                            
+                        case 'name':
+                            app.filteredStores.sort((a, b) => {
+                                const nameA = (a.name || '').toLowerCase();
+                                const nameB = (b.name || '').toLowerCase();
+                                return nameA.localeCompare(nameB);
+                            });
+                            break;
+                            
+                        case 'rank':
+                            app.filteredStores.sort((a, b) => {
+                                const pointsA = parseFloat(a.points_reward) || 0;
+                                const pointsB = parseFloat(b.points_reward) || 0;
+                                return pointsB - pointsA; // Highest first
+                            });
+                            break;
+                            
+                        case 'popular':
+                            app.filteredStores.sort((a, b) => {
+                                const countA = parseInt(a.transaction_count) || 0;
+                                const countB = parseInt(b.transaction_count) || 0;
+                                return countB - countA; // Highest first
+                            });
+                            break;
+                            
+                        default:
+                            console.log('Unknown sort type:', sortType);
+                            hideLoading();
+                            return;
+                    }
+                    
+                    console.log(`Successfully sorted ${app.filteredStores.length} stores by ${sortType}`);
+                    updateStoreDisplay();
+                    
+                    // Update map legend for sorting
+                    updateSortLegend(sortType);
+                    
+                    // For distance-based sorting, focus map on nearest stores
+                    if ((sortType === 'nearest' || sortType === 'farthest') && app.userLocation && app.filteredStores.length > 0) {
+                        focusMapOnTopResults(sortType);
+                    }
+                    
+                } catch (error) {
+                    console.error('Error sorting stores:', error);
+                    showError('Unable to sort stores. Please try again.');
+                } finally {
+                    hideLoading();
+                }
+            }, 100); // Small delay for visual feedback
         }
 
         function calculateDistances() {
             if (!app.userLocation) return;
+
+            console.log('Calculating distances for all stores...');
 
             app.stores.forEach(store => {
                 store.distance = calculateHaversineDistance(
@@ -2057,24 +2242,41 @@
                 );
             });
 
+            // Re-apply current sort after calculating distances
             const currentSort = document.getElementById('sortSelect').value;
+            console.log('Re-applying sort after distance calculation:', currentSort);
+            
             if (currentSort === 'nearest' || currentSort === 'farthest') {
                 sortStores(currentSort);
             } else {
                 updateStoreDisplay();
+                updateSortLegend(currentSort);
             }
         }
 
         function filterStoresByRadius() {
+            console.log('Filtering stores by radius:', app.searchRadius);
+            
             if (!app.userLocation || app.searchRadius === 'all') {
                 app.filteredStores = [...app.stores];
             } else {
                 const radiusKm = parseFloat(app.searchRadius);
-                app.filteredStores = app.stores.filter(store =>
-                    store.distance <= radiusKm
-                );
+                app.filteredStores = app.stores.filter(store => {
+                    return store.distance !== null && store.distance <= radiusKm;
+                });
             }
-            updateStoreDisplay();
+            
+            console.log(`Filtered to ${app.filteredStores.length} stores within radius`);
+            
+            // Re-apply current sort after filtering
+            const currentSort = document.getElementById('sortSelect').value;
+            if (currentSort && currentSort !== 'nearest') { // nearest is default, skip re-sort
+                console.log('Re-applying sort after radius filter:', currentSort);
+                sortStores(currentSort);
+            } else {
+                updateStoreDisplay();
+                updateSortLegend(currentSort);
+            }
         }
 
         function calculateHaversineDistance(lat1, lng1, lat2, lng2) {
@@ -2086,6 +2288,76 @@
                 Math.sin(dLng / 2) * Math.sin(dLng / 2);
             const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
             return R * c;
+        }
+
+        function focusMapOnTopResults(sortType) {
+            if (!app.map || !app.filteredStores || app.filteredStores.length === 0) return;
+
+            try {
+                // Get top 3-5 results to focus on
+                const topStores = app.filteredStores.slice(0, Math.min(5, app.filteredStores.length));
+                
+                if (topStores.length === 1) {
+                    // Single store - center on it
+                    app.map.flyTo({
+                        center: [topStores[0].longitude, topStores[0].latitude],
+                        zoom: 14,
+                        duration: 1500
+                    });
+                } else if (topStores.length > 1) {
+                    // Multiple stores - fit bounds to show all top results
+                    const coordinates = topStores.map(store => [store.longitude, store.latitude]);
+                    
+                    // Add user location if available for distance sorts
+                    if ((sortType === 'nearest' || sortType === 'farthest') && app.userLocation) {
+                        coordinates.push([app.userLocation.longitude, app.userLocation.latitude]);
+                    }
+                    
+                    const bounds = coordinates.reduce((bounds, coord) => {
+                        return bounds.extend(coord);
+                    }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
+
+                    app.map.fitBounds(bounds, {
+                        padding: { top: 50, bottom: 50, left: 50, right: 50 },
+                        maxZoom: 15,
+                        duration: 1500
+                    });
+                }
+                
+                console.log(`Map focused on top ${topStores.length} results for ${sortType} sort`);
+            } catch (error) {
+                console.error('Error focusing map on results:', error);
+            }
+        }
+
+        function updateSortLegend(sortType) {
+            const sortLegend = document.getElementById('sortLegend');
+            const sortLegendText = document.getElementById('sortLegendText');
+            
+            if (!sortType || sortType === 'name') {
+                sortLegend.style.display = 'none';
+                return;
+            }
+            
+            // Show legend with appropriate text
+            sortLegend.style.display = 'flex';
+            
+            switch (sortType) {
+                case 'nearest':
+                    sortLegendText.textContent = 'Nearest First';
+                    break;
+                case 'farthest':
+                    sortLegendText.textContent = 'Farthest First';
+                    break;
+                case 'rank':
+                    sortLegendText.textContent = 'Best Ranked';
+                    break;
+                case 'popular':
+                    sortLegendText.textContent = 'Most Popular';
+                    break;
+                default:
+                    sortLegendText.textContent = 'Top Results';
+            }
         }
 
         async function showStoreDetail(store) {
@@ -2202,9 +2474,10 @@
         function showError(message) {
             document.getElementById('errorMessage').textContent = message;
             document.getElementById('errorToast').style.display = 'flex';
+            // Auto-hide after 3 seconds instead of 5
             setTimeout(() => {
                 hideErrorToast();
-            }, 5000);
+            }, 3000);
         }
 
         function showSuccess(message) {
@@ -2255,36 +2528,5 @@
                 app.map.resize();
             }
         });
-
-        // Debug function for testing location
-        window.testLocation = function() {
-            console.log('🧪 Testing location...');
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    function(position) {
-                        console.log('✅ Test location success:');
-                        console.log('Latitude:', position.coords.latitude);
-                        console.log('Longitude:', position.coords.longitude);
-                        console.log('Accuracy:', position.coords.accuracy, 'meters');
-                        console.log('Timestamp:', new Date(position.timestamp).toLocaleString());
-                        updateLocationDebugInfo(position.coords);
-                    },
-                    function(error) {
-                        console.error('❌ Test location error:', error);
-                    },
-                    {
-                        enableHighAccuracy: true,
-                        timeout: 15000,
-                        maximumAge: 0
-                    }
-                );
-            } else {
-                console.error('❌ Geolocation not supported');
-            }
-        };
-
-        // Make functions available globally for debugging
-        window.showLocationDebug = showLocationDebug;
-        window.hideLocationDebug = hideLocationDebug;
     </script>
 @endsection

@@ -29,7 +29,7 @@ class StoreController extends Controller
 
             $postsData = $this->getFeedPosts(1, 20);
 
-            return view('gallery', [
+            return view('gallery.index', [
                 'posts' => $postsData['posts'],
                 'consumer' => $consumer,
                 'hasMore' => $postsData['hasMore']
@@ -48,30 +48,37 @@ class StoreController extends Controller
     {
         try {
             $page = $request->get('page', 1);
+            $sellerId = $request->get('seller_id');
             $perPage = 20;
             
-            $postsData = $this->getFeedPosts($page, $perPage);
+            $postsData = $this->getFeedPosts($page, $perPage, $sellerId);
             
             return response()->json([
                 'success' => true,
                 'posts' => $postsData['posts'],
-                'hasMore' => $postsData['hasMore']
+                'hasMore' => $postsData['hasMore'],
+                'message' => $postsData['posts']->count() > 0 ? 'Posts loaded successfully' : 'No posts found for this seller'
             ]);
 
         } catch (\Exception $e) {
             Log::error('Error loading feed: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Unable to load posts']);
+            return response()->json([
+                'success' => false, 
+                'message' => 'Unable to load posts: ' . $e->getMessage(),
+                'posts' => [],
+                'hasMore' => false
+            ], 500);
         }
     }
 
     /*
     |--------------------------------------------------------------------------
-    | Map/Location Methods - FIXED for consistent data
+    | Map/Location Methods - FIXED for Real Data
     |--------------------------------------------------------------------------
     */
 
     /**
-     * Display the store locator map page - FIXED
+     * Display the store locator map page
      */
     public function map()
     {
@@ -81,15 +88,13 @@ class StoreController extends Controller
                 return redirect()->route('login')->with('error', 'Please login to view the map');
             }
 
-            // FIXED: Use consistent store data method
             $stores = $this->getAllStoresForMap();
             $mapboxToken = env('MAPBOX_ACCESS_TOKEN', 'pk.eyJ1IjoibmVha3NlbmJlc3RmcmkiLCJhIjoiY205cXhkb3c3MTF3MzJ2b2doamJiM2NmaSJ9.zTnzZvYetGaqX0CODz4qoQ');
             
             Log::info('Map method called - Stores found: ' . $stores->count());
             
-            // FIXED: Use consistent view path
-            return view('map', compact('stores', 'consumer', 'mapboxToken'));
-                   
+            return view('map.index', compact('stores', 'consumer', 'mapboxToken'));
+               
         } catch (\Exception $e) {
             Log::error('[StoreController@map] Error: ' . $e->getMessage());
             
@@ -109,7 +114,7 @@ class StoreController extends Controller
     */
 
     /**
-     * Get all stores (API endpoint)
+     * Get all stores (API endpoint) - FIXED with real data
      */
     public function getStores(Request $request)
     {
@@ -120,7 +125,8 @@ class StoreController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => $stores,
-                'count' => $stores->count()
+                'count' => $stores->count(),
+                'message' => $stores->count() > 0 ? 'Stores loaded successfully' : 'No stores found in database'
             ]);
             
         } catch (\Exception $e) {
@@ -128,8 +134,9 @@ class StoreController extends Controller
             
             return response()->json([
                 'success' => false,
-                'message' => 'Unable to fetch stores',
-                'data' => []
+                'message' => 'Unable to fetch stores: ' . $e->getMessage(),
+                'data' => [],
+                'count' => 0
             ], 500);
         }
     }
@@ -365,17 +372,17 @@ class StoreController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | Private Helper Methods - FIXED for consistency
+    | Private Helper Methods - FIXED for Real Data
     |--------------------------------------------------------------------------
     */
 
     /**
-     * NEW: Get all stores specifically formatted for map display - CONSISTENT data
+     * Get all stores specifically formatted for map display - USES REAL DATA
      */
     private function getAllStoresForMap()
     {
         try {
-            // Fetch real stores from database with all required fields
+            // Get base store data
             $stores = DB::table('sellers')
                 ->select([
                     'id', 
@@ -397,30 +404,46 @@ class StoreController extends Controller
                 ->whereNotNull('longitude')
                 ->where('latitude', '!=', 0)
                 ->where('longitude', '!=', 0)
-                ->orderBy('total_points', 'desc')
                 ->get();
 
             Log::info('Raw stores fetched for map: ' . $stores->count());
 
-            // Process each store to add required map data with CONSISTENT values
-            return $stores->map(function($store) {
-                // FIXED: Use consistent points calculation (no random numbers!)
-                $pointsReward = $this->getConsistentStorePoints($store);
+            // Get real transaction data for all stores in one query
+            $transactionData = DB::table('point_transactions')
+                ->select([
+                    'seller_id',
+                    DB::raw('SUM(CASE WHEN type = "earn" THEN points ELSE -points END) as real_points'),
+                    DB::raw('COUNT(*) as real_transaction_count')
+                ])
+                ->groupBy('seller_id')
+                ->get()
+                ->keyBy('seller_id');
+
+            // Process each store with real data
+            return $stores->map(function($store) use ($transactionData) {
+                // Get real transaction data for this store
+                $storeTransactionData = $transactionData->get($store->id);
                 
-                // Generate consistent phone if missing (based on store ID)
+                if ($storeTransactionData) {
+                    // Use REAL data from transactions
+                    $realPoints = (int) $storeTransactionData->real_points;
+                    $realTransactionCount = (int) $storeTransactionData->real_transaction_count;
+                } else {
+                    // No transactions yet - use zeros (not fake data)
+                    $realPoints = 0;
+                    $realTransactionCount = 0;
+                }
+                
+                // Generate consistent phone if missing (only for phone)
                 if (empty($store->phone)) {
                     $store->phone = $this->generateConsistentPhone($store->id);
                 }
                 
-                // Get consistent transaction count
-                $transactionCount = $this->getConsistentTransactionCount($store);
+                // Calculate ranking based on REAL points
+                $rankClass = $this->getRankClass($realPoints);
+                $rankText = $this->getRankText($realPoints);
+                $rankIcon = $this->getRankIcon($realPoints);
                 
-                // Calculate ranking based on consistent points
-                $rankClass = $this->getRankClass($pointsReward);
-                $rankText = $this->getRankText($pointsReward);
-                $rankIcon = $this->getRankIcon($pointsReward);
-                
-                // Format the store data for JavaScript
                 return (object)[
                     'id' => $store->id,
                     'name' => $store->name,
@@ -434,21 +457,20 @@ class StoreController extends Controller
                     'image' => $store->image,
                     'is_active' => $store->is_active,
                     
-                    // CONSISTENT ranking data (this determines marker colors)
-                    'total_points' => $store->total_points,
-                    'points_reward' => $pointsReward, // FIXED: Now consistent!
+                    // REAL DATA from database
+                    'total_points' => $realPoints,
+                    'points_reward' => $realPoints,
+                    'transaction_count' => $realTransactionCount,
+                    
+                    // Ranking based on real points
                     'rank_class' => $rankClass,
                     'rank_text' => $rankText,
                     'rank_icon' => $rankIcon,
                     
-                    // Additional consistent data
-                    'transaction_count' => $transactionCount,
-                    'distance' => null, // Will be calculated in JavaScript
-                    
-                    // Hours formatting
+                    // Other fields
+                    'distance' => null,
                     'hours_formatted' => $this->formatWorkingHours($store->hours),
                     'is_open' => $this->isStoreCurrentlyOpen($store->hours),
-                    
                     'created_at' => $store->created_at
                 ];
             });
@@ -462,13 +484,14 @@ class StoreController extends Controller
     /**
      * Get feed posts for gallery
      */
-    private function getFeedPosts($page = 1, $perPage = 20)
+    private function getFeedPosts($page = 1, $perPage = 20, $sellerId = null)
     {
         try {
             $offset = ($page - 1) * $perPage;
             
             // Check if seller_photos table exists
             if (!DB::getSchemaBuilder()->hasTable('seller_photos')) {
+                Log::info('seller_photos table does not exist');
                 return ['posts' => collect(), 'hasMore' => false];
             }
             
@@ -478,11 +501,19 @@ class StoreController extends Controller
                 ->select([
                     'sp.id', 'sp.photo_url', 'sp.caption', 'sp.category', 'sp.is_featured', 'sp.created_at',
                     's.id as seller_id', 's.business_name', 's.address', 's.phone', 's.total_points', 's.description'
-                ])
-                ->orderByDesc('sp.created_at');
+                ]);
+
+            // Filter by specific seller if provided
+            if ($sellerId) {
+                $query->where('s.id', $sellerId);
+            }
+
+            $query->orderByDesc('sp.created_at');
 
             $total = $query->count();
             $posts = $query->offset($offset)->limit($perPage)->get();
+
+            Log::info("Found {$posts->count()} posts for seller {$sellerId}, total: {$total}");
 
             $processedPosts = collect();
             
@@ -530,7 +561,7 @@ class StoreController extends Controller
     }
 
     /**
-     * Get all stores with enriched data (legacy method for compatibility)
+     * Get all stores with enriched data
      */
     private function getAllStores($search = null)
     {
@@ -597,25 +628,37 @@ class StoreController extends Controller
     }
 
     /**
-     * Enrich store data with calculated fields - FIXED for consistency
+     * Enrich store data with REAL calculated fields - FIXED
      */
     private function enrichStoreData($store)
     {
-        // FIXED: Ensure consistent phone (no random generation)
+        // Generate consistent phone if missing (only field that can be fake)
         if (empty($store->phone)) {
             $store->phone = $this->generateConsistentPhone($store->id);
         }
         
-        // FIXED: Calculate consistent points (no random fallback)
-        $store->points_reward = $this->getConsistentStorePoints($store);
+        // Get REAL points and transaction count from database
+        $transactionData = DB::table('point_transactions')
+            ->where('seller_id', $store->id)
+            ->selectRaw('
+                SUM(CASE WHEN type = "earn" THEN points ELSE -points END) as real_points,
+                COUNT(*) as real_transaction_count
+            ')
+            ->first();
         
-        // Add ranking data
+        if ($transactionData) {
+            $store->points_reward = (int) $transactionData->real_points;
+            $store->transaction_count = (int) $transactionData->real_transaction_count;
+        } else {
+            // No transactions yet - use zeros (not fake data)
+            $store->points_reward = 0;
+            $store->transaction_count = 0;
+        }
+        
+        // Add ranking data based on REAL points
         $store->rank_class = $this->getRankClass($store->points_reward);
         $store->rank_text = $this->getRankText($store->points_reward);
         $store->rank_icon = $this->getRankIcon($store->points_reward);
-        
-        // FIXED: Add consistent transaction count
-        $store->transaction_count = $this->getConsistentTransactionCount($store);
         
         // Format working hours
         $store->hours_formatted = $this->formatWorkingHours($store->hours);
@@ -751,102 +794,8 @@ class StoreController extends Controller
         }
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | NEW: Consistent Data Generation Methods (NO RANDOM NUMBERS!)
-    |--------------------------------------------------------------------------
-    */
-
     /**
-     * FIXED: Get consistent store points (no random numbers!)
-     */
-    private function getConsistentStorePoints($store)
-    {
-        try {
-            // First, try to get real transaction data
-            if (DB::getSchemaBuilder()->hasTable('point_transactions')) {
-                $realPoints = DB::table('point_transactions')
-                    ->where('seller_id', $store->id)
-                    ->where('type', 'earn')
-                    ->sum('points');
-                
-                if ($realPoints > 0) {
-                    return intval($realPoints);
-                }
-            }
-            
-            // If no real transactions, use total_points directly for consistency
-            if ($store->total_points > 0) {
-                return intval($store->total_points);
-            }
-            
-            // FIXED: Generate consistent fallback based on store ID (not random!)
-            return $this->generateConsistentPointsFromId($store->id);
-            
-        } catch (\Exception $e) {
-            Log::error('Error getting consistent points for store ' . $store->id . ': ' . $e->getMessage());
-            return $this->generateConsistentPointsFromId($store->id);
-        }
-    }
-
-    /**
-     * FIXED: Get consistent transaction count (no random numbers!)
-     */
-    private function getConsistentTransactionCount($store)
-    {
-        try {
-            // First, try to get real transaction count
-            if (DB::getSchemaBuilder()->hasTable('point_transactions')) {
-                $realCount = DB::table('point_transactions')
-                    ->where('seller_id', $store->id)
-                    ->where('type', 'earn')
-                    ->count();
-                
-                if ($realCount > 0) {
-                    return intval($realCount);
-                }
-            }
-            
-            // FIXED: Generate consistent count based on store's points/ID (not random!)
-            return $this->generateConsistentCountFromStore($store);
-            
-        } catch (\Exception $e) {
-            Log::error('Error getting consistent transaction count: ' . $e->getMessage());
-            return $this->generateConsistentCountFromStore($store);
-        }
-    }
-
-    /**
-     * NEW: Generate consistent points based on store ID (always same result)
-     */
-    private function generateConsistentPointsFromId($storeId)
-    {
-        // Use store ID to generate consistent but varied points
-        $seed = intval($storeId) * 123; // Multiply by prime number for variation
-        $hash = crc32(strval($seed)); // Generate consistent hash
-        $points = abs($hash % 2000) + 100; // Range: 100-2099 points
-        
-        return $points;
-    }
-
-    /**
-     * NEW: Generate consistent transaction count based on store data
-     */
-    private function generateConsistentCountFromStore($store)
-    {
-        // Base count on store's total points for consistency
-        $basePoints = $store->total_points ?: $this->generateConsistentPointsFromId($store->id);
-        
-        // Higher points = more transactions (logical relationship)
-        if ($basePoints >= 2000) return intval($basePoints / 25); // ~80+ transactions for platinum
-        if ($basePoints >= 1000) return intval($basePoints / 30); // ~33-66 transactions for gold  
-        if ($basePoints >= 500) return intval($basePoints / 40);  // ~12-25 transactions for silver
-        
-        return max(5, intval($basePoints / 50)); // Minimum 5 transactions
-    }
-
-    /**
-     * NEW: Generate consistent phone number based on store ID
+     * Generate consistent phone number based on store ID (only remaining "fake" data)
      */
     private function generateConsistentPhone($storeId)
     {
