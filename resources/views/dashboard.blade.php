@@ -151,45 +151,43 @@
         </div>
 
         <!-- Recent Activity -->
-        <section class="activity-section">
+      <section class="activity-section">
             <div class="section-header">
                 <h2 class="section-title">Recent Activity</h2>
-                <a href="#" class="view-all">View All →</a>
+                <a href="{{ route('account') }}" class="view-all">View All →</a>
             </div>
             
             <div class="activity-list">
-                <div class="activity-item">
-                    <div class="activity-info">
-                        <div class="activity-icon">☕</div>
-                        <div class="activity-details">
-                            <div class="activity-name">Coffee Purchase</div>
-                            <div class="activity-time">2 hours ago</div>
+                @forelse($recentActivity as $activity)
+                    <div class="activity-item">
+                        <div class="activity-info">
+                            <div class="activity-icon">{{ $activity->icon }}</div>
+                            <div class="activity-details">
+                                <div class="activity-name">{{ $activity->name }}</div>
+                                <div class="activity-time">{{ $activity->time_ago }}</div>
+                                @if($activity->store_name)
+                                    <div class="activity-store">{{ $activity->store_name }}</div>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="activity-points {{ $activity->type === 'earn' ? 'positive' : 'negative' }}">
+                            {{ $activity->type === 'earn' ? '+' : '-' }}{{ number_format($activity->points) }} pts
                         </div>
                     </div>
-                    <div class="activity-points positive">+25 pts</div>
-                </div>
-
-                <div class="activity-item">
-                    <div class="activity-info">
-                        <div class="activity-icon">🎁</div>
-                        <div class="activity-details">
-                            <div class="activity-name">Reward Redeemed</div>
-                            <div class="activity-time">Yesterday</div>
+                @empty
+                    <div class="activity-item empty-activity">
+                        <div class="activity-info">
+                            <div class="activity-icon">📱</div>
+                            <div class="activity-details">
+                                <div class="activity-name">No recent activity</div>
+                                <div class="activity-time">Start scanning receipts to earn points!</div>
+                            </div>
+                        </div>
+                        <div class="activity-points">
+                            <a href="{{ route('scan.receipt') }}" class="scan-link">Scan Receipt →</a>
                         </div>
                     </div>
-                    <div class="activity-points negative">-150 pts</div>
-                </div>
-
-                <div class="activity-item">
-                    <div class="activity-info">
-                        <div class="activity-icon">🌱</div>
-                        <div class="activity-details">
-                            <div class="activity-name">Eco Action Bonus</div>
-                            <div class="activity-time">2 days ago</div>
-                        </div>
-                    </div>
-                    <div class="activity-points positive">+50 pts</div>
-                </div>
+                @endforelse
             </div>
         </section>
     </main>

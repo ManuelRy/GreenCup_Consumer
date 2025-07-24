@@ -1,331 +1,295 @@
 @extends('master')
 
 @section('content')
-    <!-- Live Animated Background -->
-    <div class="background-animation">
-        <div class="floating-shapes">
-            <div class="shape"></div>
-            <div class="shape"></div>
-            <div class="shape"></div>
-            <div class="shape"></div>
-            <div class="shape"></div>
-        </div>
-        <div class="particles">
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-        </div>
-    </div>
-
-    <div class="container">
-        <div class="map-container">
-            <!-- Top Spacing -->
-            <div class="top-spacer"></div>
-
-            <!-- Header -->
-            <div class="map-header">
-                <div class="header-nav">
-                    <a href="{{ route('dashboard') }}" class="back-btn">
-                        <span>←</span>
-                    </a>
-                    <h2>🗺️ Store Locator</h2>
-                    <button id="viewToggle" class="view-toggle-btn">
-                        <span id="toggleIcon">📋</span>
-                        <span id="toggleText">List</span>
-                    </button>
-                </div>
+    <div class="fullscreen-map-container">
+        <!-- Header (Fixed at top) -->
+        <div class="map-header-fixed">
+            <div class="header-nav">
+                <a href="{{ route('dashboard') }}" class="back-btn">
+                    <span>←</span>
+                </a>
+                <h2>🗺️ Store Locator</h2>
+                <button id="viewToggle" class="view-toggle-btn">
+                    <span id="toggleIcon">📋</span>
+                    <span id="toggleText">List</span>
+                </button>
             </div>
+        </div>
 
-            <!-- Search Bar -->
-            <div class="search-section">
-                <div class="search-container">
-                    <input type="text" id="searchInput" placeholder="Search stores, locations..." class="search-input">
-                    <button id="searchBtn" class="search-btn">🔍</button>
-                    <button id="clearSearch" class="clear-btn" style="display: none;">×</button>
-                </div>
-                <button class="location-btn" id="locationBtn">
-                    <span>📍</span>
-                    <span>My Location</span>
+        <!-- Search Bar (Fixed at top) -->
+        <div class="search-section-fixed">
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Search stores, locations..." class="search-input">
+                <button id="searchBtn" class="search-btn">🔍</button>
+                <button id="clearSearch" class="clear-btn" style="display: none;">×</button>
+            </div>
+            <button class="location-btn" id="locationBtn">
+                <span>📍</span>
+                <span>My Location</span>
+            </button>
+        </div>
+
+        <!-- Controls & Filters (Fixed at top) -->
+        <div class="toggle-controls-fixed">
+            <div class="view-options">
+                <button class="view-option active" data-view="map">
+                    <span>🗺️</span>
+                    <span>Map</span>
+                </button>
+                <button class="view-option" data-view="list">
+                    <span>📋</span>
+                    <span>List</span>
+                </button>
+            </div>
+            <div class="filter-controls">
+                <select id="sortSelect" class="sort-select">
+                    <option value="nearest">📍 Nearest First</option>
+                    <option value="farthest">📍 Farthest First</option>
+                    <option value="name">🔤 Name A-Z</option>
+                    <option value="rank">👑 Best Rank</option>
+                    <option value="popular">🔥 Most Popular</option>
+                </select>
+                <select id="radiusSelect" class="radius-select">
+                    <option value="5">Within 5km</option>
+                    <option value="10">Within 10km</option>
+                    <option value="25" selected>Within 25km</option>
+                    <option value="50">Within 50km</option>
+                    <option value="all">All Stores</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+            <div class="spinner"></div>
+            <span>Loading stores...</span>
+        </div>
+
+        <!-- Location Debug Info (Temporary) -->
+        <div id="locationDebug" class="location-debug" style="display: none;">
+            <div class="debug-info">
+                <h4>🐛 Location Debug</h4>
+                <p>Latitude: <span id="debugLat">-</span></p>
+                <p>Longitude: <span id="debugLng">-</span></p>
+                <p>Accuracy: <span id="debugAccuracy">-</span>m</p>
+                <p>Timestamp: <span id="debugTime">-</span></p>
+                <button onclick="hideLocationDebug()">Hide</button>
+            </div>
+        </div>
+
+        <!-- Full Screen Map View -->
+        <div id="mapView" class="fullscreen-map-view">
+            <!-- Map Style Controls -->
+            <div class="map-style-controls">
+                <button class="style-btn active" data-style="mapbox://styles/mapbox/streets-v12" title="Day Mode">
+                    🌅
+                </button>
+                <button class="style-btn" data-style="mapbox://styles/mapbox/dark-v11" title="Night Mode">
+                    🌙
+                </button>
+                <button class="style-btn" data-style="mapbox://styles/mapbox/satellite-v9" title="Satellite">
+                    🛰️
                 </button>
             </div>
 
-            <!-- Controls & Filters -->
-            <div class="toggle-controls">
-                <div class="view-options">
-                    <button class="view-option active" data-view="map">
-                        <span>🗺️</span>
-                        <span>Map</span>
-                    </button>
-                    <button class="view-option" data-view="list">
-                        <span>📋</span>
-                        <span>List</span>
-                    </button>
+            <!-- Map Legend -->
+            <div class="map-legend">
+                <div class="legend-item">
+                    <div class="legend-marker platinum"></div>
+                    <span>Platinum</span>
                 </div>
-                <div class="filter-controls">
-                    <select id="sortSelect" class="sort-select">
-                        <option value="nearest">📍 Nearest First</option>
-                        <option value="farthest">📍 Farthest First</option>
-                        <option value="name">🔤 Name A-Z</option>
-                        <option value="rank">👑 Best Rank</option>
-                        <option value="popular">🔥 Most Popular</option>
-                    </select>
-                    <select id="radiusSelect" class="radius-select">
-                        <option value="5">Within 5km</option>
-                        <option value="10">Within 10km</option>
-                        <option value="25" selected>Within 25km</option>
-                        <option value="50">Within 50km</option>
-                        <option value="all">All Stores</option>
-                    </select>
+                <div class="legend-item">
+                    <div class="legend-marker gold"></div>
+                    <span>Gold</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-marker silver"></div>
+                    <span>Silver</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-marker bronze"></div>
+                    <span>Bronze</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-marker user"></div>
+                    <span>Your Location</span>
                 </div>
             </div>
 
-            <!-- Map Top Gap -->
-            <div class="map-top-gap"></div>
+            <!-- Debug Location Button -->
+            <button id="debugLocationBtn" class="debug-location-btn" onclick="showLocationDebug()">
+                🐛 Debug Location
+            </button>
 
-            <!-- Loading Indicator -->
-            <div id="loadingIndicator" class="loading-indicator" style="display: none;">
-                <div class="spinner"></div>
-                <span>Loading stores...</span>
-            </div>
+            <div id="map" class="fullscreen-mapbox-map"></div>
+        </div>
 
-            <!-- Map View -->
-            <div id="mapView" class="map-view">
-                <!-- Map Style Controls -->
-                <div class="map-style-controls">
-                    <button class="style-btn active" data-style="mapbox://styles/mapbox/streets-v12" title="Day Mode">
-                        🌅
-                    </button>
-                    <button class="style-btn" data-style="mapbox://styles/mapbox/dark-v11" title="Night Mode">
-                        🌙
-                    </button>
-                    <button class="style-btn" data-style="mapbox://styles/mapbox/satellite-v9" title="Satellite">
-                        🛰️
-                    </button>
-                </div>
-
-                <!-- Map Legend -->
-                <div class="map-legend">
-                    <div class="legend-item">
-                        <div class="legend-marker platinum"></div>
-                        <span>Platinum</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-marker gold"></div>
-                        <span>Gold</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-marker silver"></div>
-                        <span>Silver</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-marker bronze"></div>
-                        <span>Bronze</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-marker user"></div>
-                        <span>Your Location</span>
-                    </div>
-                </div>
-
-                <div id="map" class="mapbox-map"></div>
-            </div>
-
-            <!-- Map Bottom Gap -->
-            <div class="map-bottom-gap"></div>
-
-            <!-- List View -->
-            <div id="listView" class="list-view" style="display: none;">
-                <div class="list-header">
-                    <h3>📍 Nearby Stores</h3>
-                    <div class="list-stats">
-                        <span id="storeCount">0</span> stores found
-                        <span id="userLocationText" style="display: none;"> within <span id="radiusText">25km</span></span>
-                    </div>
-                </div>
-                <div id="storeList" class="store-list">
-                    <!-- Store items will be populated here -->
-                </div>
-                <div id="noStoresMessage" class="no-stores" style="display: none;">
-                    <div class="no-stores-icon">🏪</div>
-                    <h3>No stores found</h3>
-                    <p>Try expanding your search radius or searching in a different area.</p>
-                    <button onclick="expandSearch()" class="expand-search-btn">Expand Search</button>
+        <!-- Full Screen List View -->
+        <div id="listView" class="fullscreen-list-view" style="display: none;">
+            <div class="list-header">
+                <h3>📍 Nearby Stores</h3>
+                <div class="list-stats">
+                    <span id="storeCount">0</span> stores found
+                    <span id="userLocationText" style="display: none;"> within <span id="radiusText">25km</span></span>
                 </div>
             </div>
+            <div id="storeList" class="store-list">
+                <!-- Store items will be populated here -->
+            </div>
+            <div id="noStoresMessage" class="no-stores" style="display: none;">
+                <div class="no-stores-icon">🏪</div>
+                <h3>No stores found</h3>
+                <p>Try expanding your search radius or searching in a different area.</p>
+                <button onclick="expandSearch()" class="expand-search-btn">Expand Search</button>
+            </div>
+        </div>
 
-            <!-- Store Detail Modal -->
-            <div id="storeModal" class="store-modal" style="display: none;">
-                <div class="modal-overlay" onclick="closeStoreModal()"></div>
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h3 id="storeName">Store Details</h3>
-                        <button onclick="closeStoreModal()" class="modal-close">×</button>
-                    </div>
+        <!-- Store Detail Modal -->
+        <div id="storeModal" class="store-modal" style="display: none;">
+            <div class="modal-overlay" onclick="closeStoreModal()"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="storeName">Store Details</h3>
+                    <button onclick="closeStoreModal()" class="modal-close">×</button>
+                </div>
 
-                    <div class="modal-body">
-                        <!-- Store Rank Display -->
-                        <div class="store-rank-display">
-                            <div id="storeRankBadge" class="rank-badge-large platinum">
-                                <span id="rankIcon">👑</span>
-                                <span id="rankText">Platinum</span>
-                            </div>
+                <div class="modal-body">
+                    <!-- Store Rank Display -->
+                    <div class="store-rank-display">
+                        <div id="storeRankBadge" class="rank-badge-large platinum">
+                            <span id="rankIcon">👑</span>
+                            <span id="rankText">Platinum</span>
                         </div>
+                    </div>
 
-                        <!-- Store Information -->
-                        <div class="store-info">
-                            <div class="info-section">
-                                <h4>📍 Location & Contact</h4>
-                                <div class="info-row">
-                                    <span class="info-icon">📍</span>
-                                    <div class="info-content">
-                                        <span class="info-label">Address</span>
-                                        <span id="storeAddress" class="info-value">-</span>
-                                    </div>
-                                </div>
-
-                                <div class="info-row">
-                                    <span class="info-icon">📞</span>
-                                    <div class="info-content">
-                                        <span class="info-label">Phone</span>
-                                        <span id="storePhone" class="info-value clickable" onclick="callStore()">-</span>
-                                    </div>
-                                </div>
-
-                                <div class="info-row">
-                                    <span class="info-icon">📏</span>
-                                    <div class="info-content">
-                                        <span class="info-label">Distance</span>
-                                        <span id="storeDistance" class="info-value">-</span>
-                                    </div>
+                    <!-- Store Information -->
+                    <div class="store-info">
+                        <div class="info-section">
+                            <h4>📍 Location & Contact</h4>
+                            <div class="info-row">
+                                <span class="info-icon">📍</span>
+                                <div class="info-content">
+                                    <span class="info-label">Address</span>
+                                    <span id="storeAddress" class="info-value">-</span>
                                 </div>
                             </div>
 
-                            <div class="info-section">
-                                <h4>⏰ Hours & Details</h4>
-                                <div class="info-row">
-                                    <span class="info-icon">⏰</span>
-                                    <div class="info-content">
-                                        <span class="info-label">Hours</span>
-                                        <span id="storeHours" class="info-value">-</span>
-                                    </div>
+                            <div class="info-row">
+                                <span class="info-icon">📞</span>
+                                <div class="info-content">
+                                    <span class="info-label">Phone</span>
+                                    <span id="storePhone" class="info-value clickable" onclick="callStore()">-</span>
                                 </div>
+                            </div>
 
-                                <div class="info-row">
-                                    <span class="info-icon">📊</span>
-                                    <div class="info-content">
-                                        <span class="info-label">Popularity</span>
-                                        <span id="storePopularity" class="info-value">-</span>
-                                    </div>
+                            <div class="info-row">
+                                <span class="info-icon">📏</span>
+                                <div class="info-content">
+                                    <span class="info-label">Distance</span>
+                                    <span id="storeDistance" class="info-value">-</span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Store Description -->
-                        <div class="store-description">
-                            <h4>ℹ️ About This Store</h4>
-                            <p id="storeDesc">Store description will appear here...</p>
-                        </div>
+                        <div class="info-section">
+                            <h4>⏰ Hours & Details</h4>
+                            <div class="info-row">
+                                <span class="info-icon">⏰</span>
+                                <div class="info-content">
+                                    <span class="info-label">Hours</span>
+                                    <span id="storeHours" class="info-value">-</span>
+                                </div>
+                            </div>
 
-                        <!-- Action Buttons -->
-                        <div class="action-buttons">
-                            <button onclick="getDirections()" class="btn-directions">
-                                <span>🧭</span>
-                                <span>Directions</span>
-                            </button>
-                            <button onclick="callStore()" class="btn-call">
-                                <span>📞</span>
-                                <span>Call</span>
-                            </button>
-                            <button onclick="shareStore()" class="btn-share">
-                                <span>📤</span>
-                                <span>Share</span>
-                            </button>
+                            <div class="info-row">
+                                <span class="info-icon">📊</span>
+                                <div class="info-content">
+                                    <span class="info-label">Popularity</span>
+                                    <span id="storePopularity" class="info-value">-</span>
+                                </div>
+                            </div>
                         </div>
+                    </div>
+
+                    <!-- Store Description -->
+                    <div class="store-description">
+                        <h4>ℹ️ About This Store</h4>
+                        <p id="storeDesc">Store description will appear here...</p>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        <button onclick="getDirections()" class="btn-directions">
+                            <span>🧭</span>
+                            <span>Directions</span>
+                        </button>
+                        <button onclick="callStore()" class="btn-call">
+                            <span>📞</span>
+                            <span>Call</span>
+                        </button>
+                        <button onclick="shareStore()" class="btn-share">
+                            <span>📤</span>
+                            <span>Share</span>
+                        </button>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Error Messages -->
-            <div id="errorToast" class="error-toast" style="display: none;">
-                <span id="errorMessage">An error occurred</span>
-                <button onclick="hideErrorToast()">×</button>
-            </div>
-
-            <!-- Bottom Spacer -->
-            <div class="bottom-spacer"></div>
+        <!-- Error Messages -->
+        <div id="errorToast" class="error-toast" style="display: none;">
+            <span id="errorMessage">An error occurred</span>
+            <button onclick="hideErrorToast()">×</button>
         </div>
     </div>
 
     <style>
-        /* Spacers for proper gaps */
-        .top-spacer {
-            height: 30px;
-            background: transparent;
-        }
-
-        .map-top-gap {
-            height: 20px;
-            background: transparent;
-        }
-
-        .map-bottom-gap {
-            height: 20px;
-            background: transparent;
-        }
-
-        .bottom-spacer {
-            height: 40px;
-            background: transparent;
-        }
-
-        /* Map Container - Fits within dashboard container */
-        .map-container {
-            position: relative;
+        /* FULL SCREEN MAP STYLES */
+        .fullscreen-map-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
             background: white;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            border-radius: 0;
-            margin: 0;
-            padding: 0;
-            height: auto;
+            z-index: 1000;
             overflow: hidden;
-            min-height: auto;
         }
 
-        /* Header */
-        .map-header {
+        /* Fixed Header */
+        .map-header-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
             background: linear-gradient(135deg, #2E8B57, #3CB371);
-            padding: 20px 30px 15px;
+            padding: 15px 20px;
             color: white;
-            position: relative;
-            z-index: 1000;
-            border-radius: 0;
-            margin: 0;
+            z-index: 1001;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
         .header-nav {
             display: flex;
             align-items: center;
             justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
         .back-btn {
             background: rgba(255, 255, 255, 0.2);
             border: none;
             border-radius: 50%;
-            width: 44px;
-            height: 44px;
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             text-decoration: none;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: bold;
             transition: all 0.3s ease;
         }
@@ -339,7 +303,7 @@
 
         .header-nav h2 {
             margin: 0;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 600;
             flex: 1;
             text-align: center;
@@ -349,9 +313,9 @@
             background: rgba(255, 255, 255, 0.2);
             border: none;
             border-radius: 20px;
-            padding: 8px 16px;
+            padding: 6px 14px;
             color: white;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             cursor: pointer;
             display: flex;
@@ -364,24 +328,29 @@
             background: rgba(255, 255, 255, 0.3);
         }
 
-        /* Search Section */
-        .search-section {
+        /* Fixed Search Section */
+        .search-section-fixed {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            right: 0;
             background: white;
-            padding: 15px 30px;
+            padding: 12px 20px;
             display: flex;
-            gap: 15px;
-            border-bottom: none;
-            box-shadow: none;
+            gap: 12px;
+            z-index: 1001;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         .search-container {
             flex: 1;
             position: relative;
+            max-width: 600px;
         }
 
         .search-input {
             width: 100%;
-            padding: 12px 80px 12px 15px;
+            padding: 10px 70px 10px 15px;
             border: 2px solid #e9ecef;
             border-radius: 25px;
             font-size: 14px;
@@ -402,29 +371,29 @@
             background: #2E8B57;
             border: none;
             border-radius: 50%;
-            width: 35px;
-            height: 35px;
+            width: 32px;
+            height: 32px;
             color: white;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 12px;
             transition: all 0.3s ease;
         }
 
         .search-btn {
-            right: 45px;
+            right: 40px;
         }
 
         .clear-btn {
             right: 5px;
             background: #dc3545;
-            font-size: 18px;
+            font-size: 16px;
         }
 
         .location-btn {
             background: #2E8B57;
             border: none;
             border-radius: 20px;
-            padding: 10px 15px;
+            padding: 8px 12px;
             color: white;
             font-size: 12px;
             font-weight: 600;
@@ -446,31 +415,35 @@
             cursor: not-allowed;
         }
 
-        /* Controls */
-        .toggle-controls {
+        /* Fixed Controls */
+        .toggle-controls-fixed {
+            position: fixed;
+            top: 126px;
+            left: 0;
+            right: 0;
             background: white;
-            padding: 15px 30px;
+            padding: 12px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            z-index: 1001;
             border-bottom: 1px solid #e9ecef;
-            flex-wrap: wrap;
-            gap: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
         .view-options {
             display: flex;
             background: #f8f9fa;
             border-radius: 25px;
-            padding: 4px;
+            padding: 3px;
         }
 
         .view-option {
             background: none;
             border: none;
-            padding: 8px 16px;
+            padding: 6px 14px;
             border-radius: 20px;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             cursor: pointer;
             display: flex;
@@ -488,15 +461,15 @@
 
         .filter-controls {
             display: flex;
-            gap: 10px;
+            gap: 8px;
         }
 
         .sort-select,
         .radius-select {
-            padding: 8px 12px;
+            padding: 6px 10px;
             border: 2px solid #e9ecef;
             border-radius: 20px;
-            font-size: 14px;
+            font-size: 13px;
             outline: none;
             background: white;
             cursor: pointer;
@@ -508,52 +481,60 @@
             border-color: #2E8B57;
         }
 
-        /* Loading */
-        .loading-indicator {
+        /* Full Screen Map View */
+        .fullscreen-map-view {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            z-index: 2000;
-        }
-
-        .spinner {
-            width: 24px;
-            height: 24px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #2E8B57;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* Map View */
-        .map-view {
-            position: relative;
-            height: calc(100vh - 240px);
-            max-height: 600px;
-            margin: 0 15px;
-            border-radius: 12px;
+            top: 178px;
+            left: 0;
+            right: 0;
+            bottom: 0;
             overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
 
+        .fullscreen-mapbox-map {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Full Screen List View */
+        .fullscreen-list-view {
+            position: absolute;
+            top: 178px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow-y: auto;
+            background: white;
+        }
+
+        .list-header {
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .list-header h3 {
+            margin: 0;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .list-stats {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .store-list {
+            padding: 15px 20px;
+        }
+
+        /* Map Controls Repositioned */
         .map-style-controls {
             position: absolute;
             top: 15px;
@@ -568,9 +549,9 @@
             background: white;
             border: 2px solid #e9ecef;
             border-radius: 50%;
-            width: 44px;
-            height: 44px;
-            font-size: 16px;
+            width: 40px;
+            height: 40px;
+            font-size: 14px;
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -596,18 +577,18 @@
             bottom: 15px;
             left: 15px;
             background: white;
-            padding: 12px;
+            padding: 10px;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             z-index: 1000;
-            font-size: 12px;
+            font-size: 11px;
         }
 
         .legend-item {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 6px;
+            gap: 6px;
+            margin-bottom: 4px;
         }
 
         .legend-item:last-child {
@@ -615,8 +596,8 @@
         }
 
         .legend-marker {
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             border: 2px solid white;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
@@ -642,55 +623,89 @@
             background: #FF6B35;
         }
 
-        .mapbox-map {
-            width: 100%;
-            height: 100%;
-            border-radius: 12px;
+        /* DEBUG LOCATION STYLES */
+        .debug-location-btn {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            z-index: 1000;
+            transition: all 0.3s ease;
         }
 
-        /* List View */
-        .list-view {
-            height: calc(100vh - 240px);
-            max-height: 600px;
-            overflow-y: auto;
+        .debug-location-btn:hover {
+            background: #c82333;
+        }
+
+        .location-debug {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             background: white;
-            margin: 0 15px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border: 2px solid #dc3545;
+            border-radius: 8px;
+            padding: 20px;
+            z-index: 2000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
 
-        .list-header {
-            padding: 20px 30px;
-            border-bottom: 1px solid #e9ecef;
-            background: #f8f9fa;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-radius: 12px 12px 0 0;
+        .debug-info h4 {
+            margin: 0 0 10px 0;
+            color: #dc3545;
         }
 
-        .list-header h3 {
-            margin: 0;
-            font-size: 18px;
-            color: #333;
+        .debug-info p {
+            margin: 5px 0;
+            font-size: 13px;
         }
 
-        .list-stats {
-            font-size: 14px;
-            color: #666;
+        .debug-info button {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
         }
 
-        .store-list {
-            padding: 0 30px 20px;
+        /* Enhanced User Marker */
+        .user-marker {
+            background: #FF6B35;
+            border: 4px solid white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            box-shadow: 0 3px 12px rgba(255, 107, 53, 0.5);
+            position: relative;
         }
 
-        /* Store Items with Rank Borders */
+        .user-marker::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        /* Store Items */
         .store-item {
             background: white;
             border: 3px solid #e9ecef;
-            border-radius: 15px;
-            padding: 15px;
-            margin-bottom: 12px;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
@@ -718,13 +733,13 @@
         }
 
         .store-item:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
         }
 
         .store-item-header {
             display: flex;
-            gap: 15px;
+            gap: 12px;
             align-items: flex-start;
         }
 
@@ -734,15 +749,15 @@
         }
 
         .store-card-avatar {
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             background: linear-gradient(135deg, #2E8B57, #3CB371);
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 20px;
             font-weight: bold;
             text-transform: uppercase;
             border: 3px solid;
@@ -751,35 +766,35 @@
 
         .store-card-avatar.platinum {
             border-color: #9B59B6;
-            box-shadow: 0 0 0 2px #8E44AD, 0 4px 12px rgba(155, 89, 182, 0.5);
+            box-shadow: 0 0 0 2px #8E44AD, 0 3px 10px rgba(155, 89, 182, 0.4);
         }
 
         .store-card-avatar.gold {
             border-color: #FFD700;
-            box-shadow: 0 0 0 2px #FFA500, 0 4px 12px rgba(255, 215, 0, 0.5);
+            box-shadow: 0 0 0 2px #FFA500, 0 3px 10px rgba(255, 215, 0, 0.4);
         }
 
         .store-card-avatar.silver {
             border-color: #C0C0C0;
-            box-shadow: 0 0 0 2px #A8A8A8, 0 4px 12px rgba(192, 192, 192, 0.5);
+            box-shadow: 0 0 0 2px #A8A8A8, 0 3px 10px rgba(192, 192, 192, 0.4);
         }
 
         .store-card-avatar.bronze {
             border-color: #CD7F32;
-            box-shadow: 0 0 0 2px #B87333, 0 4px 12px rgba(205, 127, 50, 0.5);
+            box-shadow: 0 0 0 2px #B87333, 0 3px 10px rgba(205, 127, 50, 0.4);
         }
 
         .rank-crown {
             position: absolute;
-            top: -8px;
-            right: -8px;
-            width: 20px;
-            height: 20px;
+            top: -6px;
+            right: -6px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
+            font-size: 10px;
             border: 2px solid white;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
         }
@@ -810,25 +825,25 @@
         }
 
         .store-name {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
             color: #333;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
             word-wrap: break-word;
         }
 
         .store-address {
-            font-size: 13px;
+            font-size: 12px;
             color: #666;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             line-height: 1.4;
             word-wrap: break-word;
         }
 
         .store-meta {
             display: flex;
-            gap: 12px;
-            font-size: 12px;
+            gap: 10px;
+            font-size: 11px;
             color: #999;
             align-items: center;
             flex-wrap: wrap;
@@ -837,11 +852,11 @@
         .store-rank-text {
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 3px;
             font-weight: 600;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 12px;
+            padding: 3px 6px;
+            border-radius: 10px;
+            font-size: 11px;
         }
 
         .store-rank-text.platinum {
@@ -870,55 +885,137 @@
         }
 
         .store-distance {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 700;
             color: #2E8B57;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
         }
 
         .store-phone {
-            font-size: 11px;
+            font-size: 10px;
             color: #666;
         }
 
-        /* No Stores Message */
-        .no-stores {
-            text-align: center;
-            padding: 40px 20px;
-            color: #666;
+        /* Loading */
+        .loading-indicator {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 2000;
         }
 
-        .no-stores-icon {
-            font-size: 48px;
-            margin-bottom: 15px;
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #2E8B57;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
 
-        .no-stores h3 {
-            margin: 0 0 10px 0;
-            font-size: 18px;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        .no-stores p {
-            margin: 0 0 20px 0;
-            line-height: 1.5;
-        }
-
-        .expand-search-btn {
-            background: #2E8B57;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-weight: 600;
+        /* Store Markers - Enhanced */
+        .store-marker {
+            position: relative;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 4px solid;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             cursor: pointer;
             transition: all 0.3s ease;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .expand-search-btn:hover {
-            background: #228B22;
+        .store-marker.platinum {
+            border-color: #9B59B6;
+            box-shadow: 0 4px 12px rgba(155, 89, 182, 0.6);
         }
 
-        /* Store Detail Modal */
+        .store-marker.gold {
+            border-color: #FFD700;
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.6);
+        }
+
+        .store-marker.silver {
+            border-color: #C0C0C0;
+            box-shadow: 0 4px 12px rgba(192, 192, 192, 0.6);
+        }
+
+        .store-marker.bronze {
+            border-color: #CD7F32;
+            box-shadow: 0 4px 12px rgba(205, 127, 50, 0.6);
+        }
+
+        .store-marker:hover {
+            transform: scale(1.2);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .marker-initial {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #2E8B57, #3CB371);
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-transform: uppercase;
+        }
+
+        .rank-crown-marker {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .rank-crown-marker.platinum {
+            background: linear-gradient(135deg, #9B59B6, #8E44AD);
+            color: white;
+        }
+
+        .rank-crown-marker.gold {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #333;
+        }
+
+        .rank-crown-marker.silver {
+            background: linear-gradient(135deg, #C0C0C0, #A8A8A8);
+            color: #333;
+        }
+
+        .rank-crown-marker.bronze {
+            background: linear-gradient(135deg, #CD7F32, #B87333);
+            color: white;
+        }
+
+        /* Modal Styles */
         .store-modal {
             position: fixed;
             top: 0;
@@ -959,7 +1056,6 @@
                 opacity: 0;
                 transform: translateY(50px) scale(0.9);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0) scale(1);
@@ -1005,7 +1101,6 @@
             padding: 20px;
         }
 
-        /* Store Rank Display in Modal */
         .store-rank-display {
             text-align: center;
             margin-bottom: 25px;
@@ -1047,7 +1142,6 @@
             color: white;
         }
 
-        /* Store Info Sections */
         .store-info {
             margin-bottom: 20px;
         }
@@ -1129,7 +1223,6 @@
             line-height: 1.5;
         }
 
-        /* Action Buttons */
         .action-buttons {
             display: flex;
             gap: 8px;
@@ -1182,102 +1275,41 @@
             transform: translateY(-2px);
         }
 
-        /* Store Markers - Rank-based */
-        .store-marker {
-            position: relative;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            border: 4px solid;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        /* No Stores Message */
+        .no-stores {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .no-stores-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .no-stores h3 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+        }
+
+        .no-stores p {
+            margin: 0 0 20px 0;
+            line-height: 1.5;
+        }
+
+        .expand-search-btn {
+            background: #2E8B57;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
-        .store-marker.platinum {
-            border-color: #9B59B6;
-            box-shadow: 0 4px 12px rgba(155, 89, 182, 0.6);
-        }
-
-        .store-marker.gold {
-            border-color: #FFD700;
-            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.6);
-        }
-
-        .store-marker.silver {
-            border-color: #C0C0C0;
-            box-shadow: 0 4px 12px rgba(192, 192, 192, 0.6);
-        }
-
-        .store-marker.bronze {
-            border-color: #CD7F32;
-            box-shadow: 0 4px 12px rgba(205, 127, 50, 0.6);
-        }
-
-        .store-marker:hover {
-            transform: scale(1.2);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-        }
-
-        .marker-initial {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #2E8B57, #3CB371);
-            color: white;
-            font-size: 18px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-transform: uppercase;
-        }
-
-        .rank-crown-marker {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            border: 2px solid white;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-
-        .rank-crown-marker.platinum {
-            background: linear-gradient(135deg, #9B59B6, #8E44AD);
-            color: white;
-        }
-
-        .rank-crown-marker.gold {
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            color: #333;
-        }
-
-        .rank-crown-marker.silver {
-            background: linear-gradient(135deg, #C0C0C0, #A8A8A8);
-            color: #333;
-        }
-
-        .rank-crown-marker.bronze {
-            background: linear-gradient(135deg, #CD7F32, #B87333);
-            color: white;
-        }
-
-        .user-marker {
-            background: #FF6B35;
-            border: 3px solid white;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        .expand-search-btn:hover {
+            background: #228B22;
         }
 
         /* Error Toast */
@@ -1302,7 +1334,6 @@
                 transform: translateX(100%);
                 opacity: 0;
             }
-
             to {
                 transform: translateX(0);
                 opacity: 1;
@@ -1323,109 +1354,65 @@
             justify-content: center;
         }
 
-        /* Responsive Design */
-        @media (max-width: 1240px) {
-            .map-container {
-                max-width: 100%;
-                margin: 0;
-                box-shadow: none;
-            }
-        }
-
+        /* Mobile Responsive */
         @media (max-width: 768px) {
-            .map-container {
-                height: 100vh;
+            .header-nav h2 {
+                font-size: 16px;
             }
-
-            .map-view,
-            .list-view {
-                height: calc(100vh - 260px);
-                max-height: none;
-                margin: 0 10px;
+            
+            .search-section-fixed {
+                flex-direction: column;
+                gap: 8px;
             }
-
-            .toggle-controls {
+            
+            .location-btn {
+                align-self: flex-start;
+            }
+            
+            .toggle-controls-fixed {
                 flex-direction: column;
                 gap: 10px;
                 align-items: stretch;
             }
-
+            
             .filter-controls {
                 justify-content: space-between;
             }
-
-            .action-buttons {
-                flex-direction: column;
-            }
-
-            .btn-directions,
-            .btn-call,
-            .btn-share {
-                flex-direction: row;
-                justify-content: center;
-            }
-
-            .store-card-avatar {
-                width: 60px;
-                height: 60px;
-                font-size: 24px;
+            
+            .fullscreen-map-view,
+            .fullscreen-list-view {
+                top: 220px;
             }
         }
 
         @media (max-width: 480px) {
-            .top-spacer {
-                height: 15px;
-            }
-
-            .map-top-gap,
-            .map-bottom-gap {
-                height: 15px;
-            }
-
-            .bottom-spacer {
-                height: 25px;
-            }
-
-            .map-header {
-                padding: 15px 15px 10px;
-            }
-
-            .search-section,
-            .toggle-controls {
+            .map-header-fixed {
                 padding: 12px 15px;
             }
-
-            .map-view,
-            .list-view {
-                height: 300px;
-                margin: 0 10px;
-                border-radius: 8px;
+            
+            .search-section-fixed {
+                padding: 10px 15px;
             }
-
-            .store-list,
-            .list-header {
-                padding-left: 15px;
-                padding-right: 15px;
+            
+            .toggle-controls-fixed {
+                padding: 10px 15px;
             }
-
+            
             .modal-content {
                 margin: 10px;
                 max-height: 95vh;
                 max-width: calc(100% - 20px);
             }
-
-            .store-card-avatar {
-                width: 45px;
-                height: 45px;
-                font-size: 18px;
+            
+            .action-buttons {
+                flex-direction: column;
             }
-
-            .store-name {
-                font-size: 14px;
-            }
-
-            .store-address {
-                font-size: 12px;
+            
+            .btn-directions,
+            .btn-call,
+            .btn-share {
+                flex-direction: row;
+                justify-content: center;
             }
         }
     </style>
@@ -1435,13 +1422,14 @@
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
 
     <script>
-        // Configuration
+        // Enhanced Configuration with Better Location Handling
         const CONFIG = {
             mapboxToken: '{{ $mapboxToken }}',
-            defaultCenter: [104.9910, 11.5564], // Phnom Penh
-            defaultZoom: 12,
+            // Start with a broader view
+            defaultCenter: [104.9910, 11.5564], 
+            defaultZoom: 11,
             maxZoom: 18,
-            minZoom: 8
+            minZoom: 6
         };
 
         // Application State
@@ -1455,7 +1443,9 @@
             userMarker: null,
             selectedStore: null,
             isLoading: false,
-            searchRadius: 25
+            searchRadius: 25,
+            locationRequested: false,
+            debugMode: false
         };
 
         // Initialize application
@@ -1465,54 +1455,23 @@
 
         async function initializeApp() {
             try {
-                // Initialize map first
-                console.log('Initializing map...');
+                console.log('Initializing full screen map...');
                 initializeMap();
-
-                // Initialize event listeners
-                console.log('Setting up event listeners...');
                 initializeEventListeners();
-
-                // Initialize stores data
-                console.log('Loading stores...');
                 initializeStores();
-
-                // Set up initial view
-                console.log('Setting up initial view...');
                 setupInitialView();
 
-                console.log('App initialized successfully!');
+                // Auto-request location after a short delay
+                setTimeout(() => {
+                    if (!app.userLocation) {
+                        getCurrentLocationSilently();
+                    }
+                }, 1500);
+
+                console.log('Full screen map initialized successfully!');
             } catch (error) {
                 console.error('App initialization failed:', error);
-
-                // Show a more user-friendly error
-                const mapContainer = document.getElementById('map');
-                if (mapContainer) {
-                    mapContainer.innerHTML = `
-                            <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f8f9fa; text-align: center; padding: 20px;">
-                                <div>
-                                    <div style="font-size: 48px; margin-bottom: 15px;">🗺️</div>
-                                    <h3 style="color: #333; margin-bottom: 10px;">Map Loading...</h3>
-                                    <p style="color: #666; margin-bottom: 20px;">Please wait while we load the store locations.</p>
-                                    <button onclick="location.reload()" style="background: #2E8B57; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
-                                        Refresh Page
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-                }
-
-                // Try to still show the list view with sample data
-                setTimeout(() => {
-                    try {
-                        app.stores = [];
-                        app.filteredStores = [];
-                        switchView('list');
-                        updateStoreDisplay();
-                    } catch (e) {
-                        console.error('Fallback failed:', e);
-                    }
-                }, 1000);
+                handleInitializationError();
             }
         }
 
@@ -1528,23 +1487,40 @@
                 minZoom: CONFIG.minZoom
             });
 
-            // Add controls
+            // Add navigation controls
             app.map.addControl(new mapboxgl.NavigationControl(), 'top-left');
 
-            // Add geolocate control
+            // Enhanced geolocate control
             const geolocate = new mapboxgl.GeolocateControl({
                 positionOptions: {
-                    enableHighAccuracy: true
+                    enableHighAccuracy: true,
+                    timeout: 20000,
+                    maximumAge: 300000 // 5 minutes cache
                 },
                 trackUserLocation: true,
-                showUserHeading: true
+                showUserHeading: true,
+                showAccuracyCircle: true
             });
 
             app.map.addControl(geolocate, 'top-left');
 
-            // Handle user location updates
+            // Handle successful geolocation
             geolocate.on('geolocate', function (e) {
-                updateUserLocation(e.coords.latitude, e.coords.longitude);
+                console.log('✅ Mapbox geolocation success:', e.coords);
+                updateLocationDebugInfo(e.coords);
+                updateUserLocation(e.coords.latitude, e.coords.longitude, true);
+                app.locationRequested = true;
+            });
+
+            // Handle geolocation errors
+            geolocate.on('error', function (e) {
+                console.error('❌ Mapbox geolocation error:', e);
+                showError('Unable to get your location from map controls. Try the location button.');
+            });
+
+            // Map load event
+            app.map.on('load', () => {
+                console.log('Map loaded successfully');
             });
         }
 
@@ -1580,7 +1556,7 @@
             searchInput.addEventListener('input', (e) => {
                 const hasValue = e.target.value.length > 0;
                 clearBtn.style.display = hasValue ? 'block' : 'none';
-                searchBtn.style.right = hasValue ? '45px' : '5px';
+                searchBtn.style.right = hasValue ? '40px' : '5px';
             });
 
             // Sort and filter controls
@@ -1597,25 +1573,28 @@
                 }
             });
 
-            // Location button
-            document.getElementById('locationBtn').addEventListener('click', getCurrentLocation);
+            // Location button - Enhanced
+            document.getElementById('locationBtn').addEventListener('click', getCurrentLocationWithHighAccuracy);
+
+            // Escape key handler
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeStoreModal();
+                    hideLocationDebug();
+                }
+            });
         }
 
         function initializeStores() {
-            // Initialize distance as null for all stores and ensure points consistency
             app.stores.forEach((store, index) => {
                 store.distance = null;
-                // Ensure points_reward is a number - this is what determines rank
                 store.points_reward = parseFloat(store.points_reward) || 0;
-                console.log(`Store ${index}: ${store.name} - Points Reward: ${store.points_reward} (${typeof store.points_reward}) - Rank: ${getRankText(store.points_reward)}`);
+                console.log(`Store ${index}: ${store.name} - Points: ${store.points_reward} - Rank: ${getRankText(store.points_reward)}`);
             });
 
             app.filteredStores = [...app.stores];
             addMarkersToMap();
             updateStoreDisplay();
-
-            // Try to get user location automatically on load
-            getCurrentLocation();
         }
 
         function setupInitialView() {
@@ -1625,15 +1604,222 @@
             }
         }
 
+        // ENHANCED LOCATION FUNCTIONS
+
+        // Silent location request (no user feedback)
+        async function getCurrentLocationSilently() {
+            if (!navigator.geolocation) {
+                console.log('Geolocation not supported');
+                return;
+            }
+
+            try {
+                const position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(
+                        resolve, 
+                        reject, 
+                        {
+                            enableHighAccuracy: false,
+                            timeout: 5000,
+                            maximumAge: 600000 // 10 minutes
+                        }
+                    );
+                });
+
+                console.log('📍 Silent location success:', position.coords);
+                updateLocationDebugInfo(position.coords);
+                updateUserLocation(position.coords.latitude, position.coords.longitude, false);
+
+            } catch (error) {
+                console.log('Silent location failed (this is normal):', error.message);
+            }
+        }
+
+        // High accuracy location request with user feedback
+        async function getCurrentLocationWithHighAccuracy() {
+            const locationBtn = document.getElementById('locationBtn');
+
+            if (!navigator.geolocation) {
+                showError('Geolocation is not supported by this browser');
+                return;
+            }
+
+            locationBtn.disabled = true;
+            locationBtn.innerHTML = '<span>⌛</span><span>Getting Location...</span>';
+
+            try {
+                // MULTIPLE ATTEMPTS WITH DIFFERENT SETTINGS
+                let position = null;
+                
+                // Attempt 1: High accuracy
+                try {
+                    position = await new Promise((resolve, reject) => {
+                        navigator.geolocation.getCurrentPosition(resolve, reject, {
+                            enableHighAccuracy: true,
+                            timeout: 15000,
+                            maximumAge: 0 // Force fresh location
+                        });
+                    });
+                    console.log('🎯 High accuracy location success:', position.coords);
+                } catch (highAccuracyError) {
+                    console.log('High accuracy failed, trying standard accuracy...');
+                    
+                    // Attempt 2: Standard accuracy
+                    position = await new Promise((resolve, reject) => {
+                        navigator.geolocation.getCurrentPosition(resolve, reject, {
+                            enableHighAccuracy: false,
+                            timeout: 10000,
+                            maximumAge: 60000 // 1 minute cache OK
+                        });
+                    });
+                    console.log('📍 Standard accuracy location success:', position.coords);
+                }
+
+                updateLocationDebugInfo(position.coords);
+                updateUserLocation(position.coords.latitude, position.coords.longitude, true);
+                app.locationRequested = true;
+
+                // Show success feedback
+                locationBtn.innerHTML = '<span>✅</span><span>Location Found</span>';
+                setTimeout(() => {
+                    locationBtn.innerHTML = '<span>📍</span><span>My Location</span>';
+                }, 2000);
+
+            } catch (error) {
+                console.error('❌ All location attempts failed:', error);
+                
+                let errorMessage = 'Unable to get your location. ';
+                
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMessage += 'Please allow location access in your browser.';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorMessage += 'Location services are unavailable.';
+                        break;
+                    case error.TIMEOUT:
+                        errorMessage += 'Location request timed out. Please try again.';
+                        break;
+                    default:
+                        errorMessage += 'An unknown error occurred.';
+                        break;
+                }
+                
+                showError(errorMessage);
+                
+                locationBtn.innerHTML = '<span>❌</span><span>Location Failed</span>';
+                setTimeout(() => {
+                    locationBtn.innerHTML = '<span>📍</span><span>Try Again</span>';
+                }, 3000);
+            } finally {
+                locationBtn.disabled = false;
+            }
+        }
+
+        // ENHANCED USER LOCATION UPDATE
+        function updateUserLocation(latitude, longitude, flyToLocation = true) {
+            console.log(`🎯 Updating user location: ${latitude}, ${longitude}`);
+            console.log(`Accuracy check - Lat valid: ${latitude >= -90 && latitude <= 90}, Lng valid: ${longitude >= -180 && longitude <= 180}`);
+            
+            // Validate coordinates
+            if (!latitude || !longitude || 
+                latitude < -90 || latitude > 90 || 
+                longitude < -180 || longitude > 180) {
+                console.error('❌ Invalid coordinates received:', { latitude, longitude });
+                showError('Invalid location coordinates received');
+                return;
+            }
+
+            app.userLocation = { latitude, longitude };
+
+            // Remove existing user marker
+            if (app.userMarker) {
+                app.userMarker.remove();
+            }
+
+            // Create enhanced user marker
+            const userMarkerElement = document.createElement('div');
+            userMarkerElement.className = 'user-marker';
+            userMarkerElement.title = `Your Location (${latitude.toFixed(6)}, ${longitude.toFixed(6)})`;
+
+            // CRITICAL: Ensure correct coordinate order [longitude, latitude]
+            app.userMarker = new mapboxgl.Marker(userMarkerElement)
+                .setLngLat([longitude, latitude]) // Mapbox expects [lng, lat]
+                .addTo(app.map);
+
+            console.log(`✅ User marker added at [${longitude}, ${latitude}]`);
+
+            // Fly to location if requested
+            if (flyToLocation) {
+                console.log('🎯 Flying to user location...');
+                app.map.flyTo({
+                    center: [longitude, latitude], // [lng, lat]
+                    zoom: 15,
+                    duration: 2500,
+                    essential: true
+                });
+            }
+
+            // Calculate distances and update display
+            calculateDistances();
+            filterStoresByRadius();
+
+            // Show user location text
+            document.getElementById('userLocationText').style.display = 'inline';
+            updateStoreDisplay();
+            
+            console.log('✅ User location updated successfully');
+        }
+
+        // DEBUG FUNCTIONS
+        function updateLocationDebugInfo(coords) {
+            if (!app.debugMode) return;
+            
+            document.getElementById('debugLat').textContent = coords.latitude.toFixed(6);
+            document.getElementById('debugLng').textContent = coords.longitude.toFixed(6);
+            document.getElementById('debugAccuracy').textContent = coords.accuracy.toFixed(0);
+            document.getElementById('debugTime').textContent = new Date().toLocaleTimeString();
+        }
+
+        function showLocationDebug() {
+            app.debugMode = true;
+            document.getElementById('locationDebug').style.display = 'block';
+            
+            // Trigger a fresh location request for debugging
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        updateLocationDebugInfo(position.coords);
+                        console.log('🐛 Debug location:', position.coords);
+                    },
+                    (error) => {
+                        console.error('🐛 Debug location error:', error);
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+                );
+            }
+        }
+
+        function hideLocationDebug() {
+            app.debugMode = false;
+            document.getElementById('locationDebug').style.display = 'none';
+        }
+
+        // Continue with the rest of your existing functions...
+        // (switchView, addMarkersToMap, updateListView, etc.)
+        // Copy all the remaining functions from your previous JavaScript code
+
         function switchView(view) {
             app.currentView = view;
 
-            // Update view option buttons
             document.querySelectorAll('.view-option').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.view === view);
             });
 
-            // Update header toggle button
             const toggleIcon = document.getElementById('toggleIcon');
             const toggleText = document.getElementById('toggleText');
 
@@ -1642,8 +1828,6 @@
                 document.getElementById('listView').style.display = 'none';
                 toggleIcon.textContent = '📋';
                 toggleText.textContent = 'List';
-
-                // Resize map after showing
                 setTimeout(() => app.map.resize(), 100);
             } else {
                 document.getElementById('mapView').style.display = 'none';
@@ -1656,16 +1840,11 @@
 
         function changeMapStyle(styleUrl, button) {
             showLoading();
-
             app.map.setStyle(styleUrl);
-
-            // Update active button
             document.querySelectorAll('.style-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             button.classList.add('active');
-
-            // Re-add markers after style change
             app.map.once('styledata', () => {
                 addMarkersToMap();
                 hideLoading();
@@ -1673,20 +1852,15 @@
         }
 
         function addMarkersToMap() {
-            // Clear existing markers
             app.markers.forEach(marker => marker.remove());
             app.markers = [];
 
             app.filteredStores.forEach(store => {
-                // Create custom rank-based marker
                 const markerElement = document.createElement('div');
                 const rankClass = getRankClass(store.points_reward);
                 markerElement.className = `store-marker ${rankClass}`;
-
-                // Add store initial
                 markerElement.innerHTML = `<div class="marker-initial">${store.name.charAt(0)}</div>`;
 
-                // Add rank crown
                 const rankCrown = document.createElement('div');
                 rankCrown.className = `rank-crown-marker ${rankClass}`;
                 rankCrown.textContent = getRankIcon(store.points_reward);
@@ -1698,10 +1872,8 @@
                     .setLngLat([store.longitude, store.latitude])
                     .addTo(app.map);
 
-                // Use store data directly to prevent reference issues
                 markerElement.addEventListener('click', () => {
-                    console.log('Marker clicked for store:', store.name, 'Points:', store.points_reward);
-                    showStoreDetail({ ...store }); // Pass a copy to prevent mutations
+                    showStoreDetail({ ...store });
                 });
 
                 app.markers.push(marker);
@@ -1723,13 +1895,9 @@
 
             app.filteredStores.forEach(store => {
                 const storeItem = document.createElement('div');
-                // ❌ CHANGE THIS LINE:
-                // const rankClass = getRankClass(store.rating);
-                // ✅ TO THIS:
                 const rankClass = getRankClass(store.points_reward);
                 storeItem.className = `store-item ${rankClass}`;
 
-                // Better distance logic
                 let distanceText = 'Distance unknown';
                 if (app.userLocation && store.distance !== undefined) {
                     if (store.distance > 0) {
@@ -1741,36 +1909,32 @@
                     distanceText = 'Location needed';
                 }
 
-                // ❌ CHANGE THESE TWO LINES:
-                // const rankIcon = getRankIcon(store.rating);
-                // const rankText = getRankText(store.rating);
-                // ✅ TO THESE:
                 const rankIcon = getRankIcon(store.points_reward);
                 const rankText = getRankText(store.points_reward);
 
                 storeItem.innerHTML = `
-                        <div class="store-item-header">
-                            <div class="store-rank-indicator">
-                                <div class="store-card-avatar ${rankClass}">${store.name.charAt(0)}</div>
-                                <div class="rank-crown ${rankClass}">${rankIcon}</div>
-                            </div>
-                            <div class="store-main-info">
-                                <div class="store-name">${store.name}</div>
-                                <div class="store-address">${store.address}</div>
-                                <div class="store-meta">
-                                    <div class="store-rank-text ${rankClass}">
-                                        <span>${rankIcon}</span>
-                                        <span>${rankText}</span>
-                                    </div>
-                                    <span>📊 ${store.transaction_count} visits</span>
+                    <div class="store-item-header">
+                        <div class="store-rank-indicator">
+                            <div class="store-card-avatar ${rankClass}">${store.name.charAt(0)}</div>
+                            <div class="rank-crown ${rankClass}">${rankIcon}</div>
+                        </div>
+                        <div class="store-main-info">
+                            <div class="store-name">${store.name}</div>
+                            <div class="store-address">${store.address}</div>
+                            <div class="store-meta">
+                                <div class="store-rank-text ${rankClass}">
+                                    <span>${rankIcon}</span>
+                                    <span>${rankText}</span>
                                 </div>
-                            </div>
-                            <div class="store-side-info">
-                                <div class="store-distance">${distanceText}</div>
-                                <div class="store-phone">📞 ${store.phone}</div>
+                                <span>📊 ${store.transaction_count} visits</span>
                             </div>
                         </div>
-                    `;
+                        <div class="store-side-info">
+                            <div class="store-distance">${distanceText}</div>
+                            <div class="store-phone">📞 ${store.phone}</div>
+                        </div>
+                    </div>
+                `;
 
                 storeItem.addEventListener('click', () => {
                     showStoreDetail(store);
@@ -1780,22 +1944,18 @@
             });
         }
 
-        // Helper functions for ranking system - Based on points given to consumers
+        // Ranking helper functions
         function getRankIcon(points) {
-            // Ensure points is a number
             const numPoints = parseFloat(points) || 0;
-
-            if (numPoints >= 2000) return '👑'; // Platinum - 2000+ points
-            if (numPoints >= 1000) return '🥇'; // Gold - 1000-1999 points
-            if (numPoints >= 500) return '🥈'; // Silver - 500-999 points
-            if (numPoints >= 100) return '🥉'; // Bronze - 100-499 points
-            return '⭐'; // Standard - under 100 points
+            if (numPoints >= 2000) return '👑';
+            if (numPoints >= 1000) return '🥇';
+            if (numPoints >= 500) return '🥈';
+            if (numPoints >= 100) return '🥉';
+            return '⭐';
         }
 
         function getRankText(points) {
-            // Ensure points is a number
             const numPoints = parseFloat(points) || 0;
-
             if (numPoints >= 2000) return 'Platinum';
             if (numPoints >= 1000) return 'Gold';
             if (numPoints >= 500) return 'Silver';
@@ -1804,9 +1964,7 @@
         }
 
         function getRankClass(points) {
-            // Ensure points is a number
             const numPoints = parseFloat(points) || 0;
-
             if (numPoints >= 2000) return 'platinum';
             if (numPoints >= 1000) return 'gold';
             if (numPoints >= 500) return 'silver';
@@ -1832,7 +1990,6 @@
 
             try {
                 showLoading();
-
                 const response = await fetch(`/api/stores?search=${encodeURIComponent(query)}`);
                 const data = await response.json();
 
@@ -1854,7 +2011,6 @@
             document.getElementById('searchInput').value = '';
             document.getElementById('clearSearch').style.display = 'none';
             document.getElementById('searchBtn').style.right = '5px';
-
             app.filteredStores = [...app.stores];
             updateStoreDisplay();
         }
@@ -1877,70 +2033,6 @@
                     app.filteredStores.sort((a, b) => b.transaction_count - a.transaction_count);
                     break;
             }
-
-            updateStoreDisplay();
-        }
-
-        async function getCurrentLocation() {
-            const locationBtn = document.getElementById('locationBtn');
-
-            if (!navigator.geolocation) {
-                showError('Geolocation is not supported by this browser');
-                return;
-            }
-
-            locationBtn.disabled = true;
-            locationBtn.innerHTML = '<span>⌛</span><span>Getting Location...</span>';
-
-            try {
-                const position = await new Promise((resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(resolve, reject, {
-                        enableHighAccuracy: true,
-                        timeout: 10000,
-                        maximumAge: 60000
-                    });
-                });
-
-                updateUserLocation(position.coords.latitude, position.coords.longitude);
-
-            } catch (error) {
-                console.error('Geolocation error:', error);
-                showError('Unable to get your location. Please check your location settings.');
-            } finally {
-                locationBtn.disabled = false;
-                locationBtn.innerHTML = '<span>📍</span><span>My Location</span>';
-            }
-        }
-
-        function updateUserLocation(latitude, longitude) {
-            app.userLocation = { latitude, longitude };
-
-            // Update user location marker
-            if (app.userMarker) {
-                app.userMarker.remove();
-            }
-
-            const userMarkerElement = document.createElement('div');
-            userMarkerElement.className = 'user-marker';
-
-            app.userMarker = new mapboxgl.Marker(userMarkerElement)
-                .setLngLat([longitude, latitude])
-                .addTo(app.map);
-
-            // Fly to user location
-            app.map.flyTo({
-                center: [longitude, latitude],
-                zoom: 14
-            });
-
-            // Calculate distances and update display
-            calculateDistances();
-            filterStoresByRadius();
-
-            // Show user location text
-            document.getElementById('userLocationText').style.display = 'inline';
-
-            // Update the display to show calculated distances
             updateStoreDisplay();
         }
 
@@ -1965,12 +2057,10 @@
                 );
             });
 
-            // Re-sort if currently sorting by distance
             const currentSort = document.getElementById('sortSelect').value;
             if (currentSort === 'nearest' || currentSort === 'farthest') {
                 sortStores(currentSort);
             } else {
-                // Update display even if not sorting by distance
                 updateStoreDisplay();
             }
         }
@@ -1984,12 +2074,11 @@
                     store.distance <= radiusKm
                 );
             }
-
             updateStoreDisplay();
         }
 
         function calculateHaversineDistance(lat1, lng1, lat2, lng2) {
-            const R = 6371; // Earth's radius in kilometers
+            const R = 6371;
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLng = (lng2 - lng1) * Math.PI / 180;
             const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
@@ -2000,20 +2089,13 @@
         }
 
         async function showStoreDetail(store) {
-            // Create a deep copy to prevent any mutations
             app.selectedStore = JSON.parse(JSON.stringify(store));
 
-            console.log('Opening store detail for:', app.selectedStore.name);
-            console.log('Store points_reward:', app.selectedStore.points_reward);
-            console.log('Expected rank:', getRankText(app.selectedStore.points_reward));
-
             try {
-                // Get detailed store information
                 const response = await fetch(`/api/store/${store.id}/details`);
                 const data = await response.json();
 
                 if (data.success) {
-                    // Preserve the original points_reward when merging with API data
                     const storeDetails = { ...data.data, points_reward: app.selectedStore.points_reward };
                     populateStoreModal(storeDetails);
                 } else {
@@ -2029,21 +2111,10 @@
         }
 
         function populateStoreModal(store) {
-            console.log('=== MODAL DEBUG ===');
-            console.log('Store data received:', store);
-            console.log('Store points_reward type:', typeof store.points_reward);
-            console.log('Store points_reward value:', store.points_reward);
-
-            // Ensure we have a consistent points value
             const points = parseFloat(store.points_reward) || 0;
             const rankClass = getRankClass(points);
             const rankIcon = getRankIcon(points);
             const rankText = getRankText(points);
-
-            console.log('Calculated points:', points);
-            console.log('Rank class:', rankClass);
-            console.log('Rank text:', rankText);
-            console.log('===================');
 
             document.getElementById('storeName').textContent = store.name;
             document.getElementById('storeAddress').textContent = store.address;
@@ -2051,7 +2122,6 @@
             document.getElementById('storeHours').textContent = store.hours || 'Hours not specified';
             document.getElementById('storeDesc').textContent = store.description || 'No description available';
 
-            // Better distance logic for modal
             let distanceText = 'Distance unknown';
             if (app.userLocation && store.distance !== undefined && store.distance !== null) {
                 if (store.distance > 0) {
@@ -2064,11 +2134,9 @@
             }
             document.getElementById('storeDistance').textContent = distanceText;
 
-            // Popularity
             document.getElementById('storePopularity').textContent =
                 `${store.transaction_count || 0} customer visits`;
 
-            // Rank display - use the calculated values, not recalculate
             const rankBadge = document.getElementById('storeRankBadge');
             const rankIconElement = document.getElementById('rankIcon');
             const rankTextElement = document.getElementById('rankText');
@@ -2076,8 +2144,6 @@
             rankBadge.className = `rank-badge-large ${rankClass}`;
             rankIconElement.textContent = rankIcon;
             rankTextElement.textContent = `${rankText} • ${points} pts`;
-
-            console.log('Modal updated with rank:', rankText, 'Points:', points);
         }
 
         function closeStoreModal() {
@@ -2088,7 +2154,6 @@
 
         function getDirections() {
             if (!app.selectedStore) return;
-
             const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${app.selectedStore.latitude},${app.selectedStore.longitude}&travelmode=driving`;
             window.open(googleMapsUrl, '_blank');
         }
@@ -2103,7 +2168,6 @@
 
         function shareStore() {
             if (!app.selectedStore) return;
-
             const shareData = {
                 title: app.selectedStore.name,
                 text: `Check out ${app.selectedStore.name} - ${app.selectedStore.address}`,
@@ -2113,7 +2177,6 @@
             if (navigator.share) {
                 navigator.share(shareData);
             } else {
-                // Fallback
                 navigator.clipboard.writeText(`${shareData.title} - ${shareData.text}`);
                 showSuccess('Store information copied to clipboard!');
             }
@@ -2139,14 +2202,12 @@
         function showError(message) {
             document.getElementById('errorMessage').textContent = message;
             document.getElementById('errorToast').style.display = 'flex';
-
             setTimeout(() => {
                 hideErrorToast();
             }, 5000);
         }
 
         function showSuccess(message) {
-            // You can implement a success toast similar to error toast
             console.log('Success:', message);
         }
 
@@ -2154,15 +2215,36 @@
             document.getElementById('errorToast').style.display = 'none';
         }
 
-        // Handle modal closing
+        function handleInitializationError() {
+            const mapContainer = document.getElementById('map');
+            if (mapContainer) {
+                mapContainer.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f8f9fa; text-align: center; padding: 20px;">
+                        <div>
+                            <div style="font-size: 48px; margin-bottom: 15px;">🗺️</div>
+                            <h3 style="color: #333; margin-bottom: 10px;">Map Loading...</h3>
+                            <p style="color: #666; margin-bottom: 20px;">Please wait while we load the store locations.</p>
+                            <button onclick="location.reload()" style="background: #2E8B57; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                                Refresh Page
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            setTimeout(() => {
+                try {
+                    switchView('list');
+                    updateStoreDisplay();
+                } catch (e) {
+                    console.error('Fallback failed:', e);
+                }
+            }, 1000);
+        }
+
+        // Modal event handlers
         document.addEventListener('click', function (e) {
             if (e.target.classList.contains('modal-overlay')) {
-                closeStoreModal();
-            }
-        });
-
-        document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape') {
                 closeStoreModal();
             }
         });
@@ -2173,5 +2255,36 @@
                 app.map.resize();
             }
         });
+
+        // Debug function for testing location
+        window.testLocation = function() {
+            console.log('🧪 Testing location...');
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        console.log('✅ Test location success:');
+                        console.log('Latitude:', position.coords.latitude);
+                        console.log('Longitude:', position.coords.longitude);
+                        console.log('Accuracy:', position.coords.accuracy, 'meters');
+                        console.log('Timestamp:', new Date(position.timestamp).toLocaleString());
+                        updateLocationDebugInfo(position.coords);
+                    },
+                    function(error) {
+                        console.error('❌ Test location error:', error);
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 15000,
+                        maximumAge: 0
+                    }
+                );
+            } else {
+                console.error('❌ Geolocation not supported');
+            }
+        };
+
+        // Make functions available globally for debugging
+        window.showLocationDebug = showLocationDebug;
+        window.hideLocationDebug = hideLocationDebug;
     </script>
 @endsection

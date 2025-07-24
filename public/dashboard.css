@@ -25,7 +25,7 @@ body {
 .dashboard-container {
     max-width: 100%;
     min-height: 100vh;
-    background: #ffffff;
+    background-image: linear-gradient(to left top, #cde7fe, #76daf5, #00cdca, #00b97d, #289f00);
 }
 
 /* Header */

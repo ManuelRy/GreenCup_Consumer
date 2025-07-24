@@ -12,7 +12,7 @@ class StoreController extends Controller
 {
     /*
     |--------------------------------------------------------------------------
-    | Gallery/Feed Methods (from GalleryController)
+    | Gallery/Feed Methods
     |--------------------------------------------------------------------------
     */
 
@@ -29,14 +29,14 @@ class StoreController extends Controller
 
             $postsData = $this->getFeedPosts(1, 20);
 
-            return view('gallery.index', [
+            return view('gallery', [
                 'posts' => $postsData['posts'],
                 'consumer' => $consumer,
                 'hasMore' => $postsData['hasMore']
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Gallery index error: ' . $e->getMessage());
+            Log::error('Gallery index error: ' . $e->getMessage());
             return redirect()->route('dashboard')->with('error', 'Unable to load gallery. Please try again.');
         }
     }
@@ -59,47 +59,63 @@ class StoreController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Error loading feed: ' . $e->getMessage());
+            Log::error('Error loading feed: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'Unable to load posts']);
         }
     }
 
     /*
     |--------------------------------------------------------------------------
-    | Map/Location Methods (from MapController)
+    | Map/Location Methods - FIXED for consistent data
     |--------------------------------------------------------------------------
     */
 
     /**
-     * Display the store locator map page
+     * Display the store locator map page - FIXED
      */
     public function map()
     {
         try {
-            $stores = $this->getAllStores();
+            $consumer = Auth::guard('consumer')->user();
+            if (!$consumer) {
+                return redirect()->route('login')->with('error', 'Please login to view the map');
+            }
+
+            // FIXED: Use consistent store data method
+            $stores = $this->getAllStoresForMap();
             $mapboxToken = env('MAPBOX_ACCESS_TOKEN', 'pk.eyJ1IjoibmVha3NlbmJlc3RmcmkiLCJhIjoiY205cXhkb3c3MTF3MzJ2b2doamJiM2NmaSJ9.zTnzZvYetGaqX0CODz4qoQ');
             
-            return view('map.index', compact('stores'))->with('mapboxToken', $mapboxToken);
+            Log::info('Map method called - Stores found: ' . $stores->count());
+            
+            // FIXED: Use consistent view path
+            return view('map', compact('stores', 'consumer', 'mapboxToken'));
                    
         } catch (\Exception $e) {
-            Log::error('[StoreController@map] ' . $e->getMessage());
+            Log::error('[StoreController@map] Error: ' . $e->getMessage());
             
+            $consumer = Auth::guard('consumer')->user();
             $stores = collect([]);
             $mapboxToken = env('MAPBOX_ACCESS_TOKEN', 'pk.eyJ1IjoibmVha3NlbmJlc3RmcmkiLCJhIjoiY205cXhkb3c3MTF3MzJ2b2doamJiM2NmaSJ9.zTnzZvYetGaqX0CODz4qoQ');
             
-            return view('map.index', compact('stores'))
-                   ->with('mapboxToken', $mapboxToken)
+            return view('map.index', compact('stores', 'consumer', 'mapboxToken'))
                    ->with('error', 'Some stores may not be available at the moment.');
         }
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | API Methods for Map
+    |--------------------------------------------------------------------------
+    */
+
     /**
-     * Get all stores with locations (API endpoint)
+     * Get all stores (API endpoint)
      */
     public function getStores(Request $request)
     {
         try {
-            $stores = $this->getAllStores($request->get('search'));
+            $search = $request->get('search');
+            $stores = $this->getAllStores($search);
             
             return response()->json([
                 'success' => true,
@@ -115,6 +131,27 @@ class StoreController extends Controller
                 'message' => 'Unable to fetch stores',
                 'data' => []
             ], 500);
+        }
+    }
+
+    /**
+     * Get store details (API)
+     */
+    public function getStoreDetails($id)
+    {
+        try {
+            $store = $this->getStoreById($id);
+            
+            if (!$store) {
+                return response()->json(['success' => false, 'message' => 'Store not found'], 404);
+            }
+
+            $storeDetails = $this->enrichStoreData($store);
+            return response()->json(['success' => true, 'data' => $storeDetails]);
+            
+        } catch (\Exception $e) {
+            Log::error('Get store details error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Unable to fetch store details'], 500);
         }
     }
 
@@ -157,7 +194,7 @@ class StoreController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | Store Profile Methods (from SellerController)
+    | Store Profile Methods
     |--------------------------------------------------------------------------
     */
 
@@ -167,6 +204,11 @@ class StoreController extends Controller
     public function show($id)
     {
         try {
+            $consumer = Auth::guard('consumer')->user();
+            if (!$consumer) {
+                return redirect()->route('login')->with('error', 'Please login to view store profiles');
+            }
+
             $seller = DB::table('sellers')
                 ->where('id', $id)
                 ->where('is_active', true)
@@ -183,32 +225,11 @@ class StoreController extends Controller
             $seller->photos = $photos;
             $seller = $this->addRankingData($seller);
 
-            return view('sellers.show', compact('seller'));
+            return view('store', compact('seller', 'consumer'));
 
         } catch (\Exception $e) {
-            \Log::error('Error loading seller profile: ' . $e->getMessage());
+            Log::error('Error loading seller profile: ' . $e->getMessage());
             abort(404, 'Store not found');
-        }
-    }
-
-    /**
-     * Get store details (API)
-     */
-    public function getStoreDetails($id)
-    {
-        try {
-            $store = $this->getStoreById($id);
-            
-            if (!$store) {
-                return response()->json(['success' => false, 'message' => 'Store not found'], 404);
-            }
-
-            $storeDetails = $this->enrichStoreData($store);
-            return response()->json(['success' => true, 'data' => $storeDetails]);
-            
-        } catch (\Exception $e) {
-            Log::error('Get store details error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Unable to fetch store details'], 500);
         }
     }
 
@@ -301,7 +322,7 @@ class StoreController extends Controller
             return response()->json(['success' => true, 'sellers' => $sellers]);
 
         } catch (\Exception $e) {
-            \Log::error('Search error: ' . $e->getMessage());
+            Log::error('Search error: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'Search failed']);
         }
     }
@@ -344,14 +365,112 @@ class StoreController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | Private Helper Methods
+    | Private Helper Methods - FIXED for consistency
     |--------------------------------------------------------------------------
     */
 
+    /**
+     * NEW: Get all stores specifically formatted for map display - CONSISTENT data
+     */
+    private function getAllStoresForMap()
+    {
+        try {
+            // Fetch real stores from database with all required fields
+            $stores = DB::table('sellers')
+                ->select([
+                    'id', 
+                    'business_name as name', 
+                    'description', 
+                    'working_hours as hours',
+                    'email', 
+                    'address', 
+                    'latitude', 
+                    'longitude', 
+                    'photo_url as image',
+                    'phone', 
+                    'total_points', 
+                    'is_active',
+                    'created_at'
+                ])
+                ->where('is_active', true)
+                ->whereNotNull('latitude')
+                ->whereNotNull('longitude')
+                ->where('latitude', '!=', 0)
+                ->where('longitude', '!=', 0)
+                ->orderBy('total_points', 'desc')
+                ->get();
+
+            Log::info('Raw stores fetched for map: ' . $stores->count());
+
+            // Process each store to add required map data with CONSISTENT values
+            return $stores->map(function($store) {
+                // FIXED: Use consistent points calculation (no random numbers!)
+                $pointsReward = $this->getConsistentStorePoints($store);
+                
+                // Generate consistent phone if missing (based on store ID)
+                if (empty($store->phone)) {
+                    $store->phone = $this->generateConsistentPhone($store->id);
+                }
+                
+                // Get consistent transaction count
+                $transactionCount = $this->getConsistentTransactionCount($store);
+                
+                // Calculate ranking based on consistent points
+                $rankClass = $this->getRankClass($pointsReward);
+                $rankText = $this->getRankText($pointsReward);
+                $rankIcon = $this->getRankIcon($pointsReward);
+                
+                // Format the store data for JavaScript
+                return (object)[
+                    'id' => $store->id,
+                    'name' => $store->name,
+                    'description' => $store->description ?: 'Quality eco-friendly products and services',
+                    'hours' => $store->hours ?: '9:00 AM - 6:00 PM',
+                    'address' => $store->address,
+                    'latitude' => floatval($store->latitude),
+                    'longitude' => floatval($store->longitude),
+                    'phone' => $store->phone,
+                    'email' => $store->email,
+                    'image' => $store->image,
+                    'is_active' => $store->is_active,
+                    
+                    // CONSISTENT ranking data (this determines marker colors)
+                    'total_points' => $store->total_points,
+                    'points_reward' => $pointsReward, // FIXED: Now consistent!
+                    'rank_class' => $rankClass,
+                    'rank_text' => $rankText,
+                    'rank_icon' => $rankIcon,
+                    
+                    // Additional consistent data
+                    'transaction_count' => $transactionCount,
+                    'distance' => null, // Will be calculated in JavaScript
+                    
+                    // Hours formatting
+                    'hours_formatted' => $this->formatWorkingHours($store->hours),
+                    'is_open' => $this->isStoreCurrentlyOpen($store->hours),
+                    
+                    'created_at' => $store->created_at
+                ];
+            });
+            
+        } catch (\Exception $e) {
+            Log::error('Error fetching stores for map: ' . $e->getMessage());
+            return collect([]);
+        }
+    }
+
+    /**
+     * Get feed posts for gallery
+     */
     private function getFeedPosts($page = 1, $perPage = 20)
     {
         try {
             $offset = ($page - 1) * $perPage;
+            
+            // Check if seller_photos table exists
+            if (!DB::getSchemaBuilder()->hasTable('seller_photos')) {
+                return ['posts' => collect(), 'hasMore' => false];
+            }
             
             $query = DB::table('seller_photos as sp')
                 ->join('sellers as s', 's.id', '=', 'sp.seller_id')
@@ -405,11 +524,14 @@ class StoreController extends Controller
             return ['posts' => $processedPosts, 'hasMore' => $hasMore];
 
         } catch (\Exception $e) {
-            \Log::error('Error getting feed posts: ' . $e->getMessage());
+            Log::error('Error getting feed posts: ' . $e->getMessage());
             return ['posts' => collect(), 'hasMore' => false];
         }
     }
 
+    /**
+     * Get all stores with enriched data (legacy method for compatibility)
+     */
     private function getAllStores($search = null)
     {
         try {
@@ -419,9 +541,17 @@ class StoreController extends Controller
                     'email', 'address', 'latitude', 'longitude', 'photo_url as image',
                     'phone', 'total_points', 'is_active'
                 ])
-                ->where('is_active', true)
-                ->whereNotNull('latitude')
-                ->whereNotNull('longitude');
+                ->where('is_active', true);
+
+            // Only filter by coordinates if they exist
+            $query->where(function($q) {
+                $q->where(function($subQ) {
+                    $subQ->whereNotNull('latitude')
+                         ->whereNotNull('longitude')
+                         ->where('latitude', '!=', 0)
+                         ->where('longitude', '!=', 0);
+                });
+            });
 
             if ($search) {
                 $query->where(function($q) use ($search) {
@@ -432,6 +562,8 @@ class StoreController extends Controller
             }
 
             $stores = $query->get();
+            
+            Log::info('Stores fetched from database: ' . $stores->count());
 
             return $stores->map(function($store) {
                 return $this->enrichStoreData($store);
@@ -443,6 +575,9 @@ class StoreController extends Controller
         }
     }
 
+    /**
+     * Get store by ID
+     */
     private function getStoreById($id)
     {
         try {
@@ -454,8 +589,6 @@ class StoreController extends Controller
                 ])
                 ->where('id', $id)
                 ->where('is_active', true)
-                ->whereNotNull('latitude')
-                ->whereNotNull('longitude')
                 ->first();
         } catch (\Exception $e) {
             Log::error('Error fetching store by ID: ' . $e->getMessage());
@@ -463,21 +596,40 @@ class StoreController extends Controller
         }
     }
 
+    /**
+     * Enrich store data with calculated fields - FIXED for consistency
+     */
     private function enrichStoreData($store)
     {
-        $store->phone = $store->phone ?: $this->generateDemoPhone();
-        $store->points_reward = $this->getStorePointsGivenToConsumers($store->id);
+        // FIXED: Ensure consistent phone (no random generation)
+        if (empty($store->phone)) {
+            $store->phone = $this->generateConsistentPhone($store->id);
+        }
+        
+        // FIXED: Calculate consistent points (no random fallback)
+        $store->points_reward = $this->getConsistentStorePoints($store);
+        
+        // Add ranking data
         $store->rank_class = $this->getRankClass($store->points_reward);
         $store->rank_text = $this->getRankText($store->points_reward);
         $store->rank_icon = $this->getRankIcon($store->points_reward);
-        $store->transaction_count = $this->getStoreTransactionCount($store->id);
+        
+        // FIXED: Add consistent transaction count
+        $store->transaction_count = $this->getConsistentTransactionCount($store);
+        
+        // Format working hours
         $store->hours_formatted = $this->formatWorkingHours($store->hours);
         $store->is_open = $this->isStoreCurrentlyOpen($store->hours);
-        $store->distance = 0;
+        
+        // Initialize distance
+        $store->distance = null;
         
         return $store;
     }
 
+    /**
+     * Add ranking data to seller object
+     */
     private function addRankingData($seller)
     {
         $points = $seller->total_points ?? 0;
@@ -488,6 +640,9 @@ class StoreController extends Controller
         return $seller;
     }
 
+    /**
+     * Get seller photos
+     */
     private function getSellerPhotos($sellerId)
     {
         try {
@@ -549,11 +704,14 @@ class StoreController extends Controller
             return $photos->toArray();
 
         } catch (\Exception $e) {
-            \Log::error('Error loading seller photos for seller ' . $sellerId . ': ' . $e->getMessage());
+            Log::error('Error loading seller photos for seller ' . $sellerId . ': ' . $e->getMessage());
             return [];
         }
     }
 
+    /**
+     * Search stores by query
+     */
     private function searchStoresByQuery($query, $userLat = null, $userLng = null, $radiusKm = 50)
     {
         try {
@@ -564,8 +722,14 @@ class StoreController extends Controller
                     'phone', 'total_points', 'is_active'
                 ])
                 ->where('is_active', true)
-                ->whereNotNull('latitude')
-                ->whereNotNull('longitude')
+                ->where(function($q) {
+                    $q->where(function($subQ) {
+                        $subQ->whereNotNull('latitude')
+                             ->whereNotNull('longitude')
+                             ->where('latitude', '!=', 0)
+                             ->where('longitude', '!=', 0);
+                    });
+                })
                 ->where(function($q) use ($query) {
                     $q->where('business_name', 'LIKE', "%{$query}%")
                       ->orWhere('address', 'LIKE', "%{$query}%")
@@ -587,42 +751,125 @@ class StoreController extends Controller
         }
     }
 
-    private function getStorePointsGivenToConsumers($storeId)
+    /*
+    |--------------------------------------------------------------------------
+    | NEW: Consistent Data Generation Methods (NO RANDOM NUMBERS!)
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * FIXED: Get consistent store points (no random numbers!)
+     */
+    private function getConsistentStorePoints($store)
     {
         try {
-            $exists = DB::select("SHOW TABLES LIKE 'point_transactions'");
-            if (empty($exists)) {
-                return rand(10, 500);
+            // First, try to get real transaction data
+            if (DB::getSchemaBuilder()->hasTable('point_transactions')) {
+                $realPoints = DB::table('point_transactions')
+                    ->where('seller_id', $store->id)
+                    ->where('type', 'earn')
+                    ->sum('points');
+                
+                if ($realPoints > 0) {
+                    return intval($realPoints);
+                }
             }
             
-            return DB::table('point_transactions')
-                ->where('seller_id', $storeId)
-                ->where('type', 'earn')
-                ->sum('points') ?: rand(10, 500);
+            // If no real transactions, use total_points directly for consistency
+            if ($store->total_points > 0) {
+                return intval($store->total_points);
+            }
+            
+            // FIXED: Generate consistent fallback based on store ID (not random!)
+            return $this->generateConsistentPointsFromId($store->id);
+            
         } catch (\Exception $e) {
-            Log::error('Error getting store points: ' . $e->getMessage());
-            return rand(10, 500);
+            Log::error('Error getting consistent points for store ' . $store->id . ': ' . $e->getMessage());
+            return $this->generateConsistentPointsFromId($store->id);
         }
     }
 
-    private function getStoreTransactionCount($storeId)
+    /**
+     * FIXED: Get consistent transaction count (no random numbers!)
+     */
+    private function getConsistentTransactionCount($store)
     {
         try {
-            $exists = DB::select("SHOW TABLES LIKE 'point_transactions'");
-            if (empty($exists)) {
-                return rand(5, 50);
+            // First, try to get real transaction count
+            if (DB::getSchemaBuilder()->hasTable('point_transactions')) {
+                $realCount = DB::table('point_transactions')
+                    ->where('seller_id', $store->id)
+                    ->where('type', 'earn')
+                    ->count();
+                
+                if ($realCount > 0) {
+                    return intval($realCount);
+                }
             }
             
-            return DB::table('point_transactions')
-                ->where('seller_id', $storeId)
-                ->where('type', 'earn')
-                ->count() ?: rand(5, 50);
+            // FIXED: Generate consistent count based on store's points/ID (not random!)
+            return $this->generateConsistentCountFromStore($store);
+            
         } catch (\Exception $e) {
-            Log::error('Error getting transaction count: ' . $e->getMessage());
-            return rand(5, 50);
+            Log::error('Error getting consistent transaction count: ' . $e->getMessage());
+            return $this->generateConsistentCountFromStore($store);
         }
     }
 
+    /**
+     * NEW: Generate consistent points based on store ID (always same result)
+     */
+    private function generateConsistentPointsFromId($storeId)
+    {
+        // Use store ID to generate consistent but varied points
+        $seed = intval($storeId) * 123; // Multiply by prime number for variation
+        $hash = crc32(strval($seed)); // Generate consistent hash
+        $points = abs($hash % 2000) + 100; // Range: 100-2099 points
+        
+        return $points;
+    }
+
+    /**
+     * NEW: Generate consistent transaction count based on store data
+     */
+    private function generateConsistentCountFromStore($store)
+    {
+        // Base count on store's total points for consistency
+        $basePoints = $store->total_points ?: $this->generateConsistentPointsFromId($store->id);
+        
+        // Higher points = more transactions (logical relationship)
+        if ($basePoints >= 2000) return intval($basePoints / 25); // ~80+ transactions for platinum
+        if ($basePoints >= 1000) return intval($basePoints / 30); // ~33-66 transactions for gold  
+        if ($basePoints >= 500) return intval($basePoints / 40);  // ~12-25 transactions for silver
+        
+        return max(5, intval($basePoints / 50)); // Minimum 5 transactions
+    }
+
+    /**
+     * NEW: Generate consistent phone number based on store ID
+     */
+    private function generateConsistentPhone($storeId)
+    {
+        // Generate consistent phone using store ID
+        $seed = intval($storeId) * 456; // Different multiplier for phone
+        $hash = abs(crc32(strval($seed)));
+        
+        $part1 = ($hash % 90) + 10; // 10-99
+        $part2 = (($hash >> 8) % 900) + 100; // 100-999
+        $part3 = (($hash >> 16) % 900) + 100; // 100-999
+        
+        return "+855 {$part1} {$part2} {$part3}";
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Utility Methods
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Calculate time ago from datetime
+     */
     private function getTimeAgo($datetime)
     {
         try {
@@ -641,6 +888,9 @@ class StoreController extends Controller
         }
     }
 
+    /**
+     * Calculate distance using Haversine formula
+     */
     private function calculateHaversineDistance($lat1, $lng1, $lat2, $lng2)
     {
         $earthRadius = 6371;
@@ -651,26 +901,39 @@ class StoreController extends Controller
         return $earthRadius * $c;
     }
 
+    /**
+     * Get distance WHERE clause for SQL
+     */
     private function getDistanceWhereClause($userLat, $userLng, $radiusKm)
     {
         return "(6371 * acos(cos(radians({$userLat})) * cos(radians(latitude)) * cos(radians(longitude) - radians({$userLng})) + sin(radians({$userLat})) * sin(radians(latitude)))) <= {$radiusKm}";
     }
 
-    private function generateDemoPhone()
-    {
-        return '+855 ' . rand(10, 99) . ' ' . rand(100, 999) . ' ' . rand(100, 999);
-    }
-
+    /**
+     * Format working hours
+     */
     private function formatWorkingHours($hours)
     {
         return $hours ?: 'Hours not specified';
     }
 
+    /**
+     * Check if store is currently open
+     */
     private function isStoreCurrentlyOpen($hours)
     {
         return !empty($hours);
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Ranking System Helper Methods
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Get rank class based on points
+     */
     private function getRankClass($points)
     {
         $numPoints = floatval($points);
@@ -681,6 +944,9 @@ class StoreController extends Controller
         return 'standard';
     }
 
+    /**
+     * Get rank text based on points
+     */
     private function getRankText($points)
     {
         $numPoints = floatval($points);
@@ -691,6 +957,9 @@ class StoreController extends Controller
         return 'Standard';
     }
 
+    /**
+     * Get rank icon based on points
+     */
     private function getRankIcon($points)
     {
         $numPoints = floatval($points);

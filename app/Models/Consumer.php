@@ -2,15 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\DB;
 
 class Consumer extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory;
 
     protected $fillable = [
         'full_name',
@@ -27,154 +25,78 @@ class Consumer extends Authenticatable
     ];
 
     protected $casts = [
-        'date_of_birth' => 'date',
         'email_verified_at' => 'datetime',
+        'date_of_birth' => 'date',
+        'password' => 'hashed',
     ];
 
     /**
-     * Automatically hash password when setting it
+     * Get consumer's available points (earned - spent)
      */
-    public function setPasswordAttribute($value)
+    public function getAvailablePoints()
     {
-        $this->attributes['password'] = Hash::make($value);
+        $totalEarned = DB::table('point_transactions')
+            ->where('consumer_id', $this->id)
+            ->where('type', 'earn')
+            ->sum('points');
+            
+        $totalSpent = DB::table('point_transactions')
+            ->where('consumer_id', $this->id)
+            ->where('type', 'spend')
+            ->sum('points');
+            
+        return $totalEarned - $totalSpent;
     }
 
     /**
-     * Relationship: Consumer has many point transactions
+     * Get consumer's total earned points
+     */
+    public function getTotalEarnedPoints()
+    {
+        return DB::table('point_transactions')
+            ->where('consumer_id', $this->id)
+            ->where('type', 'earn')
+            ->sum('points');
+    }
+
+    /**
+     * Get consumer's total spent points
+     */
+    public function getTotalSpentPoints()
+    {
+        return DB::table('point_transactions')
+            ->where('consumer_id', $this->id)
+            ->where('type', 'spend')
+            ->sum('points');
+    }
+
+    /**
+     * Get consumer's recent transactions
+     */
+    public function getRecentTransactions($limit = 5)
+    {
+        return DB::table('point_transactions as pt')
+            ->leftJoin('sellers as s', 's.id', '=', 'pt.seller_id')
+            ->where('pt.consumer_id', $this->id)
+            ->select([
+                'pt.id',
+                'pt.points',
+                'pt.type',
+                'pt.description',
+                'pt.receipt_code',
+                'pt.scanned_at',
+                's.business_name as store_name'
+            ])
+            ->orderBy('pt.scanned_at', 'desc')
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * Relationship with point transactions
      */
     public function pointTransactions()
     {
         return $this->hasMany(PointTransaction::class);
-    }
-
-    /**
-     * Relationship: Consumer has claimed many QR codes
-     */
-    public function claimedQrCodes()
-    {
-        return $this->hasMany(QrCode::class, 'claimed_by_consumer_id');
-    }
-
-    /**
-     * Get consumer's total available points
-     */
-    public function getAvailablePoints()
-    {
-        // Return 0 if no transactions exist yet
-        if (!$this->pointTransactions()->exists()) {
-            return 0;
-        }
-        
-        $earned = $this->pointTransactions()->where('type', 'earn')->sum('points');
-        $spent = $this->pointTransactions()->where('type', 'spend')->sum('points');
-        
-        return $earned - $spent;
-    }
-
-    /**
-     * Get consumer's point transaction history
-     */
-    public function getPointHistory($limit = 10)
-    {
-        return $this->pointTransactions()
-                    ->with(['seller'])
-                    ->latest('scanned_at')
-                    ->take($limit)
-                    ->get();
-    }
-
-    /**
-     * Get recent transactions
-     */
-    public function getRecentTransactions($days = 30)
-    {
-        return $this->pointTransactions()
-                    ->with(['seller', 'qrCode'])
-                    ->where('created_at', '>=', now()->subDays($days))
-                    ->latest('scanned_at')
-                    ->get();
-    }
-
-    /**
-     * Get transactions by seller
-     */
-    public function getTransactionsBySeller($sellerId)
-    {
-        return $this->pointTransactions()
-                    ->where('seller_id', $sellerId)
-                    ->with(['qrCode'])
-                    ->latest('scanned_at')
-                    ->get();
-    }
-
-    /**
-     * Check if consumer can claim a QR code
-     */
-    public function canClaimQrCode(QrCode $qrCode)
-    {
-        // Check if QR code is valid
-        if (!$qrCode->isValid()) {
-            return false;
-        }
-
-        // Check if already claimed
-        if ($qrCode->status === 'claimed') {
-            return false;
-        }
-
-        // Check if it's a transaction type QR code
-        if ($qrCode->type !== 'transaction') {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Get the name of the unique identifier for the user.
-     */
-    public function getAuthIdentifierName()
-    {
-        return 'id';
-    }
-
-    /**
-     * Get the unique identifier for the user.
-     */
-    public function getAuthIdentifier()
-    {
-        return $this->getKey();
-    }
-
-    /**
-     * Get the password for the user.
-     */
-    public function getAuthPassword()
-    {
-        return $this->password;
-    }
-
-    /**
-     * Get the token value for the "remember me" session.
-     */
-    public function getRememberToken()
-    {
-        return $this->remember_token;
-    }
-
-    /**
-     * Set the token value for the "remember me" session.
-     */
-    public function setRememberToken($value)
-    {
-        $this->remember_token = $value;
-    }
-
-    /**
-     * Get the column name for the "remember me" token.
-     */
-    public function getRememberTokenName()
-    {
-        return 'remember_token';
     }
 }

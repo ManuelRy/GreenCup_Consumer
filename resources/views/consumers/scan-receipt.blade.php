@@ -1315,6 +1315,7 @@ body {
     .toast.show {
         transform: translateY(0);
     }
+    
 }
 
 @media (max-width: 360px) {
@@ -1335,117 +1336,9 @@ body {
 
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script>
-let currentReceiptCode = null;
 let scanner = null;
 let isProcessing = false;
-let cameraInitialized = false;
-
-// Initialize when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    setupEventListeners();
-    initializeCamera();
-});
-
-// FIXED: Simplified camera initialization
-function initializeCamera() {
-    console.log('Initializing camera...');
-    
-    // Check basic requirements
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        showCameraStatus('Camera not supported on this browser.\n\nTry using Chrome, Firefox, or Safari.', '❌', false, true);
-        return;
-    }
-
-    // Check HTTPS requirement
-    if (!window.isSecureContext && !location.hostname.includes('localhost')) {
-        showCameraStatus('Camera requires HTTPS connection for security.', '🔒', false, true);
-        return;
-    }
-
-    // Start scanner directly
-    startSimpleScanner();
-}
-
-// FIXED: Simple scanner start function
-function startSimpleScanner() {
-    console.log('Starting simple scanner...');
-    showCameraStatus('Starting camera...', '📷');
-    
-    try {
-        // Clear any existing scanner
-        if (scanner) {
-            scanner.clear();
-        }
-
-        // Clear the container
-        const readerElement = document.getElementById('qr-reader');
-        readerElement.innerHTML = '';
-
-        // Simple, working configuration
-        const config = {
-            fps: 10,
-            qrbox: { width: 250, height: 250 },
-            aspectRatio: 1.0,
-            disableFlip: false
-        };
-        
-        scanner = new Html5QrcodeScanner("qr-reader", config);
-        
-        scanner.render(
-            (decodedText, decodedResult) => {
-                console.log('QR code scanned:', decodedText);
-                onScanSuccess(decodedText, decodedResult);
-            },
-            (error) => {
-                // Only log real errors, not scanning attempts
-                if (!error.includes('NotFoundException') && !error.includes('No QR code found')) {
-                    console.log('Scanner error:', error);
-                }
-            }
-        );
-        
-        // Check if camera loaded after delay
-        setTimeout(() => {
-            checkCameraLoaded();
-        }, 3000);
-        
-    } catch (error) {
-        console.error('Scanner initialization failed:', error);
-        showCameraStatus('Failed to initialize scanner.\n\nError: ' + error.message, '❌', true, true);
-    }
-}
-
-// FIXED: Simplified camera loading check
-function checkCameraLoaded() {
-    console.log('Checking camera status...');
-    
-    const video = document.querySelector('#qr-reader video');
-    
-    if (video && video.videoWidth > 0 && video.videoHeight > 0) {
-        console.log('Camera loaded successfully!');
-        hideCameraStatus();
-        cameraInitialized = true;
-        return;
-    }
-    
-    // Wait a bit more
-    setTimeout(() => {
-        const video2 = document.querySelector('#qr-reader video');
-        if (video2 && video2.videoWidth > 0 && video2.videoHeight > 0) {
-            console.log('Camera loaded after delay!');
-            hideCameraStatus();
-            cameraInitialized = true;
-        } else {
-            console.log('Camera failed to load');
-            showCameraStatus(
-                'Camera failed to start.\n\nThis might be due to:\n• Camera permissions\n• Camera being used by another app\n• Browser compatibility\n\nPlease try again or use manual input.', 
-                '❌', 
-                true, 
-                true
-            );
-        }
-    }, 2000);
-}
+let currentReceiptCode = null;
 
 function showCameraStatus(message, icon = '📷', showRetry = false, showManual = false) {
     const statusEl = document.getElementById('camera-status');
@@ -1453,161 +1346,166 @@ function showCameraStatus(message, icon = '📷', showRetry = false, showManual 
     const iconEl = statusEl.querySelector('.status-icon');
     const retryBtn = document.getElementById('retry-camera');
     const manualBtn = document.getElementById('use-manual');
-    const debugBtn = document.getElementById('debug-camera');
-    
     messageEl.innerHTML = message.replace(/\n/g, '<br>');
     iconEl.textContent = icon;
-    
     retryBtn.style.display = showRetry ? 'inline-block' : 'none';
     manualBtn.style.display = showManual ? 'inline-block' : 'none';
-    debugBtn.style.display = 'none'; // Simplified - removed debug for now
-    
     statusEl.classList.remove('hidden');
-    console.log('Camera status shown:', message);
 }
-
 function hideCameraStatus() {
-    const statusEl = document.getElementById('camera-status');
-    statusEl.classList.add('hidden');
-    console.log('Camera status hidden');
+    document.getElementById('camera-status').classList.add('hidden');
 }
-
-function retryCamera() {
-    console.log('Retrying camera...');
-    showCameraStatus('🔄 Retrying camera...', '🔄');
-    cameraInitialized = false;
-    
-    // Clear existing scanner
-    if (scanner) {
-        try {
-            scanner.clear();
-        } catch (e) {
-            console.log('Scanner clear failed:', e);
-        }
-        scanner = null;
-    }
-    
-    // Clear the qr-reader div
-    const readerElement = document.getElementById('qr-reader');
-    readerElement.innerHTML = '';
-    
-    // Retry after delay
-    setTimeout(() => {
-        startSimpleScanner();
-    }, 1000);
+function isInAppBrowser() {
+    return /FBAV|FBAN|FB_IAB|FBOP|Instagram|Line|Messenger/i.test(navigator.userAgent);
 }
-
-function focusManualInput() {
-    document.querySelector('.manual-section').scrollIntoView({ behavior: 'smooth' });
-    setTimeout(() => {
-        document.getElementById('receipt-code').focus();
-    }, 500);
-}
-
-function setupEventListeners() {
-    // Manual code form
-    document.getElementById('manual-code-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const code = document.getElementById('receipt-code').value.trim();
-        if (code && !isProcessing) {
-            if (code.toLowerCase() === 'demo123') {
-                showDemoReceipt();
-                return;
-            }
-            checkReceipt(code);
-        }
-    });
-
-    // Camera retry button
-    document.getElementById('retry-camera').addEventListener('click', retryCamera);
-    
-    // Manual input button
-    document.getElementById('use-manual').addEventListener('click', focusManualInput);
-
-    // Modal close events
-    document.querySelector('.close-modal').addEventListener('click', closeModal);
-    document.querySelector('.modal-backdrop').addEventListener('click', closeModal);
-    
-    // Keyboard events
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeModal();
-        }
-    });
-}
-
-function onScanSuccess(decodedText, decodedResult) {
-    if (isProcessing) return;
-    
-    // Stop scanning temporarily
-    if (scanner) {
-        try {
-            scanner.pause();
-        } catch (e) {
-            console.log('Scanner pause failed:', e);
-        }
-    }
-    
-    // Extract receipt code
-    let receiptCode = extractReceiptCode(decodedText);
-    
-    // For testing - if code starts with "demo", show demo receipt
-    if (receiptCode.toLowerCase().startsWith('demo')) {
-        showDemoReceipt();
+async function initializeCamera() {
+    if (!navigator.mediaDevices?.getUserMedia) {
+        showCameraStatus(
+            'Camera not supported on this browser.<br>Use Chrome, Safari, or Firefox.<br>Manual input below.',
+            '❌', false, true
+        );
         return;
     }
-    
-    checkReceipt(receiptCode);
+    if (isInAppBrowser()) {
+        showCameraStatus(
+            'Camera does NOT work in Messenger, Facebook, or Instagram app browser.<br>Please tap the (•••) menu and open in Chrome or Safari.',
+            '📱', false, true
+        );
+        return;
+    }
+    showCameraStatus('Starting camera...', '📷');
+    try {
+        // Always try to access camera regardless of HTTPS or HTTP or IP
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } }
+        });
+        stream.getTracks().forEach(track => track.stop());
+        startScanner();
+    } catch (err) {
+        // Browser will enforce HTTPS if required, else give error
+        if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+            showCameraStatus(
+                '🚫 Camera permission denied.<br>Tap the camera icon in your browser\'s address bar and select "Allow", then refresh.<br>Or use manual input.',
+                '🚫', false, true
+            );
+        } else if (err.name === "NotFoundError" || err.name === "DevicesNotFoundError") {
+            showCameraStatus(
+                'No camera found on this device.<br>Please use manual input.',
+                '❌', false, true
+            );
+        } else if (err.message && err.message.includes('Only secure origins are allowed')) {
+            showCameraStatus(
+                'Browser blocks camera on this address (HTTP/IP).<br>Try using HTTPS if possible, or use manual input.',
+                '🔒', false, true
+            );
+        } else if (err.name === "NotReadableError" || err.name === "TrackStartError") {
+            showCameraStatus(
+                'Camera is being used by another app.<br>Close other camera apps/tabs and try again.',
+                '📷', true, true
+            );
+        } else {
+            showCameraStatus(
+                'Failed to access camera.<br>Error: ' + (err.message || err) + '<br>Use manual input below.',
+                '❌', false, true
+            );
+        }
+    }
 }
-
+function startScanner() {
+    if (scanner) {
+        try { scanner.clear(); } catch (e) {}
+        scanner = null;
+    }
+    const readerElement = document.getElementById('qr-reader');
+    readerElement.innerHTML = "";
+    scanner = new Html5Qrcode("qr-reader");
+    scanner.start(
+        { facingMode: "environment" },
+        { fps: 12, qrbox: { width: 220, height: 220 } },
+        (decodedText, decodedResult) => { if (!isProcessing) onScanSuccess(decodedText, decodedResult); },
+        () => {}
+    ).then(hideCameraStatus)
+    .catch((err) => {
+        showCameraStatus(
+            'Camera failed to start.<br>Error: ' + (err.message || err),
+            '❌', true, true
+        );
+    });
+}
+function resumeScanner() {
+    if (scanner && !isProcessing) {
+        try { scanner.resume(); }
+        catch { setTimeout(() => { initializeCamera(); }, 500); }
+    }
+}
+function retryCamera() {
+    if (scanner) { try { scanner.clear(); } catch (e) {} scanner = null; }
+    showCameraStatus('Retrying camera...', '🔄');
+    setTimeout(() => { initializeCamera(); }, 600);
+}
+function focusManualInput() {
+    hideCameraStatus();
+    document.querySelector('.manual-section').scrollIntoView({ behavior: 'smooth' });
+    setTimeout(() => { document.getElementById('receipt-code').focus(); }, 500);
+}
+// ---- Modal, manual, API logic (unchanged, same as above) ---- //
+function showModal() { document.getElementById('receipt-modal').style.display = 'block'; document.body.style.overflow = 'hidden'; }
+function closeModal() { document.getElementById('receipt-modal').style.display = 'none'; document.body.style.overflow = 'auto'; document.getElementById('receipt-code').value = ''; resumeScanner(); }
+function setLoadingState(loading) { document.getElementById('claim-button').disabled = loading; }
+function showSuccess(points) { document.getElementById('points-amount').textContent = points; document.getElementById('success-overlay').style.display = 'block'; document.body.style.overflow = 'hidden'; }
+function showError(message) {
+    const toast = document.getElementById('error-toast');
+    const messageEl = document.getElementById('error-message');
+    messageEl.innerHTML = message.replace(/\n/g, '<br>');
+    toast.classList.add('show');
+    setTimeout(() => { toast.classList.remove('show'); }, 4000 + Math.min(message.length * 12, 3000));
+}
+function updatePointsDisplay(newBalance) {
+    const pointsEl = document.getElementById('current-points');
+    if (pointsEl && newBalance !== undefined) {
+        pointsEl.textContent = newBalance;
+    }
+}
 function extractReceiptCode(decodedText) {
-    // Handle different QR code formats
     if (decodedText.includes('/')) {
         const parts = decodedText.split('/');
         return parts[parts.length - 1];
     }
-    
     if (decodedText.includes('receipt_code=')) {
         const match = decodedText.match(/receipt_code=([^&]+)/);
         return match ? match[1] : decodedText;
     }
-    
     return decodedText;
 }
-
-// FIXED: Added missing function
 function isValidReceiptCode(code) {
-    // Basic validation - adjust as needed
     if (!code || typeof code !== 'string') return false;
     if (code.length < 3) return false;
-    if (code.toLowerCase() === 'demo123') return true; // Allow demo
-    
-    // Add your specific validation rules here
+    if (code.toLowerCase() === 'demo123') return true;
     return /^[a-zA-Z0-9-_]+$/.test(code);
 }
-
+function onScanSuccess(decodedText, decodedResult) {
+    if (isProcessing) return;
+    let receiptCode = extractReceiptCode(decodedText);
+    if (receiptCode.toLowerCase().startsWith('demo')) {
+        showDemoReceipt();
+        return;
+    }
+    checkReceipt(receiptCode);
+}
 function checkReceipt(code) {
     if (isProcessing) return;
-    
-    // Validate code format first
     if (!isValidReceiptCode(code)) {
-        showError(`Invalid QR code format: "${code}". Please scan a valid receipt QR code from a store.`);
+        showError(`Invalid QR code: "${code}". Use a store's official QR code.`);
         resumeScanner();
         return;
     }
-    
     isProcessing = true;
     currentReceiptCode = code;
-    
-    // Show loading state
     showModal();
     setLoadingState(true);
     document.getElementById('store-name').textContent = 'Verifying receipt code...';
-    
-    // Clear previous data
     document.getElementById('items-list').innerHTML = '';
     document.getElementById('total-points').textContent = '0';
-    
     fetch('/api/receipt/check', {
         method: 'POST',
         headers: {
@@ -1618,74 +1516,47 @@ function checkReceipt(code) {
     })
     .then(response => {
         if (!response.ok) {
-            if (response.status === 404) {
-                throw new Error('API_NOT_FOUND');
-            } else if (response.status === 422) {
-                throw new Error('INVALID_CODE');
-            }
+            if (response.status === 404) throw new Error('API_NOT_FOUND');
+            if (response.status === 422) throw new Error('INVALID_CODE');
             throw new Error(`HTTP_${response.status}`);
         }
         return response.json();
     })
     .then(data => {
-        if (data.success) {
-            displayReceipt(data.receipt);
-        } else {
-            let errorMessage = 'Unknown error occurred';
-            
-            if (data.message) {
-                if (data.message.includes('not found') || data.message.includes('invalid')) {
-                    errorMessage = `❌ Receipt code "${code}" not found. This may be:\n• An expired receipt\n• Invalid receipt code\n• Receipt from another system`;
-                } else if (data.message.includes('claimed')) {
-                    errorMessage = `⚠️ Receipt "${code}" has already been claimed`;
-                } else if (data.message.includes('expired')) {
-                    errorMessage = `⏰ Receipt "${code}" has expired`;
-                } else {
-                    errorMessage = data.message;
-                }
+        if (data.success) displayReceipt(data.receipt);
+        else {
+            let msg = data.message || 'Unknown error occurred';
+            if (msg.includes('not found') || msg.includes('invalid')) {
+                msg = `❌ Receipt "${code}" not found. Maybe:\n• Expired\n• Invalid\n• From another system`;
+            } else if (msg.includes('claimed')) {
+                msg = `⚠️ Receipt "${code}" has already been claimed`;
+            } else if (msg.includes('expired')) {
+                msg = `⏰ Receipt "${code}" has expired`;
             }
-            
-            showError(errorMessage);
-            closeModal();
-            resumeScanner();
+            showError(msg);
+            closeModal(); resumeScanner();
         }
     })
     .catch(error => {
-        console.error('Check receipt error:', error);
         closeModal();
-        
         let errorMessage = '';
-        
-        if (error.message === 'API_NOT_FOUND') {
-            errorMessage = '🚧 Receipt scanning feature is not yet implemented.\n\n📧 Please contact support or try again later when seller features are available.';
-        } else if (error.message === 'INVALID_CODE') {
-            errorMessage = `❌ Invalid receipt code "${code}".\n\nPlease make sure you're scanning a valid receipt QR code from a participating store.`;
-        } else if (error.message.includes('HTTP_')) {
-            errorMessage = `🌐 Server error occurred. Please try again in a moment.\n\nError: ${error.message}`;
-        } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
-            errorMessage = '📡 Network connection failed.\n\nPlease check your internet connection and try again.';
-        } else {
-            errorMessage = `❌ Error checking receipt "${code}".\n\nPlease try again or contact support if the problem persists.`;
-        }
-        
-        showError(errorMessage);
-        resumeScanner();
+        if (error.message === 'API_NOT_FOUND')
+            errorMessage = '🚧 Scanning feature not ready. Try later or contact support.';
+        else if (error.message === 'INVALID_CODE')
+            errorMessage = `❌ Invalid receipt code "${code}".`;
+        else if (error.message.includes('HTTP_'))
+            errorMessage = `🌐 Server error. Try again.\n${error.message}`;
+        else
+            errorMessage = `❌ Error checking "${code}". Try again.`;
+        showError(errorMessage); resumeScanner();
     })
-    .finally(() => {
-        isProcessing = false;
-        setLoadingState(false);
-    });
+    .finally(() => { isProcessing = false; setLoadingState(false); });
 }
-
 function displayReceipt(receipt) {
-    // Display store info
     document.getElementById('store-name').textContent = receipt.store_name;
     document.getElementById('store-address').textContent = receipt.store_address || '';
-    
-    // Display items
     const itemsList = document.getElementById('items-list');
     itemsList.innerHTML = '';
-    
     if (receipt.items && receipt.items.length > 0) {
         receipt.items.forEach(item => {
             const itemDiv = document.createElement('div');
@@ -1702,48 +1573,28 @@ function displayReceipt(receipt) {
     } else {
         itemsList.innerHTML = '<div class="receipt-item"><div class="item-details"><div class="item-name">No items found</div></div></div>';
     }
-    
-    // Display total points
     document.getElementById('total-points').textContent = receipt.total_points || 0;
-    
-    // Configure claim button
     const claimButton = document.getElementById('claim-button');
     const btnText = claimButton.querySelector('.btn-text');
-    
     if (receipt.status === 'pending') {
-        claimButton.disabled = false;
-        btnText.textContent = 'Claim Points';
+        claimButton.disabled = false; btnText.textContent = 'Claim Points';
         claimButton.classList.remove('claimed', 'expired');
     } else if (receipt.status === 'claimed') {
-        claimButton.disabled = true;
-        btnText.textContent = 'Already Claimed';
+        claimButton.disabled = true; btnText.textContent = 'Already Claimed';
         claimButton.classList.add('claimed');
     } else {
-        claimButton.disabled = true;
-        btnText.textContent = 'Receipt Expired';
+        claimButton.disabled = true; btnText.textContent = 'Receipt Expired';
         claimButton.classList.add('expired');
     }
 }
-
 function claimPoints() {
     if (!currentReceiptCode || isProcessing) return;
-    
-    // Handle demo mode
-    if (currentReceiptCode === 'DEMO123') {
-        claimDemoPoints();
-        return;
-    }
-    
+    if (currentReceiptCode === 'DEMO123') { claimDemoPoints(); return; }
     isProcessing = true;
     const claimButton = document.getElementById('claim-button');
     const btnText = claimButton.querySelector('.btn-text');
     const btnLoading = claimButton.querySelector('.btn-loading');
-    
-    // Show loading state
-    claimButton.disabled = true;
-    btnText.style.display = 'none';
-    btnLoading.style.display = 'flex';
-    
+    claimButton.disabled = true; btnText.style.display = 'none'; btnLoading.style.display = 'flex';
     fetch('/api/receipt/claim', {
         method: 'POST',
         headers: {
@@ -1753,9 +1604,7 @@ function claimPoints() {
         body: JSON.stringify({ receipt_code: currentReceiptCode })
     })
     .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         return response.json();
     })
     .then(data => {
@@ -1765,98 +1614,19 @@ function claimPoints() {
             updatePointsDisplay(data.new_balance);
         } else {
             showError(data.message || 'Failed to claim points');
-            // Reset button state
-            claimButton.disabled = false;
-            btnText.style.display = 'inline';
-            btnLoading.style.display = 'none';
+            claimButton.disabled = false; btnText.style.display = 'inline'; btnLoading.style.display = 'none';
         }
     })
     .catch(error => {
-        console.error('Claim points error:', error);
-        if (error.message.includes('404')) {
-            showError('Point claiming not yet implemented. Please wait for seller features.');
-        } else {
-            showError('Network error. Please try again.');
-        }
-        // Reset button state
-        claimButton.disabled = false;
-        btnText.style.display = 'inline';
-        btnLoading.style.display = 'none';
+        showError('Network error. Please try again.');
+        claimButton.disabled = false; btnText.style.display = 'inline'; btnLoading.style.display = 'none';
     })
-    .finally(() => {
-        isProcessing = false;
-    });
+    .finally(() => { isProcessing = false; });
 }
-
-function showModal() {
-    document.getElementById('receipt-modal').style.display = 'block';
-    document.body.style.overflow = 'hidden';
-}
-
-function closeModal() {
-    document.getElementById('receipt-modal').style.display = 'none';
-    document.body.style.overflow = 'auto';
-    document.getElementById('receipt-code').value = '';
-    resumeScanner();
-}
-
-function resumeScanner() {
-    if (scanner && cameraInitialized && !isProcessing) {
-        setTimeout(() => {
-            try {
-                scanner.resume();
-                console.log('Scanner resumed');
-            } catch (error) {
-                console.log('Scanner resume failed:', error);
-            }
-        }, 500);
-    }
-}
-
-function showSuccess(points) {
-    document.getElementById('points-amount').textContent = points;
-    document.getElementById('success-overlay').style.display = 'block';
-    document.body.style.overflow = 'hidden';
-}
-
-function showError(message) {
-    const toast = document.getElementById('error-toast');
-    const messageEl = document.getElementById('error-message');
-    
-    const formattedMessage = message.replace(/\n/g, '<br>');
-    messageEl.innerHTML = formattedMessage;
-    
-    toast.classList.add('show');
-    
-    const hideDelay = message.length > 100 ? 6000 : 4000;
-    setTimeout(() => {
-        toast.classList.remove('show');
-    }, hideDelay);
-}
-
-function updatePointsDisplay(newBalance) {
-    const pointsEl = document.getElementById('current-points');
-    if (pointsEl && newBalance !== undefined) {
-        pointsEl.textContent = newBalance;
-    }
-}
-
-function setLoadingState(loading) {
-    const claimButton = document.getElementById('claim-button');
-    claimButton.disabled = loading;
-}
-
 function escapeHtml(text) {
-    const map = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#039;'
-    };
-    return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+    const map = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'};
+    return text.replace(/[&<>"']/g, m => map[m]);
 }
-
 function showDemoReceipt() {
     const demoReceipt = {
         receipt_code: 'DEMO123',
@@ -1871,41 +1641,47 @@ function showDemoReceipt() {
         ],
         created_at: 'Dec 15, 2024 2:30 PM'
     };
-    
     currentReceiptCode = 'DEMO123';
     showModal();
     setLoadingState(false);
     displayReceipt(demoReceipt);
 }
-
 function claimDemoPoints() {
     closeModal();
     showSuccess(5);
-    
     const currentPoints = parseInt(document.getElementById('current-points').textContent) || 0;
     updatePointsDisplay(currentPoints + 5);
 }
-
-// FIXED: Added missing functions (dummy implementations)
-function requestWakeLock() {
-    // Optional: implement wake lock for mobile devices
-    console.log('Wake lock requested');
-}
-
-function releaseWakeLock() {
-    // Optional: release wake lock
-    console.log('Wake lock released');
-}
-
-// Cleanup on page unload
-window.addEventListener('beforeunload', function() {
-    if (scanner) {
-        try {
-            scanner.clear();
-        } catch (error) {
-            console.log('Scanner cleanup failed:', error);
+document.addEventListener('DOMContentLoaded', function() {
+    setupEventListeners();
+    setTimeout(() => { initializeCamera(); }, 100);
+});
+function setupEventListeners() {
+    document.getElementById('manual-code-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const code = document.getElementById('receipt-code').value.trim();
+        if (code && !isProcessing) {
+            if (code.toLowerCase() === 'demo123') {
+                showDemoReceipt();
+                return;
+            }
+            checkReceipt(code);
         }
-    }
+    });
+    document.getElementById('retry-camera').addEventListener('click', retryCamera);
+    document.getElementById('use-manual').addEventListener('click', focusManualInput);
+    document.querySelector('.close-modal').addEventListener('click', closeModal);
+    document.querySelector('.modal-backdrop').addEventListener('click', closeModal);
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden && !isProcessing) {
+            setTimeout(() => { initializeCamera(); }, 1000);
+        }
+    });
+}
+window.addEventListener('beforeunload', function() {
+    if (scanner) { try { scanner.clear(); } catch (error) {} }
 });
 </script>
+
 @endsection
