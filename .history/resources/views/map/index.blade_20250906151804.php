@@ -1,4 +1,4 @@
-@extends('master-original')
+@extends('master')
 
 @section('title', 'Store Map - Green Cup')
 
