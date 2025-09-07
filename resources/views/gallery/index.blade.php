@@ -129,12 +129,12 @@
         <div class="modal-overlay" onclick="closePostModal()"></div>
         <div class="modal-content">
             <button class="modal-close" onclick="closePostModal()" aria-label="Close">×</button>
-            
+
             <div class="modal-body">
                 <div class="modal-image-section">
                     <img id="modalPostImage" src="" alt="" loading="lazy">
                 </div>
-                
+
                 <div class="modal-info-section">
                     <div class="modal-header-info">
                         <div id="modalSellerProfile" class="modal-seller-profile">
@@ -142,12 +142,12 @@
                         </div>
                         <time id="modalPostDate" class="modal-post-date"></time>
                     </div>
-                    
+
                     <div class="modal-post-content">
                         <h3 id="modalPostTitle" class="modal-post-title"></h3>
                         <p id="modalPostCaption" class="modal-post-caption"></p>
                     </div>
-                    
+
                     <div class="modal-post-stats">
                         <div class="stat-item">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -163,7 +163,7 @@
                             <span id="modalSellerRank">Store Rank</span>
                         </div>
                     </div>
-                    
+
                     <div class="modal-actions">
                         <button class="action-btn primary" onclick="visitStore()">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -206,7 +206,7 @@
     --shadow-heavy: 0 8px 24px rgba(0,0,0,0.16);
     --border-radius: 12px;
     --border-radius-lg: 16px;
-    
+
     /* Responsive spacing - scales with viewport */
     --spacing-xs: clamp(2px, 0.5vw, 4px);
     --spacing-sm: clamp(4px, 1vw, 8px);
@@ -214,7 +214,7 @@
     --spacing-lg: clamp(12px, 2vw, 16px);
     --spacing-xl: clamp(16px, 3vw, 24px);
     --spacing-xxl: clamp(24px, 4vw, 32px);
-    
+
     /* Responsive font sizes */
     --font-xs: clamp(10px, 2vw, 12px);
     --font-sm: clamp(12px, 2.5vw, 14px);
@@ -222,7 +222,7 @@
     --font-lg: clamp(16px, 3.5vw, 18px);
     --font-xl: clamp(18px, 4vw, 20px);
     --font-xxl: clamp(20px, 5vw, 24px);
-    
+
     /* Responsive widths */
     --sidebar-width: clamp(280px, 35vw, 400px);
     --modal-width: clamp(320px, 90vw, 900px);
@@ -543,26 +543,26 @@ body {
 }
 
 /* Seller rank colors */
-.seller-avatar.platinum { 
-    background: linear-gradient(135deg, #9B59B6, #8E44AD); 
+.seller-avatar.platinum {
+    background: linear-gradient(135deg, #9B59B6, #8E44AD);
     border-color: #7D3C98;
 }
-.seller-avatar.gold { 
-    background: linear-gradient(135deg, #FFD700, #FFA500); 
+.seller-avatar.gold {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
     border-color: #E67E22;
     color: #333;
 }
-.seller-avatar.silver { 
-    background: linear-gradient(135deg, #C0C0C0, #A8A8A8); 
+.seller-avatar.silver {
+    background: linear-gradient(135deg, #C0C0C0, #A8A8A8);
     border-color: #95A5A6;
     color: #333;
 }
-.seller-avatar.bronze { 
-    background: linear-gradient(135deg, #CD7F32, #B87333); 
+.seller-avatar.bronze {
+    background: linear-gradient(135deg, #CD7F32, #B87333);
     border-color: #A0522D;
 }
-.seller-avatar.standard { 
-    background: linear-gradient(135deg, #2E8B57, #3CB371); 
+.seller-avatar.standard {
+    background: linear-gradient(135deg, #2E8B57, #3CB371);
     border-color: #228B22;
 }
 
@@ -1039,7 +1039,7 @@ body {
     .gallery-main {
         grid-template-columns: 320px 1fr;
     }
-    
+
     .modal-body {
         grid-template-columns: 1fr 280px;
     }
@@ -1051,12 +1051,12 @@ body {
         grid-template-columns: 300px 1fr;
         gap: var(--spacing-lg);
     }
-    
+
     .posts-grid {
         grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
         gap: var(--spacing-md);
     }
-    
+
     .modal-body {
         grid-template-columns: 1fr 260px;
         height: 70vh;
@@ -1070,7 +1070,7 @@ body {
         gap: 0;
         padding: var(--spacing-md);
     }
-    
+
     .sellers-panel {
         display: none;
         position: fixed;
@@ -1082,50 +1082,50 @@ body {
         border-radius: 0;
         max-width: none;
     }
-    
+
     .sellers-panel.mobile-active {
         display: flex;
     }
-    
+
     .mobile-toggle {
         display: flex;
     }
-    
+
     .posts-panel {
         grid-column: 1;
         min-height: calc(100vh - 120px);
     }
-    
+
     .posts-grid {
         grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
         gap: var(--spacing-sm);
         padding: var(--spacing-md);
     }
-    
+
     .modal-body {
         grid-template-columns: 1fr;
         height: auto;
         max-height: 85vh;
     }
-    
+
     .modal-image-section {
         max-height: 50vh;
     }
-    
+
     .modal-info-section {
         padding: var(--spacing-lg);
     }
-    
+
     .panel-header {
         flex-wrap: wrap;
         gap: var(--spacing-sm);
     }
-    
+
     .panel-controls {
         flex-direction: column;
         gap: var(--spacing-sm);
     }
-    
+
     .filter-select {
         width: 100%;
     }
@@ -1136,56 +1136,56 @@ body {
     .gallery-header {
         padding: var(--spacing-sm) var(--spacing-md);
     }
-    
+
     .header-title {
         font-size: var(--font-lg);
     }
-    
+
     .header-subtitle {
         display: none; /* Hide subtitle on very small screens */
     }
-    
+
     .gallery-main {
         padding: var(--spacing-sm);
     }
-    
+
     .posts-grid {
         grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
         gap: var(--spacing-xs);
         padding: var(--spacing-sm);
     }
-    
+
     .panel-header,
     .panel-controls,
     .sellers-list {
         padding-left: var(--spacing-md);
         padding-right: var(--spacing-md);
     }
-    
+
     .post-modal {
         padding: var(--spacing-sm);
     }
-    
+
     .modal-content {
         border-radius: var(--spacing-md);
     }
-    
+
     .modal-info-section {
         padding: var(--spacing-md);
     }
-    
+
     .modal-actions {
         flex-direction: column;
     }
-    
+
     .action-btn {
         min-width: auto;
     }
-    
+
     .seller-card {
         padding: var(--spacing-md);
     }
-    
+
     .seller-stats {
         gap: var(--spacing-md);
     }
@@ -1196,28 +1196,28 @@ body {
     .header-left {
         gap: var(--spacing-sm);
     }
-    
+
     .posts-grid {
         grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
     }
-    
+
     .panel-header {
         padding: var(--spacing-md);
     }
-    
+
     .panel-controls {
         padding: var(--spacing-md) var(--spacing-md) 0;
     }
-    
+
     .sellers-list {
         padding: var(--spacing-md);
     }
-    
+
     .modal-body {
         height: auto;
         max-height: 90vh;
     }
-    
+
     .modal-image-section {
         max-height: 40vh;
     }
@@ -1228,7 +1228,7 @@ body {
     .posts-grid {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .header-title svg {
         display: none; /* Hide icon on very small screens */
     }
@@ -1296,7 +1296,7 @@ body {
     .action-btn {
         min-height: 44px; /* Ensure minimum touch target size */
     }
-    
+
     .back-btn,
     .mobile-toggle {
         min-width: 44px;
@@ -1332,7 +1332,7 @@ function handleResize() {
     if (window.innerWidth > 968) {
         closeMobilePanel();
     }
-    
+
     // Adjust modal size based on viewport
     const modal = document.getElementById('postDetailModal');
     if (modal && modal.style.display !== 'none') {
@@ -1357,6 +1357,15 @@ async function initializeApp() {
     try {
         await loadSellers();
         initializeEventListeners();
+
+        // Check for seller parameter in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const sellerId = urlParams.get('seller');
+        if (sellerId) {
+            // Auto-select the seller if specified in URL
+            setTimeout(() => selectSeller(parseInt(sellerId)), 500);
+        }
+
         console.log('Sellers Gallery Browser initialized successfully');
     } catch (error) {
         console.error('Failed to initialize app:', error);
@@ -1368,11 +1377,11 @@ function initializeEventListeners() {
     // Search functionality
     const searchInput = document.getElementById('sellerSearch');
     searchInput.addEventListener('input', handleSearch);
-    
+
     // Filter functionality
     const filterSelect = document.getElementById('sellerFilter');
     filterSelect.addEventListener('change', handleFilter);
-    
+
     // Modal close with escape key
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
@@ -1380,29 +1389,29 @@ function initializeEventListeners() {
             closeMobilePanel();
         }
     });
-    
+
     // Touch gesture support for mobile
     let touchStartX = 0;
     let touchStartY = 0;
-    
+
     document.addEventListener('touchstart', function(e) {
         touchStartX = e.touches[0].clientX;
         touchStartY = e.touches[0].clientY;
     });
-    
+
     document.addEventListener('touchend', function(e) {
         if (!touchStartX || !touchStartY) return;
-        
+
         const touchEndX = e.changedTouches[0].clientX;
         const touchEndY = e.changedTouches[0].clientY;
-        
+
         const diffX = touchStartX - touchEndX;
         const diffY = touchStartY - touchEndY;
-        
+
         // Only handle horizontal swipes
         if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
             const sellersPanel = document.getElementById('sellersPanel');
-            
+
             // Swipe right to open panel (on mobile)
             if (diffX < 0 && window.innerWidth <= 968 && !sellersPanel.classList.contains('mobile-active')) {
                 toggleMobileView();
@@ -1412,7 +1421,7 @@ function initializeEventListeners() {
                 closeMobilePanel();
             }
         }
-        
+
         touchStartX = 0;
         touchStartY = 0;
     });
@@ -1422,23 +1431,23 @@ function initializeEventListeners() {
 async function loadSellers() {
     try {
         showSellersLoading(true);
-        
+
         // Add timeout to prevent hanging
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-        
+
         const response = await fetch('/public-api/stores', {
             signal: controller.signal
         });
-        
+
         clearTimeout(timeoutId);
-        
+
         if (!response.ok) {
             throw new Error(`API response: ${response.status}`);
         }
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
             // Accept empty array as valid response (empty database)
             app.sellers = (data.data || []).map(seller => ({
@@ -1456,11 +1465,11 @@ async function loadSellers() {
                 rank_text: seller.rank_text || getRankText(seller.points_reward || seller.total_points || 0),
                 rank_icon: seller.rank_icon || getRankIcon(seller.points_reward || seller.total_points || 0)
             }));
-            
+
             app.filteredSellers = [...app.sellers];
             renderSellers();
             updateSellersCount();
-            
+
             if (app.sellers.length === 0) {
                 console.log('✅ Database is empty - no sellers found');
                 showEmptyDatabase();
@@ -1472,7 +1481,7 @@ async function loadSellers() {
         }
     } catch (error) {
         console.error('Failed to load sellers:', error.message);
-        
+
         // Show error state instead of mock data
         app.sellers = [];
         app.filteredSellers = [];
@@ -1485,7 +1494,7 @@ async function loadSellers() {
 function showSellersLoading(show) {
     const loadingElement = document.querySelector('.loading-sellers');
     const sellersList = document.getElementById('sellersList');
-    
+
     if (show) {
         sellersList.innerHTML = '<div class="loading-sellers"><div class="loading-spinner"></div><p>Loading stores...</p></div>';
     }
@@ -1499,12 +1508,12 @@ function showEmptyDatabase() {
             <h3 style="margin-bottom: var(--spacing-sm); color: var(--text-secondary); font-size: var(--font-lg);">No Stores Yet</h3>
             <p style="font-size: var(--font-sm);">Your database is empty. Add some stores to see them here.</p>
             <button onclick="refreshData()" style="
-                margin-top: var(--spacing-lg); 
-                background: var(--primary-color); 
-                color: white; 
-                border: none; 
-                padding: var(--spacing-sm) var(--spacing-lg); 
-                border-radius: 20px; 
+                margin-top: var(--spacing-lg);
+                background: var(--primary-color);
+                color: white;
+                border: none;
+                padding: var(--spacing-sm) var(--spacing-lg);
+                border-radius: 20px;
                 cursor: pointer;
                 font-size: var(--font-sm);
                 transition: all 0.2s ease;
@@ -1522,12 +1531,12 @@ function showErrorState(errorMessage) {
             <p style="font-size: var(--font-sm); margin-bottom: var(--spacing-sm);">Failed to load stores:</p>
             <p style="font-size: var(--font-xs); color: var(--text-muted); word-break: break-word;">${errorMessage}</p>
             <button onclick="refreshData()" style="
-                margin-top: var(--spacing-lg); 
-                background: var(--primary-color); 
-                color: white; 
-                border: none; 
-                padding: var(--spacing-sm) var(--spacing-lg); 
-                border-radius: 20px; 
+                margin-top: var(--spacing-lg);
+                background: var(--primary-color);
+                color: white;
+                border: none;
+                padding: var(--spacing-sm) var(--spacing-lg);
+                border-radius: 20px;
                 cursor: pointer;
                 font-size: var(--font-sm);
                 transition: all 0.2s ease;
@@ -1542,7 +1551,7 @@ function refreshData() {
 
 function renderSellers() {
     const sellersList = document.getElementById('sellersList');
-    
+
     if (app.filteredSellers.length === 0) {
         sellersList.innerHTML = `
             <div style="text-align: center; padding: var(--spacing-xxl); color: var(--text-muted);">
@@ -1551,10 +1560,10 @@ function renderSellers() {
         `;
         return;
     }
-    
+
     // Use document fragment for better performance
     const fragment = document.createDocumentFragment();
-    
+
     app.filteredSellers.forEach(seller => {
         const sellerCard = document.createElement('div');
         sellerCard.className = 'seller-card';
@@ -1563,7 +1572,7 @@ function renderSellers() {
         sellerCard.setAttribute('tabindex', '0');
         sellerCard.setAttribute('role', 'button');
         sellerCard.setAttribute('aria-label', `Select ${seller.name} store`);
-        
+
         // Add keyboard support
         sellerCard.onkeydown = (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
@@ -1571,7 +1580,7 @@ function renderSellers() {
                 selectSeller(seller.id);
             }
         };
-        
+
         sellerCard.innerHTML = `
             <div class="seller-card-header">
                 <div class="seller-avatar ${seller.rank_class}">
@@ -1611,10 +1620,10 @@ function renderSellers() {
                 </div>
             </div>
         `;
-        
+
         fragment.appendChild(sellerCard);
     });
-    
+
     // Single DOM update instead of multiple innerHTML calls
     sellersList.innerHTML = '';
     sellersList.appendChild(fragment);
@@ -1627,32 +1636,32 @@ async function selectSeller(sellerId) {
             card.classList.remove('selected');
             card.setAttribute('aria-selected', 'false');
         });
-        
+
         const selectedCard = document.querySelector(`[data-seller-id="${sellerId}"]`);
         if (selectedCard) {
             selectedCard.classList.add('selected');
             selectedCard.setAttribute('aria-selected', 'true');
         }
-        
+
         // Find seller data
         app.selectedSeller = app.sellers.find(seller => seller.id === sellerId);
         if (!app.selectedSeller) {
             throw new Error('Seller not found');
         }
-        
+
         // Show posts panel and hide default state
         document.getElementById('defaultState').style.display = 'none';
         document.getElementById('selectedSellerContent').style.display = 'flex';
-        
+
         // Update selected seller info
         updateSelectedSellerInfo();
-        
+
         // Load seller's posts
         await loadSellerPosts(sellerId);
-        
+
         // Close mobile panel if open
         closeMobilePanel();
-        
+
     } catch (error) {
         console.error('Error selecting seller:', error);
         showError('Failed to load seller posts');
@@ -1689,18 +1698,18 @@ async function loadSellerPosts(sellerId, page = 1) {
             app.currentPostsPage = 1;
             document.getElementById('postsGrid').innerHTML = '';
         }
-        
+
         showPostsLoading(page === 1);
-        
+
         // Only try real API, no mock fallback
         const response = await fetch(`/public-api/gallery/feed?seller_id=${sellerId}&page=${page}`);
-        
+
         if (!response.ok) {
             throw new Error(`API response: ${response.status}`);
         }
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
             const posts = (data.posts || []).map(post => ({
                 id: post.id,
@@ -1712,24 +1721,24 @@ async function loadSellerPosts(sellerId, page = 1) {
                 is_featured: post.is_featured || false,
                 seller_id: post.seller_id || sellerId
             }));
-            
+
             if (page === 1) {
                 app.selectedSellerPosts = posts;
             } else {
                 app.selectedSellerPosts.push(...posts);
             }
-            
+
             app.hasMorePosts = data.hasMore || false;
-            
+
             renderPosts();
             updatePostsCount();
-            
+
             // Show/hide load more button
             const loadMoreWrapper = document.getElementById('loadMoreWrapper');
             loadMoreWrapper.style.display = app.hasMorePosts ? 'block' : 'none';
-            
+
             console.log(`✅ Loaded ${posts.length} real posts for seller ${sellerId}`);
-            
+
             if (posts.length === 0 && page === 1) {
                 showNoPosts();
             }
@@ -1748,7 +1757,7 @@ async function loadSellerPosts(sellerId, page = 1) {
 
 function showPostsLoading(show) {
     const postsGrid = document.getElementById('postsGrid');
-    
+
     if (show) {
         // Show skeleton loading with responsive grid
         const skeletons = Array(6).fill(0).map(() => '<div class="skeleton skeleton-post"></div>').join('');
@@ -1758,12 +1767,12 @@ function showPostsLoading(show) {
 
 function renderPosts() {
     const postsGrid = document.getElementById('postsGrid');
-    
+
     const postsHTML = app.selectedSellerPosts.map(post => `
         <div class="post-thumbnail" onclick="openPostDetail(${post.id})" tabindex="0" role="button" aria-label="View post: ${post.caption || 'Store post'}" onkeydown="handlePostKeydown(event, ${post.id})">
             <div class="post-image-wrapper">
-                <img src="${post.photo_url}" 
-                     alt="${post.caption || post.business_name}" 
+                <img src="${post.photo_url}"
+                     alt="${post.caption || post.business_name}"
                      class="post-thumbnail-img"
                      onerror="handleImageError(this)"
                      loading="lazy">
@@ -1784,7 +1793,7 @@ function renderPosts() {
             </div>
         </div>
     `).join('');
-    
+
     postsGrid.innerHTML = postsHTML;
 }
 
@@ -1820,7 +1829,7 @@ function showNoPostsError(errorMessage) {
 function openPostDetail(postId) {
     const post = app.selectedSellerPosts.find(p => p.id === postId);
     if (!post || !app.selectedSeller) return;
-    
+
     // Populate modal content
     document.getElementById('modalPostImage').src = post.photo_url;
     document.getElementById('modalPostTitle').textContent = post.caption || 'Store Post';
@@ -1828,7 +1837,7 @@ function openPostDetail(postId) {
     document.getElementById('modalPostDate').textContent = post.time_ago;
     document.getElementById('modalSellerLocation').textContent = app.selectedSeller.address || 'Location not available';
     document.getElementById('modalSellerRank').textContent = `${app.selectedSeller.rank_text} • ${app.selectedSeller.points_reward || app.selectedSeller.total_points} points`;
-    
+
     // Update seller profile in modal
     const modalSellerProfile = document.getElementById('modalSellerProfile');
     modalSellerProfile.innerHTML = `
@@ -1849,14 +1858,14 @@ function openPostDetail(postId) {
             </div>
         </div>
     `;
-    
+
     // Show modal
     document.getElementById('postDetailModal').style.display = 'flex';
     document.body.style.overflow = 'hidden';
-    
+
     // Adjust modal size for current viewport
     adjustModalSize();
-    
+
     // Focus management for accessibility
     setTimeout(() => {
         document.querySelector('.modal-close').focus();
@@ -1870,18 +1879,18 @@ function closePostModal() {
 
 async function loadMorePosts() {
     if (app.isLoading || !app.hasMorePosts || !app.selectedSeller) return;
-    
+
     app.isLoading = true;
     app.currentPostsPage++;
-    
+
     const loadBtn = document.querySelector('.load-more-btn');
     const loadText = loadBtn.querySelector('.load-text');
     const loadSpinner = loadBtn.querySelector('.load-spinner');
-    
+
     loadText.style.display = 'none';
     loadSpinner.style.display = 'flex';
     loadBtn.disabled = true;
-    
+
     try {
         await loadSellerPosts(app.selectedSeller.id, app.currentPostsPage);
     } catch (error) {
@@ -1899,7 +1908,7 @@ async function loadMorePosts() {
 function handleSearch() {
     clearTimeout(app.searchTimeout);
     const query = document.getElementById('sellerSearch').value.toLowerCase().trim();
-    
+
     app.searchTimeout = setTimeout(() => {
         if (query === '') {
             app.filteredSellers = [...app.sellers];
@@ -1910,10 +1919,10 @@ function handleSearch() {
                        (seller.phone && seller.phone.toLowerCase().includes(query));
             });
         }
-        
+
         renderSellers();
         updateSellersCount();
-        
+
         // Log search results for debugging
         console.log(`🔍 Search "${query}": ${app.filteredSellers.length} results`);
     }, 300);
@@ -1922,9 +1931,9 @@ function handleSearch() {
 function handleFilter() {
     const filterValue = document.getElementById('sellerFilter').value;
     const query = document.getElementById('sellerSearch').value.toLowerCase().trim();
-    
+
     let filtered = [...app.sellers];
-    
+
     // Apply search filter
     if (query) {
         filtered = filtered.filter(seller => {
@@ -1933,16 +1942,16 @@ function handleFilter() {
                    (seller.phone && seller.phone.toLowerCase().includes(query));
         });
     }
-    
+
     // Apply rank filter
     if (filterValue !== 'all') {
         filtered = filtered.filter(seller => seller.rank_class === filterValue);
     }
-    
+
     app.filteredSellers = filtered;
     renderSellers();
     updateSellersCount();
-    
+
     // Log filter results for debugging
     console.log(`🔧 Filter "${filterValue}": ${app.filteredSellers.length} results`);
 }
@@ -1959,7 +1968,7 @@ function updatePostsCount() {
 function toggleMobileView() {
     const sellersPanel = document.getElementById('sellersPanel');
     sellersPanel.classList.toggle('mobile-active');
-    
+
     // Focus management for accessibility
     if (sellersPanel.classList.contains('mobile-active')) {
         const searchInput = document.getElementById('sellerSearch');
@@ -1985,7 +1994,7 @@ function visitStore() {
 function sharePost() {
     if (app.selectedSeller) {
         const url = `${window.location.origin}/seller/${app.selectedSeller.id}`;
-        
+
         if (navigator.share) {
             navigator.share({
                 title: `Check out ${app.selectedSeller.name}!`,
@@ -2043,9 +2052,9 @@ function showToast(message, type = 'info') {
         max-width: calc(100vw - 40px);
         word-wrap: break-word;
     `;
-    
+
     document.body.appendChild(toast);
-    
+
     setTimeout(() => {
         toast.remove();
     }, 3000);

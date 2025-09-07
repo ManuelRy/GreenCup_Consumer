@@ -206,7 +206,12 @@
 
                     <!-- Store Photo Gallery -->
                     <div class="store-gallery" id="storeGallery" style="display: none;">
-                        <h4>📸 Store Gallery</h4>
+                        <div class="gallery-header">
+                            <h4>📸 Store Gallery</h4>
+                            <button id="seeMoreBtn" class="see-more-btn" onclick="viewFullGallery()" style="display: none;">
+                                View All Photos
+                            </button>
+                        </div>
                         <div class="gallery-container" id="galleryContainer">
                             <!-- Photos will be dynamically loaded here -->
                         </div>
@@ -1325,6 +1330,38 @@
             align-items: center;
             justify-content: center;
             font-size: 10px;
+        }
+
+        /* Gallery header with see more button */
+        .gallery-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .gallery-header h4 {
+            margin: 0;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .see-more-btn {
+            background: linear-gradient(135deg, #2E8B57, #3CB371);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .see-more-btn:hover {
+            background: linear-gradient(135deg, #3CB371, #2E8B57);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(46, 139, 87, 0.3);
         }
 
         .action-buttons {
@@ -2498,26 +2535,36 @@
             rankTextElement.textContent = `${rankText} • ${points} pts`;
 
             // Populate photo gallery
-            populateStoreGallery(store.photos || []);
+            populateStoreGallery(store.photos || [], store.total_photos || 0);
         }
 
-        function populateStoreGallery(photos) {
+        function populateStoreGallery(photos, totalPhotos) {
             const gallerySection = document.getElementById('storeGallery');
             const galleryContainer = document.getElementById('galleryContainer');
+            const seeMoreBtn = document.getElementById('seeMoreBtn');
 
             // Clear existing photos
             galleryContainer.innerHTML = '';
 
             if (!photos || photos.length === 0) {
                 gallerySection.style.display = 'none';
+                seeMoreBtn.style.display = 'none';
                 return;
             }
 
             // Show gallery section
             gallerySection.style.display = 'block';
 
-            // Add photos (maximum 3)
-            photos.slice(0, 3).forEach((photo, index) => {
+            // Show "View All Photos" button with count
+            seeMoreBtn.style.display = 'inline-block';
+            if (totalPhotos > photos.length) {
+                seeMoreBtn.textContent = `View All ${totalPhotos} Photos`;
+            } else {
+                seeMoreBtn.textContent = `View Photos (${totalPhotos})`;
+            }
+
+            // Add photos (last 3 images - they should already be limited by backend)
+            photos.forEach((photo, index) => {
                 const galleryItem = document.createElement('div');
                 galleryItem.className = `gallery-item ${photo.is_featured ? 'featured' : ''}`;
 
@@ -2540,9 +2587,7 @@
                 galleryItem.appendChild(img);
                 galleryContainer.appendChild(galleryItem);
             });
-        }
-
-        function openPhotoModal(photo) {
+        }        function openPhotoModal(photo) {
             // Create a simple photo modal
             const modal = document.createElement('div');
             modal.style.cssText = `
@@ -2576,6 +2621,17 @@
             });
 
             document.body.appendChild(modal);
+        }
+
+        function viewFullGallery() {
+            if (!app.selectedStore) {
+                showError('No store selected');
+                return;
+            }
+
+            // Navigate to the gallery with seller ID parameter
+            const galleryUrl = `/gallery?seller=${app.selectedStore.id}`;
+            window.open(galleryUrl, '_blank');
         }
 
         function closeStoreModal() {

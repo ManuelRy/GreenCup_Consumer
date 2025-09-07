@@ -664,12 +664,13 @@ class StoreController extends Controller
         $store->hours_formatted = $this->formatWorkingHours($store->hours);
         $store->is_open = $this->isStoreCurrentlyOpen($store->hours);
 
-        // Initialize distance
+                        // Initialize distance
         $store->distance = null;
 
-        // Add photos (last 3 images max)
+        // Add photos (last 3 images max) and total count
         $allPhotos = $this->getSellerPhotos($store->id);
-        $store->photos = array_slice($allPhotos, 0, 3);
+        $store->photos = array_slice($allPhotos, -3, 3);
+        $store->total_photos = count($allPhotos);
 
         return $store;
     }
