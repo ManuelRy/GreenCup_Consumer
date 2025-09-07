@@ -8,7 +8,12 @@
                 <a href="{{ route('account') }}" class="back-btn">
                     <span>←</span>
                 </a>
-                <h2>Transaction History</h2>
+                <div style="text-align: center; flex: 1;">
+                    <h2>Transaction History</h2>
+                    @if(isset($consumer) && $consumer)
+                        <p style="margin: 0; font-size: 12px; opacity: 0.8;">{{ $consumer->name ?? $consumer->email ?? 'Consumer' }}</p>
+                    @endif
+                </div>
                 <div class="placeholder-btn"></div>
             </div>
         </div>
@@ -70,6 +75,12 @@
                         <div class="transaction-details">
                             <div class="transaction-title">
                                 {{ $transaction->item_name ?: 'Unknown Item' }}
+                                <!-- Debug: Check transaction data -->
+                                @if(config('app.debug'))
+                                    <small style="display: block; color: #999; font-size: 10px;">
+                                        Debug: item_name: "{{ $transaction->item_name ?? 'NULL' }}", description: "{{ $transaction->description ?? 'NULL' }}"
+                                    </small>
+                                @endif
                             </div>
                             <div class="transaction-subtitle">
                                 {{ $transaction->store_name ?: 'Unknown Store' }}

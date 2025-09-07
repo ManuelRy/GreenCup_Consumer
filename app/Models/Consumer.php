@@ -39,12 +39,12 @@ class Consumer extends Authenticatable
             ->where('consumer_id', $this->id)
             ->where('type', 'earn')
             ->sum('points');
-            
+
         $totalSpent = DB::table('point_transactions')
             ->where('consumer_id', $this->id)
             ->where('type', 'spend')
             ->sum('points');
-            
+
         return $totalEarned - $totalSpent;
     }
 
@@ -98,5 +98,21 @@ class Consumer extends Authenticatable
     public function pointTransactions()
     {
         return $this->hasMany(PointTransaction::class);
+    }
+
+    /**
+     * Accessor for name attribute (alias for full_name)
+     */
+    public function getNameAttribute()
+    {
+        return $this->full_name;
+    }
+
+    /**
+     * Mutator for name attribute (sets full_name)
+     */
+    public function setNameAttribute($value)
+    {
+        $this->attributes['full_name'] = $value;
     }
 }

@@ -29,6 +29,12 @@
                 <div class="profile-info">
                     <h3 class="profile-name">{{ $consumer->name ?? 'Consumer' }}</h3>
                     <p class="profile-email">{{ $consumer->email ?? '' }}</p>
+                    <!-- Debug: Check consumer data -->
+                    @if(config('app.debug'))
+                        <small style="color: #999; font-size: 10px;">
+                            Debug: Consumer ID: {{ $consumer->id ?? 'N/A' }}, Name: "{{ $consumer->name ?? 'NULL' }}", Email: "{{ $consumer->email ?? 'NULL' }}"
+                        </small>
+                    @endif
                     <div class="profile-stats">
                         <span class="stat-item">
                             <span class="stat-icon">📅</span>
