@@ -2526,16 +2526,8 @@
                 img.alt = photo.caption || `Store photo ${index + 1}`;
                 img.loading = 'lazy';
                 
-                // Add error handling for broken images
-                img.onerror = function() {
-                    galleryItem.style.display = 'none';
-                };
-                
                 // Add click handler to open full image
-                galleryItem.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    openPhotoModal(photo);
-                });
+                galleryItem.addEventListener('click', () => openPhotoModal(photo));
                 
                 galleryItem.appendChild(img);
                 galleryContainer.appendChild(galleryItem);
