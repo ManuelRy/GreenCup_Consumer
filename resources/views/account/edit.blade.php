@@ -22,25 +22,44 @@
                     <h3 class="form-section-title">Personal Information</h3>
 
                     <div class="form-group">
-                        <label for="name">Full Name</label>
-                        <input type="text" id="name" name="name" value="{{ old('name', $consumer->name) }}" required>
-                        @error('name')
+                        <label for="full_name">Full Name</label>
+                        <input type="text" id="full_name" name="full_name" value="{{ old('full_name', $consumer->full_name) }}" required>
+                        @error('full_name')
                             <div class="error-message">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="form-group">
                         <label for="email">Email Address</label>
-                        <input type="email" id="email" name="email" value="{{ old('email', $consumer->email) }}" required>
-                        @error('email')
+                        <input type="email" id="email" name="email" value="{{ $consumer->email }}" readonly class="readonly-field">
+                        <small class="field-note">Email cannot be changed</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone_number">Phone Number (Optional)</label>
+                        <input type="tel" id="phone_number" name="phone_number" value="{{ old('phone_number', $consumer->phone_number) }}">
+                        @error('phone_number')
                             <div class="error-message">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="form-group">
-                        <label for="phone">Phone Number (Optional)</label>
-                        <input type="tel" id="phone" name="phone" value="{{ old('phone', $consumer->phone) }}">
-                        @error('phone')
+                        <label for="gender">Gender</label>
+                        <select id="gender" name="gender" required>
+                            <option value="">Select Gender</option>
+                            <option value="male" {{ old('gender', $consumer->gender) == 'male' ? 'selected' : '' }}>Male</option>
+                            <option value="female" {{ old('gender', $consumer->gender) == 'female' ? 'selected' : '' }}>Female</option>
+                            <option value="other" {{ old('gender', $consumer->gender) == 'other' ? 'selected' : '' }}>Other</option>
+                        </select>
+                        @error('gender')
+                            <div class="error-message">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label for="date_of_birth">Date of Birth (Optional)</label>
+                        <input type="date" id="date_of_birth" name="date_of_birth" value="{{ old('date_of_birth', $consumer->date_of_birth ? $consumer->date_of_birth->format('Y-m-d') : '') }}" max="{{ date('Y-m-d', strtotime('-1 day')) }}">
+                        @error('date_of_birth')
                             <div class="error-message">{{ $message }}</div>
                         @enderror
                     </div>
@@ -190,10 +209,35 @@
             transition: all 0.2s ease;
         }
 
-        .form-group input:focus {
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #f0f0f0;
+            border-radius: 8px;
+            font-size: 16px;
+            background: #fff;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
             outline: none;
             border-color: #1a1a1a;
             background: #f8f9fa;
+        }
+
+        .readonly-field {
+            background: #f5f5f5 !important;
+            color: #666 !important;
+            cursor: not-allowed !important;
+        }
+
+        .field-note {
+            color: #666;
+            font-size: 12px;
+            margin-top: 4px;
+            font-style: italic;
         }
 
         .error-message {
