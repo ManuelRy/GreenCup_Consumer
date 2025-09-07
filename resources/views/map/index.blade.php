@@ -1465,26 +1465,26 @@
             .header-nav h2 {
                 font-size: 16px;
             }
-            
+
             .search-section-fixed {
                 flex-direction: column;
                 gap: 8px;
             }
-            
+
             .location-btn {
                 align-self: flex-start;
             }
-            
+
             .toggle-controls-fixed {
                 flex-direction: column;
                 gap: 10px;
                 align-items: stretch;
             }
-            
+
             .filter-controls {
                 justify-content: space-between;
             }
-            
+
             .fullscreen-map-view,
             .fullscreen-list-view {
                 top: 220px;
@@ -1495,25 +1495,25 @@
             .map-header-fixed {
                 padding: 12px 15px;
             }
-            
+
             .search-section-fixed {
                 padding: 10px 15px;
             }
-            
+
             .toggle-controls-fixed {
                 padding: 10px 15px;
             }
-            
+
             .modal-content {
                 margin: 10px;
                 max-height: 95vh;
                 max-width: calc(100% - 20px);
             }
-            
+
             .action-buttons {
                 flex-direction: column;
             }
-            
+
             .btn-directions,
             .btn-call,
             .btn-share {
@@ -1532,7 +1532,7 @@
         const CONFIG = {
             mapboxToken: '{{ $mapboxToken }}',
             // Start with a broader view
-            defaultCenter: [104.9910, 11.5564], 
+            defaultCenter: [104.9910, 11.5564],
             defaultZoom: 11,
             maxZoom: 18,
             minZoom: 6
@@ -1666,23 +1666,23 @@
             // Sort and filter controls
             document.getElementById('sortSelect').addEventListener('change', (e) => {
                 console.log('Sort selection changed to:', e.target.value);
-                
+
                 // Add visual feedback
                 e.target.style.background = '#e3f2fd';
                 setTimeout(() => {
                     e.target.style.background = 'white';
                 }, 300);
-                
+
                 sortStores(e.target.value);
             });
 
             document.getElementById('radiusSelect').addEventListener('change', (e) => {
                 console.log('Radius selection changed to:', e.target.value);
-                
+
                 app.searchRadius = e.target.value;
                 document.getElementById('radiusText').textContent =
                     e.target.value === 'all' ? 'all areas' : e.target.value + 'km';
-                    
+
                 if (app.userLocation) {
                     filterStoresByRadius();
                 } else {
@@ -1708,7 +1708,7 @@
                 store.distance = null;
                 store.points_reward = parseFloat(store.points_reward) || parseFloat(store.total_points) || 0;
                 store.transaction_count = parseInt(store.transaction_count) || 0;
-                
+
                 console.log(`Store ${index}: ${store.name} - Points: ${store.points_reward} - Transactions: ${store.transaction_count} - Rank: ${getRankText(store.points_reward)}`);
             });
 
@@ -1719,15 +1719,15 @@
 
         function setupInitialView() {
             switchView('map');
-            
+
             // Hide sort legend initially
             updateSortLegend(null);
-            
+
             if (app.stores.length === 0) {
                 console.log('No stores found in the database');
             } else {
                 console.log(`Loaded ${app.stores.length} stores successfully`);
-                
+
                 // Debug first few stores
                 app.stores.slice(0, 3).forEach((store, i) => {
                     console.log(`Store ${i + 1}: "${store.name}" - Initial: "${store.name.charAt(0).toUpperCase()}" - Rank: ${getRankText(store.points_reward)}`);
@@ -1746,8 +1746,8 @@
             try {
                 const position = await new Promise((resolve, reject) => {
                     navigator.geolocation.getCurrentPosition(
-                        resolve, 
-                        reject, 
+                        resolve,
+                        reject,
                         {
                             enableHighAccuracy: false,
                             timeout: 8000,
@@ -1758,7 +1758,7 @@
 
                 console.log('📍 Silent location success');
                 updateUserLocation(position.coords.latitude, position.coords.longitude, false);
-                
+
                 // Show subtle success indicator
                 const locationBtn = document.getElementById('locationBtn');
                 locationBtn.style.background = '#28a745';
@@ -1787,7 +1787,7 @@
             try {
                 // MULTIPLE ATTEMPTS WITH DIFFERENT SETTINGS
                 let position = null;
-                
+
                 // Attempt 1: High accuracy
                 try {
                     position = await new Promise((resolve, reject) => {
@@ -1800,7 +1800,7 @@
                     console.log('🎯 High accuracy location success:', position.coords);
                 } catch (highAccuracyError) {
                     console.log('High accuracy failed, trying standard accuracy...');
-                    
+
                     // Attempt 2: Standard accuracy
                     position = await new Promise((resolve, reject) => {
                         navigator.geolocation.getCurrentPosition(resolve, reject, {
@@ -1823,9 +1823,9 @@
 
             } catch (error) {
                 console.error('Location request failed:', error);
-                
+
                 let errorMessage = 'Location access is currently unavailable. ';
-                
+
                 switch(error.code) {
                     case error.PERMISSION_DENIED:
                         errorMessage = 'Location access was denied. You can enable it in your browser settings or search for stores manually.';
@@ -1840,10 +1840,10 @@
                         errorMessage = 'Unable to get your location. You can still search and browse stores manually.';
                         break;
                 }
-                
+
                 // Show less intrusive error
                 showError(errorMessage);
-                
+
                 locationBtn.innerHTML = '<span>📍</span><span>Try Again</span>';
                 locationBtn.style.background = '#6c757d';
                 setTimeout(() => {
@@ -1859,10 +1859,10 @@
         function updateUserLocation(latitude, longitude, flyToLocation = true) {
             console.log(`🎯 Updating user location: ${latitude}, ${longitude}`);
             console.log(`Accuracy check - Lat valid: ${latitude >= -90 && latitude <= 90}, Lng valid: ${longitude >= -180 && longitude <= 180}`);
-            
+
             // Validate coordinates
-            if (!latitude || !longitude || 
-                latitude < -90 || latitude > 90 || 
+            if (!latitude || !longitude ||
+                latitude < -90 || latitude > 90 ||
                 longitude < -180 || longitude > 180) {
                 console.error('❌ Invalid coordinates received:', { latitude, longitude });
                 showError('Invalid location coordinates received');
@@ -1906,7 +1906,7 @@
             // Show user location text
             document.getElementById('userLocationText').style.display = 'inline';
             updateStoreDisplay();
-            
+
             console.log('✅ User location updated successfully');
         }
 
@@ -1963,7 +1963,7 @@
                     const markerElement = document.createElement('div');
                     const rankClass = getRankClass(store.points_reward);
                     markerElement.className = `store-marker ${rankClass}`;
-                    
+
                     // Create main marker content with store initial
                     const markerContent = document.createElement('div');
                     markerContent.className = 'marker-initial';
@@ -1982,7 +1982,7 @@
                         const sortIndicator = document.createElement('div');
                         sortIndicator.className = 'sort-indicator';
                         sortIndicator.textContent = index + 1;
-                        
+
                         // Different colors for different sort types
                         if (currentSort === 'farthest') {
                             sortIndicator.classList.add('distance-sort');
@@ -1991,7 +1991,7 @@
                         } else if (currentSort === 'popular') {
                             sortIndicator.classList.add('popular-sort');
                         }
-                        
+
                         markerElement.appendChild(sortIndicator);
                     }
 
@@ -2006,7 +2006,7 @@
                     markerElement.title = titleText;
 
                     // Validate coordinates before creating marker
-                    if (!store.longitude || !store.latitude || 
+                    if (!store.longitude || !store.latitude ||
                         Math.abs(store.longitude) > 180 || Math.abs(store.latitude) > 90) {
                         console.warn(`Invalid coordinates for store: ${store.name}`, store);
                         return;
@@ -2024,7 +2024,7 @@
                     });
 
                     app.markers.push(marker);
-                    
+
                 } catch (error) {
                     console.error(`Error creating marker for store ${store.name}:`, error);
                 }
@@ -2126,10 +2126,10 @@
 
         function updateStoreDisplay() {
             updateStoreCount();
-            
+
             // Always update markers regardless of current view
             addMarkersToMap();
-            
+
             // Update list view if currently visible
             if (app.currentView === 'list') {
                 updateListView();
@@ -2151,14 +2151,14 @@
 
                 if (data.success) {
                     app.filteredStores = data.data;
-                    
+
                     // Ensure new search results have all required properties
                     app.filteredStores.forEach(store => {
                         store.distance = null;
                         store.points_reward = parseFloat(store.points_reward) || parseFloat(store.total_points) || 0;
                         store.transaction_count = parseInt(store.transaction_count) || 0;
                     });
-                    
+
                     // Recalculate distances if user location is available
                     if (app.userLocation) {
                         app.filteredStores.forEach(store => {
@@ -2170,7 +2170,7 @@
                             );
                         });
                     }
-                    
+
                     // Re-apply current sort
                     const currentSort = document.getElementById('sortSelect').value;
                     if (currentSort && currentSort !== 'nearest') {
@@ -2191,14 +2191,14 @@
 
         function clearSearch() {
             console.log('Clearing search and resetting to all stores');
-            
+
             document.getElementById('searchInput').value = '';
             document.getElementById('clearSearch').style.display = 'none';
             document.getElementById('searchBtn').style.right = '5px';
-            
+
             // Reset to all stores
             app.filteredStores = [...app.stores];
-            
+
             // Recalculate distances if needed
             if (app.userLocation) {
                 calculateDistances();
@@ -2216,10 +2216,10 @@
 
         function sortStores(sortType) {
             console.log(`Sorting stores by: ${sortType}`);
-            
+
             // Show loading briefly for visual feedback
             showLoading();
-            
+
             setTimeout(() => {
                 try {
                     switch (sortType) {
@@ -2235,7 +2235,7 @@
                                 return distanceA - distanceB;
                             });
                             break;
-                            
+
                         case 'farthest':
                             if (!app.userLocation) {
                                 showError('Enable location to sort by distance');
@@ -2248,7 +2248,7 @@
                                 return distanceB - distanceA;
                             });
                             break;
-                            
+
                         case 'name':
                             app.filteredStores.sort((a, b) => {
                                 const nameA = (a.name || '').toLowerCase();
@@ -2256,7 +2256,7 @@
                                 return nameA.localeCompare(nameB);
                             });
                             break;
-                            
+
                         case 'rank':
                             app.filteredStores.sort((a, b) => {
                                 const pointsA = parseFloat(a.points_reward) || 0;
@@ -2264,7 +2264,7 @@
                                 return pointsB - pointsA; // Highest first
                             });
                             break;
-                            
+
                         case 'popular':
                             app.filteredStores.sort((a, b) => {
                                 const countA = parseInt(a.transaction_count) || 0;
@@ -2272,24 +2272,24 @@
                                 return countB - countA; // Highest first
                             });
                             break;
-                            
+
                         default:
                             console.log('Unknown sort type:', sortType);
                             hideLoading();
                             return;
                     }
-                    
+
                     console.log(`Successfully sorted ${app.filteredStores.length} stores by ${sortType}`);
                     updateStoreDisplay();
-                    
+
                     // Update map legend for sorting
                     updateSortLegend(sortType);
-                    
+
                     // For distance-based sorting, focus map on nearest stores
                     if ((sortType === 'nearest' || sortType === 'farthest') && app.userLocation && app.filteredStores.length > 0) {
                         focusMapOnTopResults(sortType);
                     }
-                    
+
                 } catch (error) {
                     console.error('Error sorting stores:', error);
                     showError('Unable to sort stores. Please try again.');
@@ -2325,7 +2325,7 @@
             // Re-apply current sort after calculating distances
             const currentSort = document.getElementById('sortSelect').value;
             console.log('Re-applying sort after distance calculation:', currentSort);
-            
+
             if (currentSort === 'nearest' || currentSort === 'farthest') {
                 sortStores(currentSort);
             } else {
@@ -2336,7 +2336,7 @@
 
         function filterStoresByRadius() {
             console.log('Filtering stores by radius:', app.searchRadius);
-            
+
             if (!app.userLocation || app.searchRadius === 'all') {
                 app.filteredStores = [...app.stores];
             } else {
@@ -2345,9 +2345,9 @@
                     return store.distance !== null && store.distance <= radiusKm;
                 });
             }
-            
+
             console.log(`Filtered to ${app.filteredStores.length} stores within radius`);
-            
+
             // Re-apply current sort after filtering
             const currentSort = document.getElementById('sortSelect').value;
             if (currentSort && currentSort !== 'nearest') { // nearest is default, skip re-sort
@@ -2376,7 +2376,7 @@
             try {
                 // Get top 3-5 results to focus on
                 const topStores = app.filteredStores.slice(0, Math.min(5, app.filteredStores.length));
-                
+
                 if (topStores.length === 1) {
                     // Single store - center on it
                     app.map.flyTo({
@@ -2387,12 +2387,12 @@
                 } else if (topStores.length > 1) {
                     // Multiple stores - fit bounds to show all top results
                     const coordinates = topStores.map(store => [store.longitude, store.latitude]);
-                    
+
                     // Add user location if available for distance sorts
                     if ((sortType === 'nearest' || sortType === 'farthest') && app.userLocation) {
                         coordinates.push([app.userLocation.longitude, app.userLocation.latitude]);
                     }
-                    
+
                     const bounds = coordinates.reduce((bounds, coord) => {
                         return bounds.extend(coord);
                     }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
@@ -2403,7 +2403,7 @@
                         duration: 1500
                     });
                 }
-                
+
                 console.log(`Map focused on top ${topStores.length} results for ${sortType} sort`);
             } catch (error) {
                 console.error('Error focusing map on results:', error);
@@ -2413,15 +2413,15 @@
         function updateSortLegend(sortType) {
             const sortLegend = document.getElementById('sortLegend');
             const sortLegendText = document.getElementById('sortLegendText');
-            
+
             if (!sortType || sortType === 'name') {
                 sortLegend.style.display = 'none';
                 return;
             }
-            
+
             // Show legend with appropriate text
             sortLegend.style.display = 'flex';
-            
+
             switch (sortType) {
                 case 'nearest':
                     sortLegendText.textContent = 'Nearest First';
@@ -2504,39 +2504,39 @@
         function populateStoreGallery(photos) {
             const gallerySection = document.getElementById('storeGallery');
             const galleryContainer = document.getElementById('galleryContainer');
-            
+
             // Clear existing photos
             galleryContainer.innerHTML = '';
-            
+
             if (!photos || photos.length === 0) {
                 gallerySection.style.display = 'none';
                 return;
             }
-            
+
             // Show gallery section
             gallerySection.style.display = 'block';
-            
+
             // Add photos (maximum 3)
             photos.slice(0, 3).forEach((photo, index) => {
                 const galleryItem = document.createElement('div');
                 galleryItem.className = `gallery-item ${photo.is_featured ? 'featured' : ''}`;
-                
+
                 const img = document.createElement('img');
                 img.src = photo.url;
                 img.alt = photo.caption || `Store photo ${index + 1}`;
                 img.loading = 'lazy';
-                
+
                 // Add error handling for broken images
                 img.onerror = function() {
                     galleryItem.style.display = 'none';
                 };
-                
+
                 // Add click handler to open full image
                 galleryItem.addEventListener('click', (e) => {
                     e.stopPropagation();
                     openPhotoModal(photo);
                 });
-                
+
                 galleryItem.appendChild(img);
                 galleryContainer.appendChild(galleryItem);
             });
@@ -2558,7 +2558,7 @@
                 z-index: 10000;
                 cursor: pointer;
             `;
-            
+
             const img = document.createElement('img');
             img.src = photo.url;
             img.style.cssText = `
@@ -2567,14 +2567,14 @@
                 object-fit: contain;
                 border-radius: 8px;
             `;
-            
+
             modal.appendChild(img);
-            
+
             // Close on click
             modal.addEventListener('click', () => {
                 document.body.removeChild(modal);
             });
-            
+
             document.body.appendChild(modal);
         }
 

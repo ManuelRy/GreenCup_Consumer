@@ -50,9 +50,9 @@ class StoreController extends Controller
             $page = $request->get('page', 1);
             $sellerId = $request->get('seller_id');
             $perPage = 20;
-            
+
             $postsData = $this->getFeedPosts($page, $perPage, $sellerId);
-            
+
             return response()->json([
                 'success' => true,
                 'posts' => $postsData['posts'],
@@ -63,7 +63,7 @@ class StoreController extends Controller
         } catch (\Exception $e) {
             Log::error('Error loading feed: ' . $e->getMessage());
             return response()->json([
-                'success' => false, 
+                'success' => false,
                 'message' => 'Unable to load posts: ' . $e->getMessage(),
                 'posts' => [],
                 'hasMore' => false
@@ -90,18 +90,18 @@ class StoreController extends Controller
 
             $stores = $this->getAllStoresForMap();
             $mapboxToken = env('MAPBOX_ACCESS_TOKEN', 'pk.eyJ1IjoibmVha3NlbmJlc3RmcmkiLCJhIjoiY205cXhkb3c3MTF3MzJ2b2doamJiM2NmaSJ9.zTnzZvYetGaqX0CODz4qoQ');
-            
+
             Log::info('Map method called - Stores found: ' . $stores->count());
-            
+
             return view('map.index', compact('stores', 'consumer', 'mapboxToken'));
-               
+
         } catch (\Exception $e) {
             Log::error('[StoreController@map] Error: ' . $e->getMessage());
-            
+
             $consumer = Auth::guard('consumer')->user();
             $stores = collect([]);
             $mapboxToken = env('MAPBOX_ACCESS_TOKEN', 'pk.eyJ1IjoibmVha3NlbmJlc3RmcmkiLCJhIjoiY205cXhkb3c3MTF3MzJ2b2doamJiM2NmaSJ9.zTnzZvYetGaqX0CODz4qoQ');
-            
+
             return view('map.index', compact('stores', 'consumer', 'mapboxToken'))
                    ->with('error', 'Some stores may not be available at the moment.');
         }
@@ -121,17 +121,17 @@ class StoreController extends Controller
         try {
             $search = $request->get('search');
             $stores = $this->getAllStores($search);
-            
+
             return response()->json([
                 'success' => true,
                 'data' => $stores,
                 'count' => $stores->count(),
                 'message' => $stores->count() > 0 ? 'Stores loaded successfully' : 'No stores found in database'
             ]);
-            
+
         } catch (\Exception $e) {
             Log::error('Get stores API error: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Unable to fetch stores: ' . $e->getMessage(),
@@ -148,14 +148,14 @@ class StoreController extends Controller
     {
         try {
             $store = $this->getStoreById($id);
-            
+
             if (!$store) {
                 return response()->json(['success' => false, 'message' => 'Store not found'], 404);
             }
 
             $storeDetails = $this->enrichStoreData($store);
             return response()->json(['success' => true, 'data' => $storeDetails]);
-            
+
         } catch (\Exception $e) {
             Log::error('Get store details error: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'Unable to fetch store details'], 500);
@@ -175,7 +175,7 @@ class StoreController extends Controller
 
         try {
             $store = $this->getStoreById($request->store_id);
-            
+
             if (!$store || !$store->latitude || !$store->longitude) {
                 return response()->json(['success' => false, 'message' => 'Store location not available'], 404);
             }
@@ -192,7 +192,7 @@ class StoreController extends Controller
                     'distance_miles' => round($distance * 0.621371, 2)
                 ]
             ]);
-            
+
         } catch (\Exception $e) {
             Log::error('Calculate distance error: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'Unable to calculate distance'], 500);
@@ -285,13 +285,13 @@ class StoreController extends Controller
                 $request->user_lng,
                 $request->radius ?? 50
             );
-            
+
             return response()->json([
                 'success' => true,
                 'data' => $stores,
                 'count' => $stores->count()
             ]);
-            
+
         } catch (\Exception $e) {
             Log::error('Search stores error: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'Search failed', 'data' => []], 500);
@@ -305,11 +305,11 @@ class StoreController extends Controller
     {
         try {
             $query = $request->get('q', '');
-            
+
             if (empty(trim($query))) {
                 return response()->json(['success' => true, 'sellers' => []]);
             }
-            
+
             $sellers = DB::table('sellers')
                 ->where('is_active', true)
                 ->where(function($queryBuilder) use ($query) {
@@ -385,17 +385,17 @@ class StoreController extends Controller
             // Get base store data
             $stores = DB::table('sellers')
                 ->select([
-                    'id', 
-                    'business_name as name', 
-                    'description', 
+                    'id',
+                    'business_name as name',
+                    'description',
                     'working_hours as hours',
-                    'email', 
-                    'address', 
-                    'latitude', 
-                    'longitude', 
+                    'email',
+                    'address',
+                    'latitude',
+                    'longitude',
                     'photo_url as image',
-                    'phone', 
-                    'total_points', 
+                    'phone',
+                    'total_points',
                     'is_active',
                     'created_at'
                 ])
@@ -423,7 +423,7 @@ class StoreController extends Controller
             return $stores->map(function($store) use ($transactionData) {
                 // Get real transaction data for this store
                 $storeTransactionData = $transactionData->get($store->id);
-                
+
                 if ($storeTransactionData) {
                     // Use REAL data from transactions
                     $realPoints = (int) $storeTransactionData->real_points;
@@ -433,17 +433,17 @@ class StoreController extends Controller
                     $realPoints = 0;
                     $realTransactionCount = 0;
                 }
-                
+
                 // Generate consistent phone if missing (only for phone)
                 if (empty($store->phone)) {
                     $store->phone = $this->generateConsistentPhone($store->id);
                 }
-                
+
                 // Calculate ranking based on REAL points
                 $rankClass = $this->getRankClass($realPoints);
                 $rankText = $this->getRankText($realPoints);
                 $rankIcon = $this->getRankIcon($realPoints);
-                
+
                 return (object)[
                     'id' => $store->id,
                     'name' => $store->name,
@@ -456,17 +456,17 @@ class StoreController extends Controller
                     'email' => $store->email,
                     'image' => $store->image,
                     'is_active' => $store->is_active,
-                    
+
                     // REAL DATA from database
                     'total_points' => $realPoints,
                     'points_reward' => $realPoints,
                     'transaction_count' => $realTransactionCount,
-                    
+
                     // Ranking based on real points
                     'rank_class' => $rankClass,
                     'rank_text' => $rankText,
                     'rank_icon' => $rankIcon,
-                    
+
                     // Other fields
                     'distance' => null,
                     'hours_formatted' => $this->formatWorkingHours($store->hours),
@@ -474,7 +474,7 @@ class StoreController extends Controller
                     'created_at' => $store->created_at
                 ];
             });
-            
+
         } catch (\Exception $e) {
             Log::error('Error fetching stores for map: ' . $e->getMessage());
             return collect([]);
@@ -488,13 +488,13 @@ class StoreController extends Controller
     {
         try {
             $offset = ($page - 1) * $perPage;
-            
+
             // Check if seller_photos table exists
             if (!DB::getSchemaBuilder()->hasTable('seller_photos')) {
                 Log::info('seller_photos table does not exist');
                 return ['posts' => collect(), 'hasMore' => false];
             }
-            
+
             $query = DB::table('seller_photos as sp')
                 ->join('sellers as s', 's.id', '=', 'sp.seller_id')
                 ->where('s.is_active', true)
@@ -516,7 +516,7 @@ class StoreController extends Controller
             Log::info("Found {$posts->count()} posts for seller {$sellerId}, total: {$total}");
 
             $processedPosts = collect();
-            
+
             foreach ($posts as $post) {
                 $photoUrl = $post->photo_url;
                 if (!str_starts_with($photoUrl, 'http') && !str_starts_with($photoUrl, '/')) {
@@ -525,10 +525,10 @@ class StoreController extends Controller
                 if (str_starts_with($photoUrl, '/storage/')) {
                     $photoUrl = asset($photoUrl);
                 }
-                
+
                 $timeAgo = $this->getTimeAgo($post->created_at);
                 $points = $post->total_points ?? 0;
-                
+
                 $processedPost = (object)[
                     'id' => $post->id,
                     'seller_id' => $post->seller_id,
@@ -546,7 +546,7 @@ class StoreController extends Controller
                     'rank_text' => $this->getRankText($points),
                     'rank_icon' => $this->getRankIcon($points)
                 ];
-                
+
                 $processedPosts->push($processedPost);
             }
 
@@ -593,13 +593,13 @@ class StoreController extends Controller
             }
 
             $stores = $query->get();
-            
+
             Log::info('Stores fetched from database: ' . $stores->count());
 
             return $stores->map(function($store) {
                 return $this->enrichStoreData($store);
             });
-            
+
         } catch (\Exception $e) {
             Log::error('Error fetching stores: ' . $e->getMessage());
             return collect([]);
@@ -636,7 +636,7 @@ class StoreController extends Controller
         if (empty($store->phone)) {
             $store->phone = $this->generateConsistentPhone($store->id);
         }
-        
+
         // Get REAL points and transaction count from database
         $transactionData = DB::table('point_transactions')
             ->where('seller_id', $store->id)
@@ -645,7 +645,7 @@ class StoreController extends Controller
                 COUNT(*) as real_transaction_count
             ')
             ->first();
-        
+
         if ($transactionData) {
             $store->points_reward = (int) $transactionData->real_points;
             $store->transaction_count = (int) $transactionData->real_transaction_count;
@@ -654,23 +654,23 @@ class StoreController extends Controller
             $store->points_reward = 0;
             $store->transaction_count = 0;
         }
-        
+
         // Add ranking data based on REAL points
         $store->rank_class = $this->getRankClass($store->points_reward);
         $store->rank_text = $this->getRankText($store->points_reward);
         $store->rank_icon = $this->getRankIcon($store->points_reward);
-        
+
         // Format working hours
         $store->hours_formatted = $this->formatWorkingHours($store->hours);
         $store->is_open = $this->isStoreCurrentlyOpen($store->hours);
-        
+
         // Initialize distance
         $store->distance = null;
-        
+
         // Add photos (last 3 images max)
         $allPhotos = $this->getSellerPhotos($store->id);
         $store->photos = array_slice($allPhotos, 0, 3);
-        
+
         return $store;
     }
 
@@ -735,7 +735,7 @@ class StoreController extends Controller
                     if (str_starts_with($photoUrl, '/storage/')) {
                         $photoUrl = asset($photoUrl);
                     }
-                    
+
                     $photos->push((object)[
                         'id' => 0,
                         'url' => $photoUrl,
@@ -806,11 +806,11 @@ class StoreController extends Controller
         // Generate consistent phone using store ID
         $seed = intval($storeId) * 456; // Different multiplier for phone
         $hash = abs(crc32(strval($seed)));
-        
+
         $part1 = ($hash % 90) + 10; // 10-99
         $part2 = (($hash >> 8) % 900) + 100; // 100-999
         $part3 = (($hash >> 16) % 900) + 100; // 100-999
-        
+
         return "+855 {$part1} {$part2} {$part3}";
     }
 
@@ -829,7 +829,7 @@ class StoreController extends Controller
             $created = Carbon::parse($datetime);
             $now = Carbon::now();
             $diff = $created->diff($now);
-            
+
             if ($diff->y > 0) return $diff->y . ' year' . ($diff->y > 1 ? 's' : '') . ' ago';
             elseif ($diff->m > 0) return $diff->m . ' month' . ($diff->m > 1 ? 's' : '') . ' ago';
             elseif ($diff->d > 0) return $diff->d == 1 ? 'Yesterday' : $diff->d . ' day' . ($diff->d > 1 ? 's' : '') . ' ago';
