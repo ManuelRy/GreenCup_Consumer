@@ -17,7 +17,7 @@ class ConsumerController extends Controller
     | Authentication Methods (from LoginController)
     |--------------------------------------------------------------------------
     */
-    
+
     /**
      * Show the login form
      */
@@ -118,35 +118,35 @@ class ConsumerController extends Controller
  public function dashboard(Request $request)
     {
         $consumer = Auth::guard('consumer')->user();
-        
+
         if (!$consumer) {
             return redirect()->route('login');
         }
-        
+
         $selectedMonth = $request->get('month', Carbon::now()->format('F'));
         $year = Carbon::now()->year;
-        
+
         $monthNumber = Carbon::parse("1 $selectedMonth $year")->month;
-        
+
         try {
             // Use DB queries instead of Eloquent relationships
             $totalEarned = DB::table('point_transactions')
                 ->where('consumer_id', $consumer->id)
                 ->where('type', 'earn')
                 ->sum('points') ?? 0;
-                
+
             $totalSpent = DB::table('point_transactions')
                 ->where('consumer_id', $consumer->id)
                 ->where('type', 'spend')
                 ->sum('points') ?? 0;
-                
+
             $availablePoints = $totalEarned - $totalSpent;
-            
+
             $monthlyData = $this->getMonthlyData($consumer->id, $monthNumber, $year);
-            
+
             // Get recent activity data (NEW)
             $recentActivity = $this->getRecentActivityForDashboard($consumer->id);
-            
+
         } catch (\Exception $e) {
             \Log::error('Dashboard error: ' . $e->getMessage());
             $availablePoints = 0;
@@ -161,7 +161,7 @@ class ConsumerController extends Controller
             ];
             $recentActivity = collect([]);
         }
-        
+
         return view('dashboard', compact('consumer', 'availablePoints', 'monthlyData', 'selectedMonth', 'recentActivity'));
     }
      private function getRecentActivityForDashboard($consumerId, $limit = 5)
@@ -184,12 +184,12 @@ class ConsumerController extends Controller
             ->orderBy('pt.scanned_at', 'desc')
             ->limit($limit)
             ->get();
-        
+
         return $transactions->map(function ($transaction) {
             // Parse receipt items to get activity name
             $activityName = 'Unknown Activity';
             $icon = '🔄';
-            
+
             if ($transaction->receipt_items) {
                 $items = json_decode($transaction->receipt_items, true) ?: [];
                 if (!empty($items)) {
@@ -216,10 +216,10 @@ class ConsumerController extends Controller
                     $icon = $transaction->type === 'earn' ? '💚' : '💸';
                 }
             }
-            
+
             // Format time ago
             $timeAgo = Carbon::parse($transaction->scanned_at)->diffForHumans();
-            
+
             return (object) [
                 'id' => $transaction->id,
                 'name' => $activityName,
@@ -240,7 +240,7 @@ class ConsumerController extends Controller
     private function getActivityIcon($itemName)
     {
         $itemName = strtolower($itemName);
-        
+
         if (str_contains($itemName, 'coffee')) return '☕';
         if (str_contains($itemName, 'cup') || str_contains($itemName, 'bottle')) return '🥤';
         if (str_contains($itemName, 'bag')) return '🛍️';
@@ -249,7 +249,7 @@ class ConsumerController extends Controller
         if (str_contains($itemName, 'container')) return '📦';
         if (str_contains($itemName, 'utensil') || str_contains($itemName, 'bamboo')) return '🥢';
         if (str_contains($itemName, 'smoothie') || str_contains($itemName, 'juice')) return '🥤';
-        
+
         return '🛒'; // Default shopping icon
     }
 
@@ -265,33 +265,33 @@ class ConsumerController extends Controller
     public function account()
     {
         $consumer = Auth::guard('consumer')->user();
-        
+
         if (!$consumer) {
             return redirect()->route('login');
         }
-        
+
         try {
             // Check if required tables exist
             if (!DB::getSchemaBuilder()->hasTable('point_transactions')) {
                 throw new \Exception('Tables not migrated yet');
             }
-            
+
             // Calculate points summary
             $totalPointsEarned = DB::table('point_transactions')
                 ->where('consumer_id', $consumer->id)
                 ->where('type', 'earn')
                 ->sum('points') ?? 0;
-                
+
             $totalPointsSpent = DB::table('point_transactions')
                 ->where('consumer_id', $consumer->id)
                 ->where('type', 'spend')
                 ->sum('points') ?? 0;
-                
+
             $availablePoints = $totalPointsEarned - $totalPointsSpent;
-            
+
             // Get transaction history with receipt system data
             $transactions = $this->getTransactionHistory($consumer->id);
-                
+
         } catch (\Exception $e) {
             \Log::error('Account page error: ' . $e->getMessage());
             $totalPointsEarned = 0;
@@ -299,7 +299,7 @@ class ConsumerController extends Controller
             $availablePoints = 0;
             $transactions = collect([]);
         }
-        
+
         return view('account.index', compact(
             'consumer', 'totalPointsEarned', 'totalPointsSpent', 'availablePoints', 'transactions'
         ));
@@ -326,14 +326,14 @@ class ConsumerController extends Controller
         if (!$consumer) {
             return redirect()->route('login')->with('error', 'Please login to update your profile');
         }
-        
+
         $data = $request->validate([
             'full_name'     => 'required|string|max:255',
             'phone_number'  => 'nullable|string|max:20',
             'gender'        => 'required|in:male,female,other',
             'date_of_birth' => 'nullable|date|before:today',
         ]);
-        
+
         $consumer->update($data);
         return redirect()->route('account')->with('success', 'Profile updated successfully!');
     }
@@ -347,12 +347,12 @@ class ConsumerController extends Controller
         if (!$consumer) {
             return redirect()->route('login')->with('error', 'Please login to change your password');
         }
-        
+
         $request->validate([
             'current_password' => 'required|current_password:consumer',
             'password' => ['required', 'confirmed', Password::defaults()],
         ]);
-        
+
         $consumer->update(['password' => Hash::make($request->password)]);
         return redirect()->route('account')->with('success', 'Password updated successfully!');
     }
@@ -366,19 +366,30 @@ class ConsumerController extends Controller
         if (!$consumer) {
             return redirect()->route('login');
         }
-        
-        // Base query for receipt system
+
+        // Base query for receipt system - using the same logic as getTransactionHistory
         $query = DB::table('point_transactions as pt')
             ->leftJoin('sellers as s', 's.id', '=', 'pt.seller_id')
             ->leftJoin('pending_transactions as pend', 'pend.receipt_code', '=', 'pt.receipt_code')
             ->where('pt.consumer_id', $consumer->id)
             ->select([
-                'pt.id', 'pt.points', 'pt.type', 'pt.description', 'pt.units_scanned',
-                'pt.seller_id', 'pt.scanned_at as transaction_date', 'pt.receipt_code',
-                'pt.created_at', 's.business_name as store_name', 's.address as store_location',
-                'pend.items as receipt_items', 'pend.total_points as receipt_total_points'
+                'pt.id',
+                'pt.points',
+                'pt.type',
+                'pt.description',
+                'pt.units_scanned',
+                'pt.seller_id',
+                'pt.scanned_at as transaction_date',
+                'pt.receipt_code',
+                'pt.created_at',
+                's.business_name as store_name',
+                's.address as store_location',
+                's.phone as store_phone',
+                'pend.items as receipt_items',
+                'pend.total_points as receipt_total_points',
+                'pend.total_quantity as receipt_total_quantity'
             ]);
-        
+
         // Apply filters
         if ($request->filled('type')) {
             $query->where('pt.type', $request->type);
@@ -392,18 +403,18 @@ class ConsumerController extends Controller
         if ($request->filled('date_to')) {
             $query->whereDate('pt.scanned_at', '<=', $request->date_to);
         }
-        
-        $transactions = $query->orderBy('pt.scanned_at', 'desc')->paginate(20);
-        
-        // Process transactions for display
-        $transactions->getCollection()->transform(function ($transaction) {
-            // Parse receipt items
+
+        $transactionData = $query->orderBy('pt.scanned_at', 'desc')->get();
+
+        // Process transactions using the same logic as getTransactionHistory
+        $processedTransactions = $transactionData->map(function ($transaction) {
+            // Parse receipt items if available
             $items = [];
             if ($transaction->receipt_items) {
                 $items = json_decode($transaction->receipt_items, true) ?: [];
             }
-            
-            // Determine item name
+
+            // Determine item name from receipt items or description - SAME LOGIC AS WORKING METHOD
             $itemName = 'Unknown Item';
             if (!empty($items)) {
                 if (count($items) === 1) {
@@ -415,13 +426,60 @@ class ConsumerController extends Controller
                         $itemName .= ' +' . (count($itemNames) - 2) . ' more';
                     }
                 }
+            } elseif ($transaction->description) {
+                // Extract item name from description like "Purchased: Coffee, Muffin from Store"
+                if (preg_match('/Purchased: (.+?) from/', $transaction->description, $matches)) {
+                    $itemName = $matches[1];
+                } else {
+                    $itemName = 'Receipt Purchase';
+                }
             }
-            
-            $transaction->item_name = $itemName;
-            $transaction->receipt_items_parsed = $items;
-            return $transaction;
+
+            // Calculate points per unit
+            $pointsPerUnit = $transaction->units_scanned > 0
+                ? round($transaction->points / $transaction->units_scanned, 1)
+                : $transaction->points;
+
+            // Generate QR code reference for modal display
+            $qrCode = $transaction->receipt_code ?: 'TXN-' . str_pad($transaction->id, 6, '0', STR_PAD_LEFT);
+
+            return (object) [
+                'id' => $transaction->id,
+                'item_name' => $itemName,
+                'store_name' => $transaction->store_name ?: 'Unknown Store',
+                'store_location' => $transaction->store_location ?: 'Location not specified',
+                'store_phone' => $transaction->store_phone,
+                'transaction_date' => $transaction->transaction_date ?: $transaction->created_at,
+                'points' => $transaction->points,
+                'type' => $transaction->type,
+                'description' => $transaction->description,
+                'units_scanned' => $transaction->units_scanned ?: 1,
+                'points_per_unit' => $pointsPerUnit,
+                'receipt_code' => $transaction->receipt_code,
+                'qr_code' => $qrCode,
+                'code' => $qrCode,
+                'receipt_items_parsed' => $items, // Keep this for the template
+                'receipt_items' => $items, // Also keep this
+                'receipt_total_points' => $transaction->receipt_total_points,
+                'receipt_total_quantity' => $transaction->receipt_total_quantity,
+                'created_at' => $transaction->created_at
+            ];
         });
-        
+
+        // Paginate the processed data manually
+        $page = $request->get('page', 1);
+        $perPage = 20;
+        $offset = ($page - 1) * $perPage;
+        $paginatedItems = $processedTransactions->slice($offset, $perPage)->values();
+
+        $transactions = new \Illuminate\Pagination\LengthAwarePaginator(
+            $paginatedItems,
+            $processedTransactions->count(),
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
         // Get unique stores for filter dropdown
         $stores = DB::table('point_transactions as pt')
             ->join('sellers as s', 'pt.seller_id', '=', 's.id')
@@ -430,7 +488,7 @@ class ConsumerController extends Controller
             ->distinct()
             ->orderBy('s.business_name')
             ->get();
-        
+
         return view('account.transactions', compact('consumer', 'transactions', 'stores'));
     }
 
@@ -456,21 +514,21 @@ class ConsumerController extends Controller
                 ->where('consumer_id', $consumer->id)
                 ->where('type', 'consumer_profile')
                 ->first();
-                
+
             // Get recent transactions using DB query
             $recentTransactions = DB::table('point_transactions as pt')
                 ->leftJoin('sellers as s', 's.id', '=', 'pt.seller_id')
                 ->where('pt.consumer_id', $consumer->id)
                 ->select([
                     'pt.points',
-                    'pt.type', 
+                    'pt.type',
                     'pt.scanned_at',
                     's.business_name as store_name'
                 ])
                 ->orderBy('pt.scanned_at', 'desc')
                 ->limit(5)
                 ->get();
-                
+
             // If no QR code exists, create one
             if (!$qrCode) {
                 $qrCodeData = [
@@ -484,11 +542,11 @@ class ConsumerController extends Controller
                     'created_at' => now(),
                     'updated_at' => now()
                 ];
-                
+
                 $qrCodeId = DB::table('qr_codes')->insertGetId($qrCodeData);
                 $qrCode = (object) array_merge($qrCodeData, ['id' => $qrCodeId]);
             }
-            
+
         } catch (\Exception $e) {
             \Log::error('QR Code page error: ' . $e->getMessage());
             $qrCode = null;
@@ -519,22 +577,22 @@ class ConsumerController extends Controller
     public function getPoints()
     {
         $consumer = Auth::guard('consumer')->user();
-        
+
         if (!$consumer) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
-        
+
         try {
             $totalEarned = DB::table('point_transactions')
                 ->where('consumer_id', $consumer->id)
                 ->where('type', 'earn')
                 ->sum('points') ?? 0;
-                
+
             $totalSpent = DB::table('point_transactions')
                 ->where('consumer_id', $consumer->id)
                 ->where('type', 'spend')
                 ->sum('points') ?? 0;
-            
+
             return response()->json([
                 'success' => true,
                 'data' => [
@@ -585,7 +643,7 @@ class ConsumerController extends Controller
             ->orderBy('pt.scanned_at', 'desc')
             ->limit($limit)
             ->get();
-        
+
         // Process and enhance transaction data
         return $transactions->map(function ($transaction) {
             // Parse receipt items if available
@@ -593,7 +651,7 @@ class ConsumerController extends Controller
             if ($transaction->receipt_items) {
                 $items = json_decode($transaction->receipt_items, true) ?: [];
             }
-            
+
             // Determine item name from receipt items or description
             $itemName = 'Unknown Item';
             if (!empty($items)) {
@@ -614,15 +672,15 @@ class ConsumerController extends Controller
                     $itemName = 'Receipt Purchase';
                 }
             }
-            
+
             // Calculate points per unit
-            $pointsPerUnit = $transaction->units_scanned > 0 
+            $pointsPerUnit = $transaction->units_scanned > 0
                 ? round($transaction->points / $transaction->units_scanned, 1)
                 : $transaction->points;
-            
+
             // Generate QR code reference for modal display
             $qrCode = $transaction->receipt_code ?: 'TXN-' . str_pad($transaction->id, 6, '0', STR_PAD_LEFT);
-            
+
             return (object) [
                 'id' => $transaction->id,
                 'item_name' => $itemName,
@@ -657,31 +715,31 @@ class ConsumerController extends Controller
             ->whereMonth('created_at', $month)
             ->whereYear('created_at', $year)
             ->sum('points');
-            
+
         $pointsOut = DB::table('point_transactions')
             ->where('consumer_id', $consumerId)
             ->where('type', 'spend')
             ->whereMonth('created_at', $month)
             ->whereYear('created_at', $year)
             ->sum('points');
-            
+
         $prevMonth = $month == 1 ? 12 : $month - 1;
         $prevYear = $month == 1 ? $year - 1 : $year;
-        
+
         $prevPointsIn = DB::table('point_transactions')
             ->where('consumer_id', $consumerId)
             ->where('type', 'earn')
             ->whereMonth('created_at', $prevMonth)
             ->whereYear('created_at', $prevYear)
             ->sum('points');
-            
+
         $prevPointsOut = DB::table('point_transactions')
             ->where('consumer_id', $consumerId)
             ->where('type', 'spend')
             ->whereMonth('created_at', $prevMonth)
             ->whereYear('created_at', $prevYear)
             ->sum('points');
-        
+
         return [
             'points_in' => $pointsIn,
             'points_out' => $pointsOut,

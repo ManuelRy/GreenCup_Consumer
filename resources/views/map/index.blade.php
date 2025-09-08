@@ -2,20 +2,6 @@
 
 @section('content')
     <div class="fullscreen-map-container">
-        <!-- Header (Fixed at top) -->
-        <div class="map-header-fixed">
-            <div class="header-nav">
-                <a href="{{ route('dashboard') }}" class="back-btn">
-                    <span>←</span>
-                </a>
-                <h2>🗺️ Store Locator</h2>
-                <button id="viewToggle" class="view-toggle-btn">
-                    <span id="toggleIcon">📋</span>
-                    <span id="toggleText">List</span>
-                </button>
-            </div>
-        </div>
-
         <!-- Search Bar (Fixed at top) -->
         <div class="search-section-fixed">
             <div class="search-container">
@@ -28,17 +14,12 @@
                 <span>My Location</span>
             </button>
         </div>
-
         <!-- Controls & Filters (Fixed at top) -->
         <div class="toggle-controls-fixed">
             <div class="view-options">
-                <button class="view-option active" data-view="map">
-                    <span>🗺️</span>
-                    <span>Map</span>
-                </button>
-                <button class="view-option" data-view="list">
-                    <span>📋</span>
-                    <span>List</span>
+                <button id="viewToggle" class="view-toggle-btn">
+                    <span id="toggleIcon">📋🗺️</span>
+                    <span id="toggleText">List</span>
                 </button>
             </div>
             <div class="filter-controls">

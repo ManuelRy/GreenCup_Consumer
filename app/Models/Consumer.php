@@ -49,6 +49,17 @@ class Consumer extends Authenticatable
     }
 
     /**
+     * Cached available points attribute accessor
+     */
+    public function getAvailablePointsAttribute()
+    {
+        if (!isset($this->attributes['cached_available_points'])) {
+            $this->attributes['cached_available_points'] = $this->getAvailablePoints();
+        }
+        return $this->attributes['cached_available_points'];
+    }
+
+    /**
      * Get consumer's total earned points
      */
     public function getTotalEarnedPoints()

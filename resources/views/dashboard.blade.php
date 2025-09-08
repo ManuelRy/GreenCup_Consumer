@@ -2,17 +2,6 @@
 
 @section('content')
 <div class="dashboard-container">
-    <!-- Header -->
-    <header class="dashboard-header">
-        <div class="header-content">
-            <h1 class="app-logo">Green Cup</h1>
-            <div class="user-info">
-                <span class="user-name">{{ $consumer->full_name ?? 'User' }}</span>
-                <div class="user-avatar">👤</div>
-            </div>
-        </div>
-    </header>
-
     <!-- Main Content -->
     <main class="main-content">
         <!-- Points Section -->
