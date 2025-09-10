@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\{ConsumerController, StoreController, ReceiptController};
+use App\Http\Controllers\{AccountController, AuthController, ConsumerController, DashboardController, LoginController, StoreController, ReceiptController, RegisterController};
 
 /*
 |--------------------------------------------------------------------------
@@ -17,19 +17,19 @@ Route::get('/', fn() => redirect()->route('login'))->name('home');
 | Public Routes (Guest Only) - Authentication & Registration
 |--------------------------------------------------------------------------
 */
-Route::middleware(['guest:consumer'])->group(function () {
-    // Authentication
-    Route::get('/login', [ConsumerController::class, 'showLogin'])->name('login');
-    Route::post('/login', [ConsumerController::class, 'login'])->name('login.store');
+// Route::middleware(['guest:consumer'])->group(function () {
+// Authentication
+Route::get('/login', [LoginController::class, 'index'])->name('login');
+Route::post('/login', [LoginController::class, 'store'])->name('login.store');
 
-    // Registration
-    Route::get('/register', [ConsumerController::class, 'showRegister'])->name('register');
-    Route::post('/register', [ConsumerController::class, 'register'])->name('register.store');
+// Registration
+Route::get('/register', [RegisterController::class, 'index'])->name('register');
+Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
 
-    // Legacy routes for backward compatibility
-    Route::get('/consumers/create', [ConsumerController::class, 'showRegister'])->name('consumers.create');
-    Route::post('/consumers', [ConsumerController::class, 'register'])->name('consumers.store');
-});
+// Legacy routes for backward compatibility
+Route::get('/consumers/create', [RegisterController::class, 'index'])->name('consumers.create');
+Route::post('/consumers', [RegisterController::class, 'store'])->name('consumers.store');
+// });
 
 /*
 |--------------------------------------------------------------------------
@@ -45,14 +45,15 @@ Route::middleware(['auth:consumer'])->group(function () {
     |--------------------------------------------------------------------------
     */
     // Core consumer pages
-    Route::get('/dashboard', [ConsumerController::class, 'dashboard'])->name('dashboard');
-    Route::get('/account', [ConsumerController::class, 'account'])->name('account');
-    Route::get('/account/edit', [ConsumerController::class, 'showEditAccount'])->name('account.edit');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/account', [AccountController::class, 'index'])->name('account');
+    Route::get('/account/edit', [AccountController::class, 'edit'])->name('account.edit');
 
     // Profile management
-    Route::put('/account/profile', [ConsumerController::class, 'updateProfile'])->name('account.profile.update');
-    Route::put('/account/password', [ConsumerController::class, 'updatePassword'])->name('account.password.update');
-    Route::get('/account/transactions', [ConsumerController::class, 'transactionHistory'])->name('account.transactions');
+    Route::put('/account/profile', [AccountController::class, 'updateProfile'])->name('account.profile.update');
+    Route::put('/account/password', [AccountController::class, 'updatePassword'])->name('account.password.update');
+    Route::get('/account/transactions', [AccountController::class, 'transactionHistory'])->name('account.transactions');
 
     // QR Code
     Route::get('/qr-code', [ConsumerController::class, 'showQrCode'])->name('consumer.qr-code');
@@ -117,8 +118,8 @@ Route::middleware(['auth:consumer'])->group(function () {
     | Logout Routes
     |--------------------------------------------------------------------------
     */
-    Route::post('/logout', [ConsumerController::class, 'logout'])->name('logout');
-    Route::get('/logout', [ConsumerController::class, 'logout'])->name('logout.get');
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get('/logout', [AuthController::class, 'logout'])->name('logout.get');
 });
 
 /*
@@ -148,58 +149,58 @@ Route::prefix('public-api')->name('public.api.')->group(function () {
 | Development/Testing Routes (Local Environment Only)
 |--------------------------------------------------------------------------
 */
-if (app()->environment('local')) {
-    Route::prefix('dev')->name('dev.')->group(function () {
-        // Quick login as first consumer
-        Route::get('/login', function () {
-            $consumer = \App\Models\Consumer::first();
-            if ($consumer) {
-                Auth::guard('consumer')->login($consumer);
-                return redirect()->route('dashboard')->with('success', 'Dev login successful!');
-            }
-            return redirect()->route('login')->with('error', 'No consumer found. Please register first.');
-        })->name('login');
+// if (app()->environment('local')) {
+//     Route::prefix('dev')->name('dev.')->group(function () {
+//         // Quick login as first consumer
+//         Route::get('/login', function () {
+//             $consumer = \App\Models\Consumer::first();
+//             if ($consumer) {
+//                 Auth::guard('consumer')->login($consumer);
+//                 return redirect()->route('dashboard')->with('success', 'Dev login successful!');
+//             }
+//             return redirect()->route('login')->with('error', 'No consumer found. Please register first.');
+//         })->name('login');
 
-        // Quick access to features
-        Route::get('/dashboard', function () {
-            $consumer = \App\Models\Consumer::first();
-            if ($consumer) {
-                Auth::guard('consumer')->login($consumer);
-                return redirect()->route('dashboard');
-            }
-            return redirect()->route('login');
-        })->name('dashboard');
+//         // Quick access to features
+//         Route::get('/dashboard', function () {
+//             $consumer = \App\Models\Consumer::first();
+//             if ($consumer) {
+//                 Auth::guard('consumer')->login($consumer);
+//                 return redirect()->route('dashboard');
+//             }
+//             return redirect()->route('login');
+//         })->name('dashboard');
 
-        Route::get('/gallery', function () {
-            $consumer = \App\Models\Consumer::first();
-            if ($consumer) {
-                Auth::guard('consumer')->login($consumer);
-                return redirect()->route('gallery');
-            }
-            return redirect()->route('login');
-        })->name('gallery');
+//         Route::get('/gallery', function () {
+//             $consumer = \App\Models\Consumer::first();
+//             if ($consumer) {
+//                 Auth::guard('consumer')->login($consumer);
+//                 return redirect()->route('gallery');
+//             }
+//             return redirect()->route('login');
+//         })->name('gallery');
 
-        // Database status
-        Route::get('/status', function () {
-            return response()->json([
-                'consumers' => \App\Models\Consumer::count(),
-                'sellers' => \App\Models\Seller::count(),
-                'photos' => \DB::table('seller_photos')->count(),
-                'transactions' => \DB::table('point_transactions')->count(),
-                'environment' => app()->environment(),
-            ]);
-        })->name('status');
-    });
-}
+//         // Database status
+//         Route::get('/status', function () {
+//             return response()->json([
+//                 'consumers' => \App\Models\Consumer::count(),
+//                 'sellers' => \App\Models\Seller::count(),
+//                 'photos' => \DB::table('seller_photos')->count(),
+//                 'transactions' => \DB::table('point_transactions')->count(),
+//                 'environment' => app()->environment(),
+//             ]);
+//         })->name('status');
+//     });
+// }
 
 /*
 |--------------------------------------------------------------------------
 | Error Handling
 |--------------------------------------------------------------------------
 */
-Route::fallback(function () {
-    if (!Auth::guard('consumer')->check()) {
-        return redirect()->route('login')->with('error', 'Please log in to access this page.');
-    }
-    return response()->view('errors.404', [], 404);
-});
+// Route::fallback(function () {
+//     if (!Auth::guard('consumer')->check()) {
+//         return redirect()->route('login')->with('error', 'Please log in to access this page.');
+//     }
+//     return response()->view('errors.404', [], 404);
+// });
