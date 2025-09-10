@@ -309,18 +309,23 @@
             background: rgba(255, 255, 255, 0.3);
         }
 
-        /* Fixed Search Section */
+        /* Fixed Search Section - Responsive */
         .search-section-fixed {
             position: fixed;
-            top: 70px;
+            top: var(--navbar-height);
             left: 0;
             right: 0;
-            background: white;
+            background: linear-gradient(135deg, rgba(255,255,255,0.98), rgba(248,250,252,0.98));
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             padding: 12px 20px;
             display: flex;
             gap: 12px;
             z-index: 1001;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            border-bottom: 1px solid rgba(226,232,240,0.5);
+            min-height: 60px;
+            box-sizing: border-box;
         }
 
         .search-container {
@@ -396,76 +401,110 @@
             cursor: not-allowed;
         }
 
-        /* Fixed Controls */
+        /* Fixed Controls - Responsive */
         .toggle-controls-fixed {
             position: fixed;
-            top: 126px;
+            top: calc(var(--navbar-height) + 72px);
             left: 0;
             right: 0;
-            background: white;
+            background: linear-gradient(135deg, rgba(255,255,255,0.98), rgba(248,250,252,0.98));
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             padding: 12px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             z-index: 1001;
-            border-bottom: 1px solid #e9ecef;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border-bottom: 1px solid rgba(226,232,240,0.5);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            min-height: 60px;
+            box-sizing: border-box;
+            overflow: visible;
         }
 
         .view-options {
             display: flex;
-            background: #f8f9fa;
-            border-radius: 25px;
-            padding: 3px;
+            background: rgba(248,249,250,0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 4px;
+            border: 1px solid rgba(226,232,240,0.5);
         }
 
-        .view-option {
+        .view-toggle-btn {
             background: none;
             border: none;
-            padding: 6px 14px;
-            border-radius: 20px;
+            padding: 8px 16px;
+            border-radius: 12px;
             font-size: 13px;
             font-weight: 600;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 6px;
-            transition: all 0.3s ease;
-            color: #666;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #64748b;
+            min-height: 36px;
         }
 
-        .view-option.active {
-            background: #2E8B57;
+        .view-toggle-btn:hover {
+            background: rgba(241,245,249,0.8);
+            color: #334155;
+        }
+
+        .view-toggle-btn.active {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
             color: white;
-            box-shadow: 0 2px 8px rgba(46, 139, 87, 0.3);
+            box-shadow: 0 2px 8px rgba(34,197,94,0.3);
         }
 
         .filter-controls {
             display: flex;
-            gap: 8px;
+            gap: 10px;
+            position: relative;
+            z-index: 1002;
         }
 
         .sort-select,
         .radius-select {
-            padding: 6px 10px;
-            border: 2px solid #e9ecef;
-            border-radius: 20px;
+            padding: 8px 14px;
+            border: 2px solid rgba(226,232,240,0.6);
+            border-radius: 12px;
             font-size: 13px;
+            font-weight: 500;
             outline: none;
-            background: white;
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #334155;
+            min-height: 36px;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 1050;
         }
 
         .sort-select:focus,
         .radius-select:focus {
-            border-color: #2E8B57;
+            border-color: #22c55e;
+            box-shadow: 0 0 0 3px rgba(34,197,94,0.1);
+            background: rgba(255,255,255,1);
+            transform: translateY(-1px);
+            z-index: 1060;
         }
 
-        /* Full Screen Map View */
+        .sort-select:hover,
+        .radius-select:hover {
+            border-color: #94a3b8;
+            background: rgba(255,255,255,1);
+        }
+
+        /* Full Screen Map View - Responsive */
         .fullscreen-map-view {
             position: absolute;
-            top: 178px;
+            top: calc(var(--navbar-height) + 144px);
             left: 0;
             right: 0;
             bottom: 0;
@@ -477,10 +516,10 @@
             height: 100%;
         }
 
-        /* Full Screen List View */
+        /* Full Screen List View - Responsive */
         .fullscreen-list-view {
             position: absolute;
-            top: 178px;
+            top: calc(var(--navbar-height) + 144px);
             left: 0;
             right: 0;
             bottom: 0;
@@ -1478,15 +1517,31 @@
             justify-content: center;
         }
 
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            .header-nav h2 {
-                font-size: 16px;
+        /* Responsive Design */
+        @media (max-width: 991.98px) {
+            .search-section-fixed {
+                padding: 10px 16px;
+                min-height: 64px;
             }
 
+            .toggle-controls-fixed {
+                padding: 10px 16px;
+                min-height: 64px;
+                top: calc(var(--navbar-height) + 76px);
+            }
+
+            .fullscreen-map-view,
+            .fullscreen-list-view {
+                top: calc(var(--navbar-height) + 152px);
+            }
+        }
+
+        @media (max-width: 767.98px) {
             .search-section-fixed {
                 flex-direction: column;
                 gap: 8px;
+                padding: 8px 12px;
+                min-height: 80px;
             }
 
             .location-btn {
@@ -1497,6 +1552,9 @@
                 flex-direction: column;
                 gap: 10px;
                 align-items: stretch;
+                padding: 8px 12px;
+                min-height: 80px;
+                top: calc(var(--navbar-height) + 92px);
             }
 
             .filter-controls {
@@ -1505,21 +1563,25 @@
 
             .fullscreen-map-view,
             .fullscreen-list-view {
-                top: 220px;
+                top: calc(var(--navbar-height) + 184px);
             }
         }
 
-        @media (max-width: 480px) {
-            .map-header-fixed {
-                padding: 12px 15px;
-            }
-
+        @media (max-width: 575.98px) {
             .search-section-fixed {
-                padding: 10px 15px;
+                padding: 6px 8px;
+                min-height: 90px;
             }
 
             .toggle-controls-fixed {
-                padding: 10px 15px;
+                padding: 6px 8px;
+                min-height: 90px;
+                top: calc(var(--navbar-height) + 102px);
+            }
+
+            .fullscreen-map-view,
+            .fullscreen-list-view {
+                top: calc(var(--navbar-height) + 204px);
             }
 
             .modal-content {
@@ -1527,6 +1589,18 @@
                 max-height: 95vh;
                 max-width: calc(100% - 20px);
             }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn-directions,
+            .btn-call,
+            .btn-share {
+                flex-direction: row;
+                justify-content: center;
+            }
+        }
 
             .action-buttons {
                 flex-direction: column;
