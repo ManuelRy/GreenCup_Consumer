@@ -1,9 +1,9 @@
 @extends('master')
 
 @section('content')
-    <div class="container">
+    <div class="container page-content">
         <!-- Header with back button -->
-        <div class="account-header">
+        {{-- <div class="account-header">
             <div class="header-nav">
                 <a href="{{ route('dashboard') }}" class="back-btn">
                     <span>←</span>
@@ -16,7 +16,7 @@
                     </button>
                 </form>
             </div>
-        </div>
+        </div> --}}
 
         <!-- Profile Section -->
         <div class="profile-section">
@@ -77,7 +77,7 @@
         <!-- Account Settings -->
         <div class="settings-section">
             <h3 class="section-title">Account Settings</h3>
-            
+
             <div class="settings-list">
                 <a href="{{ route('account.edit') }}" class="setting-item">
                     <div class="setting-icon">👤</div>
@@ -117,7 +117,7 @@
                     <div class="points-subtitle">Available</div>
                 </div>
             </div>
-            
+
             <div class="points-breakdown">
                 <div class="breakdown-item">
                     <span class="breakdown-label">Total Earned</span>
@@ -136,7 +136,7 @@
                 <h3 class="section-title">Recent Transactions</h3>
                 <a href="{{ route('account.transactions') }}" class="see-all-link">See All</a>
             </div>
-            
+
             @forelse($transactions->take(5) as $transaction)
                 <div class="account-card" onclick="showTransactionDetail({{ json_encode($transaction) }})">
                     <div class="account-info">
@@ -204,28 +204,28 @@
                     <h3 style="margin: 0; font-size: 18px; font-weight: 600;">Change Password</h3>
                     <button onclick="closePasswordModal()" style="background: rgba(255,255,255,0.1); border: none; color: white; font-size: 24px; cursor: pointer; padding: 4px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">×</button>
                 </div>
-                
+
                 <form id="passwordForm" action="{{ route('account.password.update') }}" method="POST">
                     @csrf
                     @method('PUT')
-                    
+
                     <div style="padding: 20px;">
                         <div style="margin-bottom: 16px;">
                             <label for="current_password" style="display: block; font-size: 14px; font-weight: 600; color: #1a1a1a; margin-bottom: 6px;">Current Password</label>
                             <input type="password" id="current_password" name="current_password" required style="width: 100%; padding: 10px 12px; border: 2px solid #e9ecef; border-radius: 6px; font-size: 14px; background: white; transition: border-color 0.2s ease; box-sizing: border-box;" onfocus="this.style.borderColor='#1a1a1a'" onblur="this.style.borderColor='#e9ecef'">
                         </div>
-                        
+
                         <div style="margin-bottom: 16px;">
                             <label for="password" style="display: block; font-size: 14px; font-weight: 600; color: #1a1a1a; margin-bottom: 6px;">New Password</label>
                             <input type="password" id="password" name="password" required minlength="8" style="width: 100%; padding: 10px 12px; border: 2px solid #e9ecef; border-radius: 6px; font-size: 14px; background: white; transition: border-color 0.2s ease; box-sizing: border-box;" onfocus="this.style.borderColor='#1a1a1a'" onblur="this.style.borderColor='#e9ecef'">
                         </div>
-                        
+
                         <div style="margin-bottom: 24px;">
                             <label for="password_confirmation" style="display: block; font-size: 14px; font-weight: 600; color: #1a1a1a; margin-bottom: 6px;">Confirm New Password</label>
                             <input type="password" id="password_confirmation" name="password_confirmation" required style="width: 100%; padding: 10px 12px; border: 2px solid #e9ecef; border-radius: 6px; font-size: 14px; background: white; transition: border-color 0.2s ease; box-sizing: border-box;" onfocus="this.style.borderColor='#1a1a1a'" onblur="this.style.borderColor='#e9ecef'">
                         </div>
                     </div>
-                    
+
                     <div style="padding: 20px; display: flex; gap: 12px; justify-content: flex-end;">
                         <button type="button" onclick="closePasswordModal()" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.background='#5a6268'" onmouseout="this.style.background='#6c757d'">Cancel</button>
                         <button type="submit" style="background: #1a1a1a; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.background='#333'" onmouseout="this.style.background='#1a1a1a'">Update Password</button>
@@ -243,7 +243,7 @@
                 <h3>Transaction Receipt</h3>
                 <button onclick="closeTransactionDetail()" class="modal-close">×</button>
             </div>
-            
+
             <div class="modal-body">
                 <!-- Transaction Status -->
                 <div class="transaction-status">
@@ -260,32 +260,32 @@
                 <!-- Transaction Details -->
                 <div class="detail-section">
                     <h4 class="detail-header">Transaction Details</h4>
-                    
+
                     <div class="detail-row">
                         <span class="detail-label">Item</span>
                         <span class="detail-value" id="modalItemName">-</span>
                     </div>
-                    
+
                     <div class="detail-row">
                         <span class="detail-label">Store</span>
                         <span class="detail-value" id="modalStoreName">-</span>
                     </div>
-                    
+
                     <div class="detail-row">
                         <span class="detail-label">Location</span>
                         <span class="detail-value" id="modalStoreLocation">-</span>
                     </div>
-                    
+
                     <div class="detail-row">
                         <span class="detail-label">Date & Time</span>
                         <span class="detail-value" id="modalDateTime">-</span>
                     </div>
-                    
+
                     <div class="detail-row">
                         <span class="detail-label">Transaction ID</span>
                         <span class="detail-value" id="modalTransactionId">-</span>
                     </div>
-                    
+
                     <div class="detail-row">
                         <span class="detail-label">Units Scanned</span>
                         <span class="detail-value" id="modalUnitsScanned">-</span>
@@ -295,12 +295,12 @@
                 <!-- QR Code Info -->
                 <div class="detail-section">
                     <h4 class="detail-header">QR Code Information</h4>
-                    
+
                     <div class="detail-row">
                         <span class="detail-label">QR Code</span>
                         <span class="detail-value qr-code" id="modalQrCode">-</span>
                     </div>
-                    
+
                     <div class="detail-row">
                         <span class="detail-label">Points per Unit</span>
                         <span class="detail-value" id="modalPointsPerUnit">-</span>
@@ -325,27 +325,31 @@
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
         }
-        
+
         body {
             margin: 0;
             padding: 0;
             overflow-x: hidden;
             background: #f8f8f8;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         /* Container */
         .container {
             background: #ffffff;
-            min-height: 100vh;
+            min-height: calc(100vh - var(--navbar-height));
             position: relative;
             max-width: 100%;
             width: 100%;
+            padding-top: 0;
         }
 
         @media (min-width: 768px) {
             .container {
                 border-radius: 16px;
                 box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+                margin: 1rem;
+                min-height: calc(100vh - var(--navbar-height) - 2rem);
             }
         }
 
@@ -491,8 +495,9 @@
 
         /* Profile Section */
         .profile-section {
-            padding: 20px;
+            padding: 30px 20px 20px 20px;
             background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            margin-top: 0;
         }
 
         .profile-card {
@@ -1216,27 +1221,27 @@
             const points = (transaction.type === 'earn' ? '+' : '-') + (transaction.points || 0);
             pointsAmount.textContent = points;
             pointsAmount.style.color = transaction.type === 'earn' ? '#22c55e' : '#ef4444';
-            
-            document.getElementById('modalItemName').textContent = 
+
+            document.getElementById('modalItemName').textContent =
                 transaction.item_name || 'Unknown Item';
-            document.getElementById('modalStoreName').textContent = 
+            document.getElementById('modalStoreName').textContent =
                 transaction.store_name || 'Unknown Store';
-            document.getElementById('modalStoreLocation').textContent = 
+            document.getElementById('modalStoreLocation').textContent =
                 transaction.store_location || 'Location not specified';
-            document.getElementById('modalDateTime').textContent = 
+            document.getElementById('modalDateTime').textContent =
                 new Date(transaction.transaction_date || transaction.created_at).toLocaleString();
-            document.getElementById('modalTransactionId').textContent = 
+            document.getElementById('modalTransactionId').textContent =
                 '#' + (transaction.id || '000').toString().padStart(6, '0');
-            document.getElementById('modalUnitsScanned').textContent = 
+            document.getElementById('modalUnitsScanned').textContent =
                 transaction.units_scanned || '1';
-            
+
             let qrCode = transaction.qr_code || transaction.code || 'N/A';
             if (qrCode === 'N/A') {
                 qrCode = 'QR-TXN-' + (transaction.id || 'X');
             }
             document.getElementById('modalQrCode').textContent = qrCode;
-            
-            document.getElementById('modalPointsPerUnit').textContent = 
+
+            document.getElementById('modalPointsPerUnit').textContent =
                 (transaction.points_per_unit || transaction.points || 0) + ' pts';
 
             // Show modal
@@ -1259,7 +1264,7 @@
             } else {
                 // Fallback
                 const receiptText = `Green Cup Transaction\nID: ${document.getElementById('modalTransactionId').textContent}\nPoints: ${document.getElementById('modalPointsAmount').textContent}`;
-                
+
                 if (navigator.clipboard) {
                     navigator.clipboard.writeText(receiptText).then(() => {
                         alert('Receipt copied to clipboard!');
@@ -1273,18 +1278,18 @@
         function showPasswordChangeModal() {
             const modal = document.getElementById('passwordModal');
             const modalContent = document.getElementById('modalContent');
-            
+
             if (modal && modalContent) {
                 // Show modal
                 modal.style.display = 'block';
                 document.body.style.overflow = 'hidden';
-                
+
                 // Clear form
                 const form = document.getElementById('passwordForm');
                 if (form) {
                     form.reset();
                 }
-                
+
                 // Trigger animation
                 setTimeout(() => {
                     modal.style.background = 'rgba(0,0,0,0.8)';
@@ -1298,14 +1303,14 @@
         function closePasswordModal() {
             const modal = document.getElementById('passwordModal');
             const modalContent = document.getElementById('modalContent');
-            
+
             if (modal && modalContent) {
                 // Animate out
                 modal.style.background = 'rgba(0,0,0,0)';
                 modal.style.opacity = '0';
                 modalContent.style.transform = 'translateY(20px)';
                 modalContent.style.opacity = '0';
-                
+
                 // Hide after animation
                 setTimeout(() => {
                     modal.style.display = 'none';
@@ -1341,13 +1346,13 @@
                 passwordForm.addEventListener('submit', function(e) {
                     const password = document.getElementById('password').value;
                     const confirmPassword = document.getElementById('password_confirmation').value;
-                    
+
                     if (password !== confirmPassword) {
                         e.preventDefault();
                         alert('New passwords do not match!');
                         return;
                     }
-                    
+
                     if (password.length < 8) {
                         e.preventDefault();
                         alert('Password must be at least 8 characters long!');
@@ -1360,12 +1365,12 @@
         // Touch feedback
         document.addEventListener('DOMContentLoaded', function() {
             const touchElements = document.querySelectorAll('.account-card, .back-btn, .btn-share, .empty-link, .setting-item, .logout-btn');
-            
+
             touchElements.forEach(element => {
                 element.addEventListener('touchstart', function() {
                     this.style.opacity = '0.7';
                 }, { passive: true });
-                
+
                 element.addEventListener('touchend', function() {
                     this.style.opacity = '';
                 }, { passive: true });

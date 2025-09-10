@@ -1,9 +1,9 @@
 @extends('master')
 
 @section('content')
-<div class="sellers-gallery-container">
+<div class="sellers-gallery-container page-content">
     <!-- Header -->
-    <header class="gallery-header">
+    {{-- <header class="gallery-header">
         <div class="header-content">
             <div class="header-left">
                 <a href="{{ route('dashboard') }}" class="back-btn" aria-label="Back to Dashboard">
@@ -31,7 +31,22 @@
                 </svg>
             </button>
         </div>
-    </header>
+    </header> --}}
+
+    <!-- Mobile Filter Toggle (Only visible on mobile when header is hidden) -->
+    <div class="mobile-filter-toggle">
+        <button class="filter-toggle-btn" onclick="toggleMobileView()" aria-label="Open Stores Filter">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9,22 9,12 15,12 15,22"/>
+            </svg>
+            <span>Stores</span>
+            <span class="stores-count-badge" id="mobileStoresCount">0</span>
+        </button>
+    </div>
+
+    <!-- Mobile Backdrop -->
+    <div class="mobile-backdrop" id="mobileBackdrop" onclick="closeMobilePanel()"></div>
 
     <!-- Main Content -->
     <main class="gallery-main">
@@ -45,8 +60,16 @@
                     </svg>
                     Stores Directory
                 </h2>
-                <div class="sellers-count">
-                    <span id="sellersCount">0</span> stores
+                <div class="panel-header-actions">
+                    <div class="sellers-count">
+                        <span id="sellersCount">0</span> stores
+                    </div>
+                    <button class="mobile-close-btn" onclick="closeMobilePanel()" aria-label="Close stores panel">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
                 </div>
             </div>
 
@@ -207,6 +230,9 @@
     --border-radius: 12px;
     --border-radius-lg: 16px;
 
+    /* Navbar height - inherit from master layout */
+    --navbar-height: 60px; /* Default, will be overridden by master layout */
+
     /* Responsive spacing - scales with viewport */
     --spacing-xs: clamp(2px, 0.5vw, 4px);
     --spacing-sm: clamp(4px, 1vw, 8px);
@@ -229,6 +255,25 @@
     --modal-height: clamp(400px, 80vh, 600px);
 }
 
+/* Responsive navbar height adjustments - mirror master layout */
+@media (max-width: 991.98px) {
+    :root {
+        --navbar-height: 64px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    :root {
+        --navbar-height: 68px;
+    }
+}
+
+@media (max-width: 575.98px) {
+    :root {
+        --navbar-height: 70px;
+    }
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -245,9 +290,84 @@ body {
 
 /* Main Container */
 .sellers-gallery-container {
-    min-height: 100vh;
+    min-height: calc(100vh - var(--navbar-height));
     display: flex;
     flex-direction: column;
+    background: var(--background-color);
+}
+
+/* Mobile Filter Toggle - Only visible on mobile when header is hidden */
+.mobile-filter-toggle {
+    display: none;
+    padding: var(--spacing-lg);
+    background: var(--panel-bg);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: var(--navbar-height);
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.filter-toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    border: none;
+    padding: var(--spacing-xl) var(--spacing-xxl);
+    border-radius: 25px;
+    font-size: var(--font-lg);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 20px rgba(29, 209, 161, 0.3);
+    margin: 0 auto;
+    min-height: 56px; /* Better touch target */
+    width: 100%;
+    max-width: 280px;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.filter-toggle-btn:hover {
+    background: linear-gradient(135deg, var(--primary-dark), #0e8f6e);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(29, 209, 161, 0.4);
+}
+
+.filter-toggle-btn:active {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(29, 209, 161, 0.4);
+}
+
+.filter-toggle-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.filter-toggle-btn:hover::before {
+    left: 100%;
+}
+
+.stores-count-badge {
+    background: rgba(255, 255, 255, 0.3);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: var(--font-sm);
+    font-weight: 700;
+    margin-left: var(--spacing-md);
+    min-width: 28px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(5px);
 }
 
 /* Header - Fully Responsive */
@@ -255,9 +375,8 @@ body {
     background: var(--background-color);
     padding: clamp(12px, 2vh, 16px) clamp(16px, 4vw, 24px);
     border-bottom: 1px solid rgba(255,255,255,0.2);
-    position: sticky;
-    top: 0;
-    z-index: 100;
+    position: relative; /* Changed from sticky to relative to work with navbar */
+    z-index: 10;
 }
 
 .header-content {
@@ -364,7 +483,7 @@ body {
     grid-template-columns: var(--sidebar-width) 1fr;
     gap: var(--spacing-xl);
     padding: var(--spacing-xl);
-    min-height: calc(100vh - 100px);
+    min-height: calc(100vh - var(--navbar-height) - 120px); /* Account for navbar and header */
 }
 
 /* Panels */
@@ -411,6 +530,50 @@ body {
     flex-shrink: 0;
 }
 
+.panel-header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.mobile-close-btn {
+    display: none;
+    background: var(--hover-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.mobile-close-btn:hover {
+    background: var(--border-color);
+    color: var(--text-primary);
+}
+
+.mobile-close-btn:active {
+    transform: scale(0.95);
+}
+
+/* Mobile-specific close button styling */
+@media (max-width: 767.98px) {
+    .mobile-close-btn {
+        width: 44px;
+        height: 44px;
+        background: rgba(0, 0, 0, 0.1);
+        border: none;
+    }
+
+    .mobile-close-btn:hover {
+        background: rgba(0, 0, 0, 0.2);
+    }
+}
+
 /* Panel Controls - Responsive */
 .panel-controls {
     padding: var(--spacing-lg) var(--spacing-xl) 0;
@@ -434,6 +597,7 @@ body {
     outline: none;
     transition: all 0.2s ease;
     background: white;
+    min-height: 44px; /* Touch-friendly */
 }
 
 .search-input:focus {
@@ -459,10 +623,35 @@ body {
     cursor: pointer;
     transition: all 0.2s ease;
     min-width: 120px;
+    min-height: 44px; /* Touch-friendly */
 }
 
 .filter-select:focus {
     border-color: var(--primary-color);
+}
+
+/* Mobile-specific search and filter improvements */
+@media (max-width: 767.98px) {
+    .search-input {
+        font-size: var(--font-base);
+        padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-lg) 48px;
+        border-radius: 25px;
+        min-height: 50px;
+    }
+
+    .filter-select {
+        font-size: var(--font-base);
+        padding: var(--spacing-lg);
+        border-radius: 25px;
+        min-height: 50px;
+        width: 100%;
+    }
+
+    .search-icon {
+        left: var(--spacing-lg);
+        width: 20px;
+        height: 20px;
+    }
 }
 
 /* Sellers List - Responsive */
@@ -506,6 +695,7 @@ body {
     cursor: pointer;
     transition: all 0.2s ease;
     position: relative;
+    min-height: 80px; /* Ensure adequate touch target */
 }
 
 .seller-card:hover {
@@ -518,6 +708,23 @@ body {
     border-color: var(--primary-color);
     background: rgba(29, 209, 161, 0.05);
     box-shadow: var(--shadow-medium);
+}
+
+/* Mobile-specific seller card improvements */
+@media (max-width: 767.98px) {
+    .seller-card {
+        padding: var(--spacing-lg) var(--spacing-xl);
+        margin-bottom: var(--spacing-lg);
+        min-height: 90px;
+        border-radius: var(--border-radius-lg);
+    }
+}
+
+@media (max-width: 480px) {
+    .seller-card {
+        padding: var(--spacing-md) var(--spacing-lg);
+        min-height: 80px;
+    }
 }
 
 .seller-card-header {
@@ -717,9 +924,40 @@ body {
     flex: 1;
     padding: var(--spacing-xl);
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(clamp(140px, 25vw, 200px), 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(clamp(180px, 30vw, 220px), 1fr));
     gap: var(--spacing-lg);
     overflow-y: auto;
+}
+
+/* Mobile-first approach for better touch experience */
+@media (max-width: 767.98px) {
+    .posts-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: var(--spacing-md);
+        padding: var(--spacing-md);
+    }
+}
+
+@media (max-width: 575.98px) {
+    .posts-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: var(--spacing-sm);
+        padding: var(--spacing-sm);
+    }
+}
+
+@media (max-width: 480px) {
+    .posts-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: var(--spacing-xs);
+    }
+}
+
+@media (max-width: 360px) {
+    .posts-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
 }
 
 .post-thumbnail {
@@ -1027,17 +1265,19 @@ body {
 
 /* Responsive Design Breakpoints */
 
-/* Large Desktop */
+/* Extra Large Desktop (Bootstrap xl) */
 @media (min-width: 1400px) {
     .gallery-main {
         grid-template-columns: 420px 1fr;
+        padding: var(--spacing-xxl);
     }
 }
 
-/* Desktop */
-@media (max-width: 1200px) {
+/* Large Desktop (Bootstrap lg) */
+@media (max-width: 1199.98px) {
     .gallery-main {
         grid-template-columns: 320px 1fr;
+        padding: var(--spacing-xl);
     }
 
     .modal-body {
@@ -1045,11 +1285,12 @@ body {
     }
 }
 
-/* Tablet Landscape */
-@media (max-width: 1024px) {
+/* Medium Desktop/Tablet Landscape (Bootstrap md) */
+@media (max-width: 991.98px) {
     .gallery-main {
         grid-template-columns: 300px 1fr;
         gap: var(--spacing-lg);
+        padding: var(--spacing-lg);
     }
 
     .posts-grid {
@@ -1061,14 +1302,43 @@ body {
         grid-template-columns: 1fr 260px;
         height: 70vh;
     }
+
+    .panel-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+    }
+
+    .panel-header-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
 }
 
-/* Tablet Portrait & Mobile Landscape */
-@media (max-width: 968px) {
+/* Tablet Portrait & Mobile Landscape (Bootstrap sm) */
+@media (max-width: 767.98px) {
+    /* Show mobile filter toggle */
+    .mobile-filter-toggle {
+        display: block;
+        position: sticky;
+        top: var(--navbar-height);
+        z-index: 100;
+        background: var(--panel-bg);
+        border-bottom: 2px solid var(--border-color);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Show mobile close button in sellers panel */
+    .mobile-close-btn {
+        display: flex;
+    }
+
     .gallery-main {
         grid-template-columns: 1fr;
         gap: 0;
         padding: var(--spacing-md);
+        min-height: calc(100vh - var(--navbar-height) - 120px); /* Adjust for navbar and mobile toggle */
     }
 
     .sellers-panel {
@@ -1077,14 +1347,40 @@ body {
         top: 0;
         left: 0;
         width: 100%;
-        height: 100%;
-        z-index: 1000;
+        height: 100vh;
+        z-index: 1500;
         border-radius: 0;
         max-width: none;
+        overflow-y: auto;
+        background: var(--panel-bg);
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+        transform: translateX(-100%);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        padding-top: var(--navbar-height); /* Space for navbar */
     }
 
     .sellers-panel.mobile-active {
         display: flex;
+        transform: translateX(0);
+    }
+
+    /* Enhanced backdrop when mobile panel is open */
+    .mobile-backdrop {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 1400;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .mobile-backdrop.active {
+        display: block;
+        opacity: 1;
     }
 
     .mobile-toggle {
@@ -1093,7 +1389,8 @@ body {
 
     .posts-panel {
         grid-column: 1;
-        min-height: calc(100vh - 120px);
+        min-height: calc(100vh - var(--navbar-height) - 160px); /* Account for navbar and mobile toggle */
+        margin-top: var(--spacing-lg);
     }
 
     .posts-grid {
@@ -1131,35 +1428,92 @@ body {
     }
 }
 
-/* Mobile Portrait */
-@media (max-width: 640px) {
+/* Mobile Portrait (Improved) */
+@media (max-width: 575.98px) {
     .gallery-header {
         padding: var(--spacing-sm) var(--spacing-md);
     }
 
-    .header-title {
-        font-size: var(--font-lg);
-    }
-
-    .header-subtitle {
-        display: none; /* Hide subtitle on very small screens */
-    }
-
     .gallery-main {
         padding: var(--spacing-sm);
+        min-height: calc(100vh - var(--navbar-height) - 100px);
     }
 
-    .posts-grid {
-        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-        gap: var(--spacing-xs);
-        padding: var(--spacing-sm);
+    .mobile-filter-toggle {
+        padding: var(--spacing-lg) var(--spacing-md);
+    }
+
+    .filter-toggle-btn {
+        padding: var(--spacing-xl);
+        min-height: 60px;
+        font-size: var(--font-xl);
+        border-radius: 20px;
+        max-width: none;
+        width: 100%;
+    }
+
+    .sellers-panel {
+        padding-top: calc(var(--navbar-height) + var(--spacing-md));
     }
 
     .panel-header,
     .panel-controls,
     .sellers-list {
-        padding-left: var(--spacing-md);
-        padding-right: var(--spacing-md);
+        padding-left: var(--spacing-lg);
+        padding-right: var(--spacing-lg);
+    }
+
+    .panel-controls {
+        gap: var(--spacing-lg);
+        flex-direction: column;
+    }
+
+    .search-input, .filter-select {
+        min-height: 52px;
+        font-size: var(--font-lg);
+        padding: var(--spacing-lg);
+        border-radius: 26px;
+        width: 100%;
+    }
+
+    .search-input {
+        padding-left: 52px;
+    }
+
+    .search-icon {
+        left: var(--spacing-lg);
+        width: 24px;
+        height: 24px;
+    }
+
+    .seller-card {
+        padding: var(--spacing-lg);
+        margin-bottom: var(--spacing-lg);
+        min-height: 88px;
+        border-radius: var(--border-radius);
+        border-width: 2px;
+    }
+
+    .seller-card:active {
+        transform: scale(0.98);
+        transition: transform 0.1s ease;
+    }
+
+    .mobile-close-btn {
+        width: 48px;
+        height: 48px;
+        border-radius: 24px;
+    }
+
+    .posts-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: var(--spacing-sm);
+        padding: var(--spacing-md);
+    }
+
+    .post-card {
+        min-height: 120px;
+        border-radius: var(--border-radius);
     }
 
     .post-modal {
@@ -1168,37 +1522,113 @@ body {
 
     .modal-content {
         border-radius: var(--spacing-md);
+        max-height: calc(100vh - var(--navbar-height) - 20px);
+        margin: var(--spacing-sm);
+        width: 95vw;
+    }
+
+    .modal-body {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr auto;
+        gap: var(--spacing-lg);
+    }
+
+    .modal-image-section img {
+        max-height: 50vh;
+        object-fit: contain;
     }
 
     .modal-info-section {
-        padding: var(--spacing-md);
+        padding: var(--spacing-lg);
     }
 
     .modal-actions {
         flex-direction: column;
+        gap: var(--spacing-md);
     }
 
     .action-btn {
         min-width: auto;
+        min-height: 48px;
     }
 
-    .seller-card {
-        padding: var(--spacing-md);
-    }
-
-    .seller-stats {
-        gap: var(--spacing-md);
+    .sellers-panel {
+        top: var(--navbar-height);
+        height: calc(100vh - var(--navbar-height));
     }
 }
 
-/* Extra Small Mobile */
+/* Extra Small Mobile (Optimized) */
 @media (max-width: 480px) {
     .header-left {
         gap: var(--spacing-sm);
     }
 
-    .posts-grid {
-        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    .panel-header {
+        padding: var(--spacing-lg);
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .panel-header-actions {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .panel-controls {
+        padding: var(--spacing-lg) var(--spacing-lg) 0;
+        flex-direction: column;
+        gap: var(--spacing-lg);
+    }
+
+    .sellers-list {
+        padding: var(--spacing-lg);
+    }
+
+    .modal-body {
+        height: auto;
+        max-height: calc(90vh - var(--navbar-height));
+    }
+
+    .modal-image-section {
+        max-height: calc(50vh - var(--navbar-height));
+    }
+
+    .gallery-main {
+        min-height: calc(100vh - var(--navbar-height) - 60px);
+    }
+}
+
+/* Very Small Screens (Optimized) */
+@media (max-width: 360px) {
+    .header-title svg {
+        display: none;
+    }
+
+    .header-title {
+        font-size: var(--font-base);
+    }
+
+    .back-btn, .mobile-toggle {
+        width: 40px;
+        height: 40px;
+    }
+
+    .mobile-close-btn {
+        width: 40px;
+        height: 40px;
+    }
+
+    .gallery-main {
+        min-height: calc(100vh - var(--navbar-height) - 50px);
+        padding: var(--spacing-xs);
+    }
+
+    .filter-toggle-btn {
+        padding: var(--spacing-md) var(--spacing-lg);
+        font-size: var(--font-sm);
+        min-height: 44px;
     }
 
     .panel-header {
@@ -1211,26 +1641,6 @@ body {
 
     .sellers-list {
         padding: var(--spacing-md);
-    }
-
-    .modal-body {
-        height: auto;
-        max-height: 90vh;
-    }
-
-    .modal-image-section {
-        max-height: 40vh;
-    }
-}
-
-/* Very Small Screens */
-@media (max-width: 360px) {
-    .posts-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .header-title svg {
-        display: none; /* Hide icon on very small screens */
     }
 }
 
@@ -1957,7 +2367,14 @@ function handleFilter() {
 }
 
 function updateSellersCount() {
-    document.getElementById('sellersCount').textContent = app.filteredSellers.length;
+    const count = app.filteredSellers.length;
+    document.getElementById('sellersCount').textContent = count;
+
+    // Also update mobile count badge
+    const mobileCountBadge = document.getElementById('mobileStoresCount');
+    if (mobileCountBadge) {
+        mobileCountBadge.textContent = count;
+    }
 }
 
 function updatePostsCount() {
@@ -1967,20 +2384,82 @@ function updatePostsCount() {
 // MOBILE FUNCTIONS
 function toggleMobileView() {
     const sellersPanel = document.getElementById('sellersPanel');
-    sellersPanel.classList.toggle('mobile-active');
+    const mobileBackdrop = document.getElementById('mobileBackdrop');
 
-    // Focus management for accessibility
+    sellersPanel.classList.toggle('mobile-active');
+    mobileBackdrop.classList.toggle('active');
+
+    // Prevent body scroll when modal is open
     if (sellersPanel.classList.contains('mobile-active')) {
+        document.body.style.overflow = 'hidden';
+
+        // Focus management for accessibility
         const searchInput = document.getElementById('sellerSearch');
         setTimeout(() => searchInput.focus(), 100);
+
+        // Add swipe gesture support
+        addSwipeGesture(sellersPanel);
+    } else {
+        document.body.style.overflow = '';
     }
 }
 
 function closeMobilePanel() {
     const sellersPanel = document.getElementById('sellersPanel');
+    const mobileBackdrop = document.getElementById('mobileBackdrop');
+
     if (sellersPanel.classList.contains('mobile-active')) {
         sellersPanel.classList.remove('mobile-active');
+        mobileBackdrop.classList.remove('active');
+        document.body.style.overflow = '';
     }
+}
+
+// Add swipe gesture for mobile panel
+function addSwipeGesture(panel) {
+    let startX = 0;
+    let currentX = 0;
+    let isSwping = false;
+
+    function handleTouchStart(e) {
+        startX = e.touches[0].clientX;
+        isSwping = true;
+    }
+
+    function handleTouchMove(e) {
+        if (!isSwping) return;
+        currentX = e.touches[0].clientX;
+        const diffX = startX - currentX;
+
+        // Only allow left swipe (positive diffX)
+        if (diffX > 0) {
+            panel.style.transform = `translateX(-${Math.min(diffX, panel.offsetWidth)}px)`;
+        }
+    }
+
+    function handleTouchEnd(e) {
+        if (!isSwping) return;
+        isSwping = false;
+
+        const diffX = startX - currentX;
+        const threshold = panel.offsetWidth * 0.3; // 30% of panel width
+
+        if (diffX > threshold) {
+            closeMobilePanel();
+        } else {
+            panel.style.transform = 'translateX(0)';
+        }
+    }
+
+    // Remove existing listeners first
+    panel.removeEventListener('touchstart', handleTouchStart);
+    panel.removeEventListener('touchmove', handleTouchMove);
+    panel.removeEventListener('touchend', handleTouchEnd);
+
+    // Add new listeners
+    panel.addEventListener('touchstart', handleTouchStart, { passive: true });
+    panel.addEventListener('touchmove', handleTouchMove, { passive: true });
+    panel.addEventListener('touchend', handleTouchEnd, { passive: true });
 }
 
 // MODAL ACTIONS

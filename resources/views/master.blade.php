@@ -22,49 +22,53 @@
 
         /* Define navbar height as CSS variable for responsiveness */
         :root {
-            --navbar-height: 70px; /* Default for large screens */
+            --navbar-height: 60px; /* Default for large screens */
         }
 
         /* Responsive navbar height adjustments */
         @media (max-width: 991.98px) {
             :root {
-                --navbar-height: 76px; /* Slightly taller on tablets */
+                --navbar-height: 64px; /* Slightly taller on tablets */
             }
         }
 
         @media (max-width: 767.98px) {
             :root {
-                --navbar-height: 80px; /* Taller on mobile for touch targets */
+                --navbar-height: 68px; /* Taller on mobile for touch targets */
             }
         }
 
         @media (max-width: 575.98px) {
             :root {
-                --navbar-height: 84px; /* Maximum height on small mobile */
+                --navbar-height: 70px; /* Maximum height on small mobile */
             }
         }
 
         /* Custom navbar styles */
         .navbar-brand {
             font-weight: 600;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             color: #28a745 !important;
+            margin-right: 1rem;
         }
 
         .navbar {
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             background-color: #ffffff !important;
             min-height: var(--navbar-height);
+            max-height: var(--navbar-height);
             transition: min-height 0.3s ease;
+            padding: 0.25rem 0;
         }
 
         .navbar-nav .nav-link {
             color: #495057 !important;
             font-weight: 500;
             transition: all 0.2s ease;
-            margin: 0 0.25rem;
-            padding: 0.5rem 0.75rem !important;
+            margin: 0 0.1rem;
+            padding: 0.4rem 0.6rem !important;
             border-radius: 6px;
+            font-size: 0.9rem;
         }
 
         .navbar-nav .nav-link:hover {
@@ -99,8 +103,8 @@
         }
 
         .user-avatar {
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             background: linear-gradient(135deg, #28a745, #20c997);
             display: flex;
@@ -108,16 +112,16 @@
             justify-content: center;
             color: white;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             border: 2px solid rgba(255, 255, 255, 0.2);
         }
 
         .points-badge {
             background: linear-gradient(135deg, #28a745, #20c997);
             color: white;
-            padding: 0.35rem 0.85rem;
+            padding: 0.25rem 0.7rem;
             border-radius: 20px;
-            font-size: 0.875rem;
+            font-size: 0.8rem;
             font-weight: 600;
             box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
         }
@@ -139,6 +143,12 @@
             color: #28a745;
         }
 
+        .dropdown-item.active {
+            background-color: rgba(40, 167, 69, 0.15);
+            color: #28a745;
+            font-weight: 600;
+        }
+
         .dropdown-divider {
             margin: 0.5rem 0;
         }
@@ -146,16 +156,17 @@
         /* Mobile optimizations */
         @media (max-width: 991.98px) {
             .navbar-nav {
-                padding-top: 1rem;
+                padding-top: 0.5rem;
                 border-top: 1px solid #dee2e6;
-                margin-top: 1rem;
+                margin-top: 0.5rem;
             }
 
             .navbar-nav .nav-link {
-                padding: 0.75rem 0 !important;
+                padding: 0.5rem 0 !important;
                 border-bottom: 1px solid #f8f9fa;
                 margin: 0;
                 border-radius: 0;
+                font-size: 0.9rem;
             }
 
             .navbar-nav .nav-link:hover,
@@ -166,25 +177,31 @@
             }
 
             .user-dropdown {
-                margin-top: 1rem;
-                padding-top: 1rem;
+                margin-top: 0.5rem;
+                padding-top: 0.5rem;
                 border-top: 1px solid #dee2e6;
             }
 
             .points-badge {
-                margin-bottom: 0.5rem;
+                margin-bottom: 0.25rem;
                 display: inline-block;
             }
 
             .user-info {
                 justify-content: flex-start;
             }
+
+            /* Ensure collapsed navbar doesn't take too much space */
+            .navbar-collapse {
+                max-height: calc(100vh - var(--navbar-height) - 20px);
+                overflow-y: auto;
+            }
         }
 
         /* Extra small screens */
         @media (max-width: 576px) {
             .navbar-brand {
-                font-size: 1.25rem;
+                font-size: 1.2rem;
             }
 
             .container {
@@ -193,14 +210,19 @@
             }
 
             .points-badge {
-                font-size: 0.8rem;
-                padding: 0.25rem 0.65rem;
+                font-size: 0.75rem;
+                padding: 0.2rem 0.5rem;
             }
 
             .user-avatar {
-                width: 32px;
-                height: 32px;
-                font-size: 0.8rem;
+                width: 28px;
+                height: 28px;
+                font-size: 0.75rem;
+            }
+
+            .navbar-nav .nav-link {
+                font-size: 0.85rem;
+                padding: 0.3rem 0.5rem !important;
             }
         }
 
@@ -209,9 +231,14 @@
             padding-top: 2rem;
         }
 
-        /* Ensure content doesn't hide behind fixed navbar */
-        body {
-            padding-top: 0;
+        /* Ensure proper spacing for content below fixed navbar */
+        .container {
+            margin-top: 0;
+        }
+
+        /* Additional spacing for pages that need it */
+        .page-content {
+            padding-top: 1rem;
         }
     </style>
 </head>
