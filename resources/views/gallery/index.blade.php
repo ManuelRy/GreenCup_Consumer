@@ -375,6 +375,28 @@ function initializeEventListeners() {
     syncInputs();
 }
 
+function applySearchAndFilter() {
+    const query = (document.getElementById('storeSearch')?.value || document.getElementById('mobileStoreSearch')?.value || '').toLowerCase().trim();
+    const filterValue = document.getElementById('storeFilter')?.value || document.getElementById('mobileStoreFilter')?.value || 'all';
+
+    let filtered = [...app.stores];
+
+    if (query) {
+        filtered = filtered.filter(store =>
+            store.name.toLowerCase().includes(query) ||
+            (store.address && store.address.toLowerCase().includes(query))
+        );
+    }
+
+    if (filterValue !== 'all') {
+        filtered = filtered.filter(store => store.rank_class === filterValue);
+    }
+
+    app.filteredStores = filtered;
+    renderStores();
+    updateStoresCount();
+}
+
 function syncInputs() {
     const desktopSearch = document.getElementById('storeSearch');
     const mobileSearch = document.getElementById('mobileStoreSearch');
@@ -382,13 +404,25 @@ function syncInputs() {
     const mobileFilter = document.getElementById('mobileStoreFilter');
 
     if (desktopSearch && mobileSearch) {
-        desktopSearch.addEventListener('input', () => mobileSearch.value = desktopSearch.value);
-        mobileSearch.addEventListener('input', () => desktopSearch.value = mobileSearch.value);
+        desktopSearch.addEventListener('input', () => {
+            mobileSearch.value = desktopSearch.value;
+            applySearchAndFilter();
+        });
+        mobileSearch.addEventListener('input', () => {
+            desktopSearch.value = mobileSearch.value;
+            applySearchAndFilter();
+        });
     }
 
     if (desktopFilter && mobileFilter) {
-        desktopFilter.addEventListener('change', () => mobileFilter.value = desktopFilter.value);
-        mobileFilter.addEventListener('change', () => desktopFilter.value = mobileFilter.value);
+        desktopFilter.addEventListener('change', () => {
+            mobileFilter.value = desktopFilter.value;
+            applySearchAndFilter();
+        });
+        mobileFilter.addEventListener('change', () => {
+            desktopFilter.value = mobileFilter.value;
+            applySearchAndFilter();
+        });
     }
 }
 
@@ -438,6 +472,8 @@ async function loadStores() {
             app.filteredStores = [...app.stores];
             renderStores();
             updateStoresCount();
+            // Apply default filter state
+            applySearchAndFilter();
         } else {
             throw new Error(data.message || 'Failed to load stores');
         }
@@ -466,35 +502,63 @@ function showStoresLoading(show) {
 }
 
 function renderStores() {
-    const storesHTML = app.filteredStores.map(store => `
-        <div class="store-card border p-3 m-2" onclick="selectStore(${store.id})" data-store-id="${store.id}">
-            <div class="d-flex align-items-center gap-3">
-                <div class="store-avatar ${store.rank_class}">
-                    ${store.name.charAt(0).toUpperCase()}
-                    <div class="rank-badge">
-                        ${store.rank_icon}
+    console.log('=== RENDER STORES DEBUG ===');
+    console.log('Filtered stores to render:', app.filteredStores.length);
+    console.log('First store:', app.filteredStores[0]);
+
+    if (app.filteredStores.length === 0) {
+        const emptyHTML = `
+            <div class="text-center p-4 text-muted">
+                <p>No stores found</p>
+            </div>
+        `;
+        document.getElementById('storesList').innerHTML = emptyHTML;
+        document.getElementById('mobileStoresList').innerHTML = emptyHTML;
+        console.log('Rendered empty state');
+        return;
+    }
+
+    // Simple test HTML first
+    const storesHTML = app.filteredStores.map(store => {
+        console.log(`Rendering store: ${store.name} (${store.rank_class})`);
+        return `
+            <div class="card mb-2 p-3" onclick="selectStore(${store.id})" data-store-id="${store.id}" style="cursor: pointer; border: 1px solid #dee2e6;">
+                <div class="d-flex align-items-center">
+                    <div class="me-3" style="width: 40px; height: 40px; background: #198754; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                        ${store.name.charAt(0).toUpperCase()}
                     </div>
-                </div>
-                <div class="flex-grow-1 min-w-0">
-                    <h6 class="mb-1 text-truncate">${store.name}</h6>
-                    <small class="text-muted d-block text-truncate">
-                        <i class="bi bi-geo-alt me-1"></i>${store.address || 'No address'}
-                    </small>
-                    <div class="d-flex gap-3 mt-1">
-                        <small class="text-muted">
-                            <i class="bi bi-star-fill me-1"></i>${store.total_points} pts
-                        </small>
-                        <small class="text-muted">
-                            <i class="bi bi-people me-1"></i>${store.transaction_count} visits
-                        </small>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-1">${store.name}</h6>
+                        <small class="text-muted">${store.address || 'No address'}</small>
+                        <br>
+                        <small class="text-muted">${store.total_points} pts • ${store.rank_text}</small>
                     </div>
                 </div>
             </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 
-    document.getElementById('storesList').innerHTML = storesHTML;
-    document.getElementById('mobileStoresList').innerHTML = storesHTML;
+    console.log('Generated HTML length:', storesHTML.length);
+    console.log('Setting innerHTML for storesList and mobileStoresList');
+
+    const storesListElement = document.getElementById('storesList');
+    const mobileStoresListElement = document.getElementById('mobileStoresList');
+
+    if (storesListElement) {
+        storesListElement.innerHTML = storesHTML;
+        console.log('Desktop stores list updated');
+    } else {
+        console.error('storesList element not found!');
+    }
+
+    if (mobileStoresListElement) {
+        mobileStoresListElement.innerHTML = storesHTML;
+        console.log('Mobile stores list updated');
+    } else {
+        console.error('mobileStoresList element not found!');
+    }
+
+    console.log('=== END RENDER DEBUG ===');
 }
 
 function selectStore(storeId) {
@@ -656,47 +720,11 @@ function openPostModal(postId) {
 }
 
 function handleSearch() {
-    const query = (document.getElementById('storeSearch')?.value || document.getElementById('mobileStoreSearch')?.value || '').toLowerCase().trim();
-
-    // Reset filter to "all" when searching
-    if (query) {
-        document.getElementById('storeFilter').value = 'all';
-        document.getElementById('mobileStoreFilter').value = 'all';
-    }
-
-    if (query === '') {
-        app.filteredStores = [...app.stores];
-    } else {
-        app.filteredStores = app.stores.filter(store =>
-            store.name.toLowerCase().includes(query) ||
-            (store.address && store.address.toLowerCase().includes(query))
-        );
-    }
-
-    renderStores();
-    updateStoresCount();
+    applySearchAndFilter();
 }
 
 function handleFilter() {
-    const filterValue = document.getElementById('storeFilter')?.value || document.getElementById('mobileStoreFilter')?.value || 'all';
-    const query = (document.getElementById('storeSearch')?.value || document.getElementById('mobileStoreSearch')?.value || '').toLowerCase().trim();
-
-    let filtered = [...app.stores];
-
-    if (query) {
-        filtered = filtered.filter(store =>
-            store.name.toLowerCase().includes(query) ||
-            (store.address && store.address.toLowerCase().includes(query))
-        );
-    }
-
-    if (filterValue !== 'all') {
-        filtered = filtered.filter(store => store.rank_class === filterValue);
-    }
-
-    app.filteredStores = filtered;
-    renderStores();
-    updateStoresCount();
+    applySearchAndFilter();
 }
 
 function updateStoresCount() {
@@ -726,7 +754,8 @@ function showErrorState(message) {
 
 function visitStore() {
     if (app.selectedStore) {
-        window.location.href = `/public-api/seller/${app.selectedStore.id}`;
+        // Use the protected route for authenticated users
+        window.location.href = `/seller/${app.selectedStore.id}`;
     }
 }
 
