@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use App\Models\Consumer;
+
 
 class AccountController extends Controller
 {
@@ -45,7 +47,51 @@ class AccountController extends Controller
 
     public function edit()
     {
+        $consumer = Auth::user();
         return view('account.edit', compact('consumer'));
+    }
+    public function transactionHistory(Request $request)
+    {
+        $consumer = Auth::user();
+        // Filtering logic (optional, basic example)
+        $query = DB::table('point_transactions as pt')
+            ->leftJoin('sellers as s', 's.id', '=', 'pt.seller_id')
+            ->where('pt.consumer_id', $consumer->id);
+
+        if ($request->filled('type')) {
+            $query->where('pt.type', $request->type);
+        }
+        if ($request->filled('store')) {
+            $query->where('pt.seller_id', $request->store);
+        }
+        if ($request->filled('date_from')) {
+            $query->whereDate('pt.scanned_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('pt.scanned_at', '<=', $request->date_to);
+        }
+
+        $transactions = $query
+            ->select([
+                'pt.id',
+                'pt.points',
+                'pt.type',
+                'pt.description',
+                'pt.units_scanned',
+                'pt.scanned_at as transaction_date',
+                'pt.receipt_code',
+                'pt.created_at',
+                's.business_name as store_name',
+                's.address as store_location',
+                's.phone as store_phone',
+            ])
+            ->orderBy('pt.scanned_at', 'desc')
+            ->paginate(10);
+
+        // Get all stores for filter dropdown
+        $stores = DB::table('sellers')->select('id', 'business_name')->get();
+
+        return view('account.transactions', compact('consumer', 'transactions', 'stores'));
     }
     public function updateProfile(Request $request)
     {

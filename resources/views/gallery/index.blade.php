@@ -158,7 +158,8 @@
                     <img id="modalPostImage" src="" alt="" loading="lazy">
                 </div>
 
-                <div class="modal-info-section">
+                <button class="show-details-btn" onclick="this.nextElementSibling.classList.toggle('collapsed')">Show Details</button>
+                <div class="modal-info-section collapsed">
                     <div class="modal-header-info">
                         <div id="modalSellerProfile" class="modal-seller-profile">
                             <!-- Dynamic seller info -->
@@ -211,7 +212,7 @@
 </div>
 
 <style>
-/* CSS Variables with Responsive Scaling */
+/* CSS Variables with Enhanced Mobile-First Responsive Scaling */
 :root {
     --primary-color: #1dd1a1;
     --primary-dark: #10ac84;
@@ -233,29 +234,33 @@
     /* Navbar height - inherit from master layout */
     --navbar-height: 60px; /* Default, will be overridden by master layout */
 
-    /* Responsive spacing - scales with viewport */
-    --spacing-xs: clamp(2px, 0.5vw, 4px);
-    --spacing-sm: clamp(4px, 1vw, 8px);
-    --spacing-md: clamp(8px, 1.5vw, 12px);
-    --spacing-lg: clamp(12px, 2vw, 16px);
-    --spacing-xl: clamp(16px, 3vw, 24px);
-    --spacing-xxl: clamp(24px, 4vw, 32px);
+    /* Enhanced mobile-first responsive spacing */
+    --spacing-xs: clamp(3px, 0.8vw, 6px);
+    --spacing-sm: clamp(6px, 1.2vw, 10px);
+    --spacing-md: clamp(10px, 2vw, 16px);
+    --spacing-lg: clamp(16px, 3vw, 20px);
+    --spacing-xl: clamp(20px, 4vw, 28px);
+    --spacing-xxl: clamp(28px, 5vw, 36px);
 
-    /* Responsive font sizes */
-    --font-xs: clamp(10px, 2vw, 12px);
-    --font-sm: clamp(12px, 2.5vw, 14px);
-    --font-base: clamp(14px, 3vw, 16px);
-    --font-lg: clamp(16px, 3.5vw, 18px);
-    --font-xl: clamp(18px, 4vw, 20px);
-    --font-xxl: clamp(20px, 5vw, 24px);
+    /* Enhanced mobile-first responsive font sizes */
+    --font-xs: clamp(11px, 2.5vw, 13px);
+    --font-sm: clamp(13px, 3vw, 15px);
+    --font-base: clamp(15px, 3.5vw, 17px);
+    --font-lg: clamp(17px, 4vw, 19px);
+    --font-xl: clamp(19px, 4.5vw, 22px);
+    --font-xxl: clamp(22px, 5.5vw, 26px);
 
-    /* Responsive widths */
-    --sidebar-width: clamp(280px, 35vw, 400px);
-    --modal-width: clamp(320px, 90vw, 900px);
-    --modal-height: clamp(400px, 80vh, 600px);
+    /* Enhanced responsive widths */
+    --sidebar-width: clamp(320px, 38vw, 420px);
+    --modal-width: clamp(340px, 92vw, 920px);
+    --modal-height: clamp(450px, 85vh, 650px);
+
+    /* Mobile-optimized touch targets */
+    --touch-target-min: 48px;
+    --touch-target-comfortable: 56px;
 }
 
-/* Responsive navbar height adjustments - mirror master layout */
+/* Responsive navbar height adjustments */
 @media (max-width: 991.98px) {
     :root {
         --navbar-height: 64px;
@@ -265,12 +270,28 @@
 @media (max-width: 767.98px) {
     :root {
         --navbar-height: 68px;
+        --touch-target-min: 52px;
+        --touch-target-comfortable: 60px;
     }
 }
 
 @media (max-width: 575.98px) {
     :root {
         --navbar-height: 70px;
+        --touch-target-min: 56px;
+        --touch-target-comfortable: 64px;
+    }
+}
+
+@media (max-width: 390px) {
+    :root {
+        --navbar-height: 72px;
+        --spacing-xs: 4px;
+        --spacing-sm: 8px;
+        --spacing-md: 12px;
+        --spacing-lg: 18px;
+        --spacing-xl: 24px;
+        --spacing-xxl: 32px;
     }
 }
 
@@ -296,10 +317,10 @@ body {
     background: var(--background-color);
 }
 
-/* Mobile Filter Toggle - Only visible on mobile when header is hidden */
+/* Enhanced Mobile Filter Toggle */
 .mobile-filter-toggle {
     display: none;
-    padding: var(--spacing-lg);
+    padding: var(--spacing-lg) var(--spacing-md);
     background: var(--panel-bg);
     border-bottom: 1px solid var(--border-color);
     position: sticky;
@@ -315,31 +336,33 @@ body {
     background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
     color: white;
     border: none;
-    padding: var(--spacing-xl) var(--spacing-xxl);
-    border-radius: 25px;
+    padding: var(--spacing-lg) var(--spacing-xl);
+    border-radius: 30px;
     font-size: var(--font-lg);
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 6px 20px rgba(29, 209, 161, 0.3);
     margin: 0 auto;
-    min-height: 56px; /* Better touch target */
+    min-height: var(--touch-target-comfortable);
     width: 100%;
-    max-width: 280px;
+    max-width: 320px;
     justify-content: center;
     position: relative;
     overflow: hidden;
+    will-change: transform;
 }
 
 .filter-toggle-btn:hover {
     background: linear-gradient(135deg, var(--primary-dark), #0e8f6e);
-    transform: translateY(-3px);
+    transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(29, 209, 161, 0.4);
 }
 
 .filter-toggle-btn:active {
-    transform: translateY(-1px);
+    transform: translateY(1px) scale(0.98);
     box-shadow: 0 4px 15px rgba(29, 209, 161, 0.4);
+    transition: all 0.1s ease;
 }
 
 .filter-toggle-btn::before {
@@ -358,16 +381,16 @@ body {
 }
 
 .stores-count-badge {
-    background: rgba(255, 255, 255, 0.3);
-    padding: 6px 12px;
-    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.25);
+    padding: 8px 14px;
+    border-radius: 24px;
     font-size: var(--font-sm);
     font-weight: 700;
     margin-left: var(--spacing-md);
-    min-width: 28px;
+    min-width: 32px;
     text-align: center;
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
 }
 
 /* Header - Fully Responsive */
@@ -375,7 +398,7 @@ body {
     background: var(--background-color);
     padding: clamp(12px, 2vh, 16px) clamp(16px, 4vw, 24px);
     border-bottom: 1px solid rgba(255,255,255,0.2);
-    position: relative; /* Changed from sticky to relative to work with navbar */
+    position: relative;
     z-index: 10;
 }
 
@@ -393,15 +416,15 @@ body {
     align-items: center;
     gap: var(--spacing-lg);
     flex: 1;
-    min-width: 0; /* Allows text truncation */
+    min-width: 0;
 }
 
 .back-btn {
     background: rgba(255,255,255,0.15);
     border: none;
     border-radius: 50%;
-    width: clamp(40px, 8vw, 44px);
-    height: clamp(40px, 8vw, 44px);
+    width: var(--touch-target-min);
+    height: var(--touch-target-min);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -458,8 +481,8 @@ body {
     background: rgba(255,255,255,0.15);
     border: none;
     border-radius: var(--spacing-sm);
-    width: clamp(40px, 8vw, 44px);
-    height: clamp(40px, 8vw, 44px);
+    width: var(--touch-target-min);
+    height: var(--touch-target-min);
     display: none;
     align-items: center;
     justify-content: center;
@@ -473,7 +496,7 @@ body {
     background: rgba(255,255,255,0.25);
 }
 
-/* Main Content - Responsive Grid */
+/* Enhanced Main Content - Mobile-First Grid */
 .gallery-main {
     flex: 1;
     max-width: 1400px;
@@ -482,11 +505,11 @@ body {
     display: grid;
     grid-template-columns: var(--sidebar-width) 1fr;
     gap: var(--spacing-xl);
-    padding: var(--spacing-xl);
-    min-height: calc(100vh - var(--navbar-height) - 120px); /* Account for navbar and header */
+    padding: var(--spacing-lg);
+    min-height: calc(100vh - var(--navbar-height) - 100px);
 }
 
-/* Panels */
+/* Enhanced Panels with Better Mobile Spacing */
 .sellers-panel, .posts-panel {
     background: var(--panel-bg);
     border-radius: var(--border-radius-lg);
@@ -496,9 +519,9 @@ body {
     overflow: hidden;
 }
 
-/* Panel Headers - Responsive */
+/* Enhanced Panel Headers with Better Mobile Layout */
 .panel-header {
-    padding: var(--spacing-xl);
+    padding: var(--spacing-lg) var(--spacing-xl);
     border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
@@ -506,6 +529,7 @@ body {
     background: linear-gradient(135deg, #f8f9fa, #ffffff);
     gap: var(--spacing-md);
     flex-wrap: wrap;
+    min-height: 80px;
 }
 
 .panel-title {
@@ -522,8 +546,8 @@ body {
 .sellers-count, .posts-count {
     background: var(--primary-color);
     color: white;
-    padding: 4px var(--spacing-sm);
-    border-radius: 12px;
+    padding: 6px var(--spacing-md);
+    border-radius: 16px;
     font-size: var(--font-xs);
     font-weight: 600;
     white-space: nowrap;
@@ -541,8 +565,8 @@ body {
     background: var(--hover-bg);
     border: 1px solid var(--border-color);
     border-radius: 50%;
-    width: 40px;
-    height: 40px;
+    width: var(--touch-target-min);
+    height: var(--touch-target-min);
     align-items: center;
     justify-content: center;
     cursor: pointer;
@@ -560,21 +584,7 @@ body {
     transform: scale(0.95);
 }
 
-/* Mobile-specific close button styling */
-@media (max-width: 767.98px) {
-    .mobile-close-btn {
-        width: 44px;
-        height: 44px;
-        background: rgba(0, 0, 0, 0.1);
-        border: none;
-    }
-
-    .mobile-close-btn:hover {
-        background: rgba(0, 0, 0, 0.2);
-    }
-}
-
-/* Panel Controls - Responsive */
+/* Enhanced Panel Controls with Better Mobile UX */
 .panel-controls {
     padding: var(--spacing-lg) var(--spacing-xl) 0;
     display: flex;
@@ -585,19 +595,19 @@ body {
 .search-wrapper {
     position: relative;
     flex: 1;
-    min-width: 200px;
+    min-width: 220px;
 }
 
 .search-input {
     width: 100%;
-    padding: var(--spacing-sm) var(--spacing-md) var(--spacing-sm) 36px;
+    padding: var(--spacing-md) var(--spacing-lg) var(--spacing-md) 44px;
     border: 2px solid var(--border-color);
-    border-radius: 20px;
+    border-radius: 25px;
     font-size: var(--font-sm);
     outline: none;
     transition: all 0.2s ease;
     background: white;
-    min-height: 44px; /* Touch-friendly */
+    min-height: var(--touch-target-min);
 }
 
 .search-input:focus {
@@ -607,54 +617,30 @@ body {
 
 .search-icon {
     position: absolute;
-    left: var(--spacing-md);
+    left: var(--spacing-lg);
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-muted);
 }
 
 .filter-select {
-    padding: var(--spacing-sm) var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
     border: 2px solid var(--border-color);
-    border-radius: 20px;
+    border-radius: 25px;
     font-size: var(--font-sm);
     outline: none;
     background: white;
     cursor: pointer;
     transition: all 0.2s ease;
-    min-width: 120px;
-    min-height: 44px; /* Touch-friendly */
+    min-width: 140px;
+    min-height: var(--touch-target-min);
 }
 
 .filter-select:focus {
     border-color: var(--primary-color);
 }
 
-/* Mobile-specific search and filter improvements */
-@media (max-width: 767.98px) {
-    .search-input {
-        font-size: var(--font-base);
-        padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-lg) 48px;
-        border-radius: 25px;
-        min-height: 50px;
-    }
-
-    .filter-select {
-        font-size: var(--font-base);
-        padding: var(--spacing-lg);
-        border-radius: 25px;
-        min-height: 50px;
-        width: 100%;
-    }
-
-    .search-icon {
-        left: var(--spacing-lg);
-        width: 20px;
-        height: 20px;
-    }
-}
-
-/* Sellers List - Responsive */
+/* Enhanced Sellers List */
 .sellers-list {
     flex: 1;
     overflow-y: auto;
@@ -671,8 +657,8 @@ body {
 }
 
 .loading-spinner {
-    width: clamp(24px, 5vw, 32px);
-    height: clamp(24px, 5vw, 32px);
+    width: clamp(28px, 6vw, 36px);
+    height: clamp(28px, 6vw, 36px);
     border: 3px solid var(--border-color);
     border-top: 3px solid var(--primary-color);
     border-radius: 50%;
@@ -685,7 +671,7 @@ body {
     100% { transform: rotate(360deg); }
 }
 
-/* Seller Card - Fully Responsive */
+/* Enhanced Seller Card with Better Mobile Touch Experience */
 .seller-card {
     background: var(--card-bg);
     border: 2px solid var(--border-color);
@@ -693,9 +679,10 @@ body {
     padding: var(--spacing-lg);
     margin-bottom: var(--spacing-md);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
-    min-height: 80px; /* Ensure adequate touch target */
+    min-height: var(--touch-target-comfortable);
+    will-change: transform;
 }
 
 .seller-card:hover {
@@ -704,27 +691,15 @@ body {
     transform: translateY(-2px);
 }
 
+.seller-card:active {
+    transform: translateY(0) scale(0.98);
+    transition: all 0.1s ease;
+}
+
 .seller-card.selected {
     border-color: var(--primary-color);
     background: rgba(29, 209, 161, 0.05);
     box-shadow: var(--shadow-medium);
-}
-
-/* Mobile-specific seller card improvements */
-@media (max-width: 767.98px) {
-    .seller-card {
-        padding: var(--spacing-lg) var(--spacing-xl);
-        margin-bottom: var(--spacing-lg);
-        min-height: 90px;
-        border-radius: var(--border-radius-lg);
-    }
-}
-
-@media (max-width: 480px) {
-    .seller-card {
-        padding: var(--spacing-md) var(--spacing-lg);
-        min-height: 80px;
-    }
 }
 
 .seller-card-header {
@@ -735,14 +710,14 @@ body {
 }
 
 .seller-avatar {
-    width: clamp(40px, 8vw, 48px);
-    height: clamp(40px, 8vw, 48px);
+    width: clamp(44px, 9vw, 52px);
+    height: clamp(44px, 9vw, 52px);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: clamp(14px, 3vw, 18px);
+    font-size: clamp(16px, 3.5vw, 20px);
     font-weight: 700;
     border: 3px solid;
     position: relative;
@@ -775,15 +750,15 @@ body {
 
 .rank-badge {
     position: absolute;
-    top: -4px;
-    right: -4px;
-    width: clamp(16px, 3vw, 20px);
-    height: clamp(16px, 3vw, 20px);
+    top: -6px;
+    right: -6px;
+    width: clamp(18px, 4vw, 22px);
+    height: clamp(18px, 4vw, 22px);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: clamp(8px, 1.5vw, 10px);
+    font-size: clamp(9px, 2vw, 11px);
     border: 2px solid white;
     box-shadow: var(--shadow-light);
 }
@@ -818,7 +793,7 @@ body {
     font-size: var(--font-base);
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 2px;
+    margin-bottom: 4px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -829,7 +804,7 @@ body {
     color: var(--text-secondary);
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -845,7 +820,7 @@ body {
 .stat {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     font-size: var(--font-xs);
     color: var(--text-muted);
 }
@@ -876,8 +851,8 @@ body {
 }
 
 .default-icon svg {
-    width: clamp(48px, 10vw, 64px);
-    height: clamp(48px, 10vw, 64px);
+    width: clamp(52px, 12vw, 68px);
+    height: clamp(52px, 12vw, 68px);
 }
 
 .default-content h3 {
@@ -906,9 +881,9 @@ body {
 }
 
 .selected-seller-info .seller-avatar {
-    width: clamp(32px, 6vw, 40px);
-    height: clamp(32px, 6vw, 40px);
-    font-size: clamp(12px, 2.5vw, 16px);
+    width: clamp(36px, 7vw, 44px);
+    height: clamp(36px, 7vw, 44px);
+    font-size: clamp(14px, 3vw, 18px);
 }
 
 .selected-seller-info .seller-info .seller-name {
@@ -919,45 +894,15 @@ body {
     font-size: var(--font-xs);
 }
 
-/* Posts Grid - Fully Responsive */
+/* Enhanced Posts Grid - Ultra Mobile Responsive */
 .posts-grid {
     flex: 1;
     padding: var(--spacing-xl);
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(clamp(180px, 30vw, 220px), 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(clamp(160px, 28vw, 200px), 1fr));
     gap: var(--spacing-lg);
     overflow-y: auto;
-}
-
-/* Mobile-first approach for better touch experience */
-@media (max-width: 767.98px) {
-    .posts-grid {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: var(--spacing-md);
-        padding: var(--spacing-md);
-    }
-}
-
-@media (max-width: 575.98px) {
-    .posts-grid {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: var(--spacing-sm);
-        padding: var(--spacing-sm);
-    }
-}
-
-@media (max-width: 480px) {
-    .posts-grid {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-        gap: var(--spacing-xs);
-    }
-}
-
-@media (max-width: 360px) {
-    .posts-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
-    }
+    scroll-behavior: smooth;
 }
 
 .post-thumbnail {
@@ -966,10 +911,11 @@ body {
     border-radius: var(--border-radius);
     overflow: hidden;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     aspect-ratio: 1;
     display: flex;
     flex-direction: column;
+    will-change: transform;
 }
 
 .post-thumbnail:hover {
@@ -978,11 +924,16 @@ body {
     transform: translateY(-2px);
 }
 
+.post-thumbnail:active {
+    transform: translateY(0) scale(0.98);
+    transition: all 0.1s ease;
+}
+
 .post-image-wrapper {
     flex: 1;
     position: relative;
     overflow: hidden;
-    background: #f5f5f5;
+    background: #f8f9fa;
 }
 
 .post-thumbnail-img {
@@ -1002,17 +953,17 @@ body {
     left: var(--spacing-sm);
     background: linear-gradient(135deg, #FFD700, #FFA500);
     color: #333;
-    padding: 2px 6px;
+    padding: 4px 8px;
     border-radius: 8px;
     font-size: var(--font-xs);
     font-weight: 600;
     display: flex;
     align-items: center;
-    gap: 2px;
+    gap: 4px;
 }
 
 .post-info {
-    padding: var(--spacing-sm);
+    padding: var(--spacing-md);
     background: white;
 }
 
@@ -1020,7 +971,7 @@ body {
     font-size: var(--font-sm);
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 2px;
+    margin-bottom: 4px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1031,7 +982,7 @@ body {
     color: var(--text-muted);
 }
 
-/* Load More - Responsive */
+/* Enhanced Load More Button */
 .load-more-wrapper {
     padding: var(--spacing-xl);
     text-align: center;
@@ -1041,8 +992,8 @@ body {
     background: var(--primary-color);
     color: white;
     border: none;
-    padding: var(--spacing-md) var(--spacing-xl);
-    border-radius: 20px;
+    padding: var(--spacing-lg) var(--spacing-xl);
+    border-radius: 25px;
     font-size: var(--font-sm);
     font-weight: 600;
     cursor: pointer;
@@ -1051,6 +1002,7 @@ body {
     align-items: center;
     gap: var(--spacing-sm);
     margin: 0 auto;
+    min-height: var(--touch-target-min);
 }
 
 .load-more-btn:hover {
@@ -1065,15 +1017,15 @@ body {
 }
 
 .spinner {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     border: 2px solid rgba(255,255,255,0.3);
     border-top: 2px solid white;
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
 
-/* Post Detail Modal - Fully Responsive */
+/* Enhanced Post Detail Modal - Mobile-First */
 .post-modal {
     position: fixed;
     top: 0;
@@ -1085,7 +1037,7 @@ body {
     align-items: center;
     justify-content: center;
     z-index: 10000;
-    padding: var(--spacing-lg);
+    padding: var(--spacing-md);
 }
 
 .modal-overlay {
@@ -1101,7 +1053,7 @@ body {
     background: white;
     border-radius: var(--border-radius-lg);
     max-width: var(--modal-width);
-    max-height: 90vh;
+    max-height: 92vh;
     width: 100%;
     overflow: hidden;
     box-shadow: var(--shadow-heavy);
@@ -1111,28 +1063,29 @@ body {
     position: absolute;
     top: var(--spacing-lg);
     right: var(--spacing-lg);
-    background: rgba(0,0,0,0.5);
+    background: rgba(0,0,0,0.6);
     border: none;
     color: white;
-    font-size: clamp(18px, 4vw, 24px);
-    width: clamp(32px, 6vw, 40px);
-    height: clamp(32px, 6vw, 40px);
+    font-size: clamp(20px, 5vw, 28px);
+    width: var(--touch-target-min);
+    height: var(--touch-target-min);
     border-radius: 50%;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.2s ease;
+    transition: all 0.2s ease;
     z-index: 10001;
 }
 
 .modal-close:hover {
-    background: rgba(0,0,0,0.7);
+    background: rgba(0,0,0,0.8);
+    transform: scale(1.05);
 }
 
 .modal-body {
     display: grid;
-    grid-template-columns: 1fr 350px;
+    grid-template-columns: 1fr 360px;
     height: var(--modal-height);
 }
 
@@ -1145,9 +1098,32 @@ body {
 }
 
 .modal-image-section img {
+    display: block;
+    width: 100%;
+    height: auto;
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
+    margin: 0 auto;
+    border-radius: 12px;
+    background: #f8f8f8;
+}
+
+.show-details-btn {
+    display: none;
+    width: 100%;
+    padding: var(--spacing-lg);
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    font-size: var(--font-base);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.show-details-btn:hover {
+    background: var(--primary-dark);
 }
 
 .modal-info-section {
@@ -1156,6 +1132,10 @@ body {
     display: flex;
     flex-direction: column;
     overflow-y: auto;
+}
+
+.modal-info-section.collapsed {
+    display: none;
 }
 
 .modal-header-info {
@@ -1175,9 +1155,9 @@ body {
 }
 
 .modal-seller-profile .seller-avatar {
-    width: clamp(36px, 7vw, 44px);
-    height: clamp(36px, 7vw, 44px);
-    font-size: clamp(14px, 3vw, 16px);
+    width: clamp(40px, 8vw, 48px);
+    height: clamp(40px, 8vw, 48px);
+    font-size: clamp(16px, 3.5vw, 20px);
 }
 
 .modal-post-date {
@@ -1203,7 +1183,7 @@ body {
 .modal-post-caption {
     font-size: var(--font-sm);
     color: var(--text-secondary);
-    line-height: 1.5;
+    line-height: 1.6;
     word-wrap: break-word;
 }
 
@@ -1230,10 +1210,10 @@ body {
 
 .action-btn {
     flex: 1;
-    min-width: 120px;
-    padding: var(--spacing-md);
+    min-width: 140px;
+    padding: var(--spacing-lg);
     border: none;
-    border-radius: var(--spacing-sm);
+    border-radius: var(--spacing-md);
     font-size: var(--font-sm);
     font-weight: 600;
     cursor: pointer;
@@ -1242,6 +1222,7 @@ body {
     align-items: center;
     justify-content: center;
     gap: var(--spacing-sm);
+    min-height: var(--touch-target-min);
 }
 
 .action-btn.primary {
@@ -1251,6 +1232,7 @@ body {
 
 .action-btn.primary:hover {
     background: var(--primary-dark);
+    transform: translateY(-1px);
 }
 
 .action-btn.secondary {
@@ -1261,46 +1243,47 @@ body {
 
 .action-btn.secondary:hover {
     background: var(--border-color);
+    transform: translateY(-1px);
 }
 
-/* Responsive Design Breakpoints */
+/* Enhanced Mobile Responsiveness - Improved Breakpoints */
 
-/* Extra Large Desktop (Bootstrap xl) */
+/* Extra Large Desktop */
 @media (min-width: 1400px) {
     .gallery-main {
-        grid-template-columns: 420px 1fr;
+        grid-template-columns: 440px 1fr;
         padding: var(--spacing-xxl);
     }
 }
 
-/* Large Desktop (Bootstrap lg) */
+/* Large Desktop */
 @media (max-width: 1199.98px) {
     .gallery-main {
-        grid-template-columns: 320px 1fr;
+        grid-template-columns: 340px 1fr;
         padding: var(--spacing-xl);
     }
 
     .modal-body {
-        grid-template-columns: 1fr 280px;
+        grid-template-columns: 1fr 300px;
     }
 }
 
-/* Medium Desktop/Tablet Landscape (Bootstrap md) */
+/* Medium Desktop/Tablet Landscape */
 @media (max-width: 991.98px) {
     .gallery-main {
-        grid-template-columns: 300px 1fr;
+        grid-template-columns: 320px 1fr;
         gap: var(--spacing-lg);
         padding: var(--spacing-lg);
     }
 
     .posts-grid {
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
         gap: var(--spacing-md);
     }
 
     .modal-body {
-        grid-template-columns: 1fr 260px;
-        height: 70vh;
+        grid-template-columns: 1fr 280px;
+        height: 75vh;
     }
 
     .panel-header {
@@ -1314,11 +1297,10 @@ body {
         justify-content: space-between;
     }
 }
-}
 
-/* Tablet Portrait & Mobile Landscape (Bootstrap sm) */
+/* Enhanced Tablet Portrait & Mobile Landscape */
 @media (max-width: 767.98px) {
-    /* Show mobile filter toggle */
+    /* Show enhanced mobile interface */
     .mobile-filter-toggle {
         display: block;
         position: sticky;
@@ -1326,19 +1308,30 @@ body {
         z-index: 100;
         background: var(--panel-bg);
         border-bottom: 2px solid var(--border-color);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        padding: var(--spacing-lg) var(--spacing-lg);
     }
 
-    /* Show mobile close button in sellers panel */
+    .filter-toggle-btn {
+        max-width: none;
+        width: 100%;
+        min-height: var(--touch-target-comfortable);
+        font-size: var(--font-lg);
+        padding: var(--spacing-xl);
+        border-radius: 28px;
+    }
+
     .mobile-close-btn {
         display: flex;
+        min-width: var(--touch-target-min);
+        min-height: var(--touch-target-min);
     }
 
     .gallery-main {
         grid-template-columns: 1fr;
         gap: 0;
         padding: var(--spacing-md);
-        min-height: calc(100vh - var(--navbar-height) - 120px); /* Adjust for navbar and mobile toggle */
+        min-height: calc(100vh - var(--navbar-height) - 140px);
     }
 
     .sellers-panel {
@@ -1353,10 +1346,10 @@ body {
         max-width: none;
         overflow-y: auto;
         background: var(--panel-bg);
-        box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
         transform: translateX(-100%);
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        padding-top: var(--navbar-height); /* Space for navbar */
+        padding-top: var(--navbar-height);
     }
 
     .sellers-panel.mobile-active {
@@ -1364,7 +1357,6 @@ body {
         transform: translateX(0);
     }
 
-    /* Enhanced backdrop when mobile panel is open */
     .mobile-backdrop {
         display: none;
         position: fixed;
@@ -1376,6 +1368,7 @@ body {
         z-index: 1400;
         opacity: 0;
         transition: opacity 0.3s ease;
+        backdrop-filter: blur(4px);
     }
 
     .mobile-backdrop.active {
@@ -1383,77 +1376,100 @@ body {
         opacity: 1;
     }
 
-    .mobile-toggle {
-        display: flex;
-    }
-
     .posts-panel {
         grid-column: 1;
-        min-height: calc(100vh - var(--navbar-height) - 160px); /* Account for navbar and mobile toggle */
+        min-height: calc(100vh - var(--navbar-height) - 180px);
         margin-top: var(--spacing-lg);
     }
 
     .posts-grid {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: var(--spacing-sm);
-        padding: var(--spacing-md);
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: var(--spacing-md);
+        padding: var(--spacing-lg);
     }
 
+    /* Enhanced Mobile Modal */
     .modal-body {
         grid-template-columns: 1fr;
+        grid-template-rows: 1fr auto;
         height: auto;
-        max-height: 85vh;
+        max-height: 88vh;
+        padding: 0;
     }
 
     .modal-image-section {
-        max-height: 50vh;
+        max-height: 55vh;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #000;
+        border-top-left-radius: 16px;
+        border-top-right-radius: 16px;
+        overflow: hidden;
+    }
+
+    .modal-image-section img {
+        width: 100%;
+        max-width: 100%;
+        max-height: 55vh;
+        height: auto;
+        object-fit: contain;
+        border-radius: 0;
+        background: #000;
+    }
+
+    .show-details-btn {
+        display: block;
+        min-height: var(--touch-target-comfortable);
     }
 
     .modal-info-section {
         padding: var(--spacing-lg);
-    }
-
-    .panel-header {
-        flex-wrap: wrap;
-        gap: var(--spacing-sm);
+        max-height: 45vh;
+        overflow-y: auto;
     }
 
     .panel-controls {
         flex-direction: column;
-        gap: var(--spacing-sm);
+        gap: var(--spacing-lg);
+        padding: var(--spacing-lg);
     }
 
-    .filter-select {
+    .search-input, .filter-select {
+        min-height: var(--touch-target-comfortable);
+        font-size: var(--font-base);
+        padding: var(--spacing-lg);
+        border-radius: 28px;
         width: 100%;
+    }
+
+    .search-input {
+        padding-left: 56px;
+    }
+
+    .search-icon {
+        left: var(--spacing-xl);
+        width: 22px;
+        height: 22px;
     }
 }
 
-/* Mobile Portrait (Improved) */
+/* Enhanced Mobile Portrait */
 @media (max-width: 575.98px) {
-    .gallery-header {
-        padding: var(--spacing-sm) var(--spacing-md);
-    }
-
-    .gallery-main {
-        padding: var(--spacing-sm);
-        min-height: calc(100vh - var(--navbar-height) - 100px);
-    }
-
     .mobile-filter-toggle {
         padding: var(--spacing-lg) var(--spacing-md);
     }
 
     .filter-toggle-btn {
-        padding: var(--spacing-xl);
-        min-height: 60px;
+        min-height: 64px;
         font-size: var(--font-xl);
-        border-radius: 20px;
-        max-width: none;
-        width: 100%;
+        border-radius: 24px;
     }
 
-    .sellers-panel {
-        padding-top: calc(var(--navbar-height) + var(--spacing-md));
+    .gallery-main {
+        padding: var(--spacing-sm);
+        min-height: calc(100vh - var(--navbar-height) - 120px);
     }
 
     .panel-header,
@@ -1463,83 +1479,24 @@ body {
         padding-right: var(--spacing-lg);
     }
 
-    .panel-controls {
-        gap: var(--spacing-lg);
-        flex-direction: column;
-    }
-
-    .search-input, .filter-select {
-        min-height: 52px;
-        font-size: var(--font-lg);
-        padding: var(--spacing-lg);
-        border-radius: 26px;
-        width: 100%;
-    }
-
-    .search-input {
-        padding-left: 52px;
-    }
-
-    .search-icon {
-        left: var(--spacing-lg);
-        width: 24px;
-        height: 24px;
-    }
-
     .seller-card {
         padding: var(--spacing-lg);
         margin-bottom: var(--spacing-lg);
-        min-height: 88px;
+        min-height: 92px;
         border-radius: var(--border-radius);
-        border-width: 2px;
-    }
-
-    .seller-card:active {
-        transform: scale(0.98);
-        transition: transform 0.1s ease;
-    }
-
-    .mobile-close-btn {
-        width: 48px;
-        height: 48px;
-        border-radius: 24px;
     }
 
     .posts-grid {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
         gap: var(--spacing-sm);
         padding: var(--spacing-md);
     }
 
-    .post-card {
-        min-height: 120px;
-        border-radius: var(--border-radius);
-    }
-
-    .post-modal {
-        padding: var(--spacing-sm);
-    }
-
     .modal-content {
-        border-radius: var(--spacing-md);
+        border-radius: 20px;
         max-height: calc(100vh - var(--navbar-height) - 20px);
-        margin: var(--spacing-sm);
-        width: 95vw;
-    }
-
-    .modal-body {
-        grid-template-columns: 1fr;
-        grid-template-rows: 1fr auto;
-        gap: var(--spacing-lg);
-    }
-
-    .modal-image-section img {
-        max-height: 50vh;
-        object-fit: contain;
-    }
-
-    .modal-info-section {
-        padding: var(--spacing-lg);
+        margin: 0 auto;
+        width: 96vw;
     }
 
     .modal-actions {
@@ -1549,65 +1506,40 @@ body {
 
     .action-btn {
         min-width: auto;
-        min-height: 48px;
-    }
-
-    .sellers-panel {
-        top: var(--navbar-height);
-        height: calc(100vh - var(--navbar-height));
+        min-height: var(--touch-target-comfortable);
+        width: 100%;
     }
 }
 
-/* Extra Small Mobile (Optimized) */
-@media (max-width: 480px) {
-    .header-left {
-        gap: var(--spacing-sm);
+/* Ultra Small Mobile Devices */
+@media (max-width: 390px) {
+    .posts-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-xs);
+        padding: var(--spacing-sm);
     }
 
-    .panel-header {
-        padding: var(--spacing-lg);
-        flex-direction: column;
-        align-items: stretch;
+    .seller-card {
+        padding: var(--spacing-md);
+        min-height: 80px;
     }
 
-    .panel-header-actions {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
+    .modal-content {
+        width: 98vw;
+        border-radius: 16px;
     }
 
-    .panel-controls {
-        padding: var(--spacing-lg) var(--spacing-lg) 0;
-        flex-direction: column;
-        gap: var(--spacing-lg);
-    }
-
-    .sellers-list {
-        padding: var(--spacing-lg);
-    }
-
-    .modal-body {
-        height: auto;
-        max-height: calc(90vh - var(--navbar-height));
-    }
-
-    .modal-image-section {
-        max-height: calc(50vh - var(--navbar-height));
-    }
-
-    .gallery-main {
-        min-height: calc(100vh - var(--navbar-height) - 60px);
+    .filter-toggle-btn {
+        padding: var(--spacing-lg) var(--spacing-xl);
+        font-size: var(--font-lg);
+        min-height: 56px;
     }
 }
 
-/* Very Small Screens (Optimized) */
+/* Very Small Screens */
 @media (max-width: 360px) {
     .header-title svg {
         display: none;
-    }
-
-    .header-title {
-        font-size: var(--font-base);
     }
 
     .back-btn, .mobile-toggle {
@@ -1615,28 +1547,13 @@ body {
         height: 40px;
     }
 
-    .mobile-close-btn {
-        width: 40px;
-        height: 40px;
-    }
-
-    .gallery-main {
-        min-height: calc(100vh - var(--navbar-height) - 50px);
-        padding: var(--spacing-xs);
-    }
-
-    .filter-toggle-btn {
-        padding: var(--spacing-md) var(--spacing-lg);
-        font-size: var(--font-sm);
-        min-height: 44px;
+    .posts-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
     }
 
     .panel-header {
         padding: var(--spacing-md);
-    }
-
-    .panel-controls {
-        padding: var(--spacing-md) var(--spacing-md) 0;
     }
 
     .sellers-list {
@@ -1644,7 +1561,7 @@ body {
     }
 }
 
-/* Accessibility */
+/* Accessibility Enhancements */
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
         animation-duration: 0.01ms !important;
@@ -1662,7 +1579,7 @@ body {
     }
 }
 
-/* Focus styles for accessibility */
+/* Enhanced Focus styles for accessibility */
 .seller-card:focus,
 .post-thumbnail:focus,
 .back-btn:focus,
@@ -1670,8 +1587,9 @@ body {
 .search-input:focus,
 .filter-select:focus,
 .load-more-btn:focus,
-.action-btn:focus {
-    outline: 2px solid var(--primary-color);
+.action-btn:focus,
+.filter-toggle-btn:focus {
+    outline: 3px solid var(--primary-color);
     outline-offset: 2px;
 }
 
@@ -1698,19 +1616,42 @@ body {
     border-radius: var(--border-radius);
 }
 
-/* Touch-friendly improvements */
+/* Enhanced Touch-friendly improvements */
 @media (hover: none) and (pointer: coarse) {
     .seller-card,
     .post-thumbnail,
     .load-more-btn,
-    .action-btn {
-        min-height: 44px; /* Ensure minimum touch target size */
+    .action-btn,
+    .filter-toggle-btn {
+        min-height: var(--touch-target-comfortable);
     }
 
     .back-btn,
-    .mobile-toggle {
-        min-width: 44px;
-        min-height: 44px;
+    .mobile-toggle,
+    .mobile-close-btn {
+        min-width: var(--touch-target-min);
+        min-height: var(--touch-target-min);
+    }
+
+    /* Enhanced touch feedback */
+    .seller-card:active,
+    .post-thumbnail:active,
+    .filter-toggle-btn:active {
+        transform: scale(0.98);
+        transition: transform 0.1s ease;
+    }
+}
+
+/* Safe area adjustments for notched devices */
+@supports (padding: max(0px)) {
+    .mobile-filter-toggle {
+        padding-left: max(var(--spacing-md), env(safe-area-inset-left));
+        padding-right: max(var(--spacing-md), env(safe-area-inset-right));
+    }
+
+    .sellers-panel {
+        padding-left: max(var(--spacing-lg), env(safe-area-inset-left));
+        padding-right: max(var(--spacing-lg), env(safe-area-inset-right));
     }
 }
 </style>
@@ -1731,15 +1672,15 @@ const app = {
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
-    handleResize(); // Initial responsive setup
+    handleResize();
 });
 
-// Add resize listener for responsive adjustments
+// Enhanced resize listener for responsive adjustments
 window.addEventListener('resize', handleResize);
 
 function handleResize() {
     // Close mobile panel if screen becomes large
-    if (window.innerWidth > 968) {
+    if (window.innerWidth > 767) {
         closeMobilePanel();
     }
 
@@ -1752,14 +1693,23 @@ function handleResize() {
 
 function adjustModalSize() {
     const modalBody = document.querySelector('.modal-body');
-    if (window.innerWidth <= 968) {
+    const showDetailsBtn = document.querySelector('.show-details-btn');
+    const modalInfoSection = document.querySelector('.modal-info-section');
+
+    if (window.innerWidth <= 767) {
         modalBody.style.gridTemplateColumns = '1fr';
+        modalBody.style.gridTemplateRows = '1fr auto';
         modalBody.style.height = 'auto';
-        modalBody.style.maxHeight = '85vh';
+        modalBody.style.maxHeight = '88vh';
+        showDetailsBtn.style.display = 'block';
+        modalInfoSection.classList.add('collapsed');
     } else {
-        modalBody.style.gridTemplateColumns = window.innerWidth <= 1200 ? '1fr 280px' : '1fr 350px';
+        modalBody.style.gridTemplateColumns = window.innerWidth <= 1200 ? '1fr 280px' : '1fr 360px';
+        modalBody.style.gridTemplateRows = 'unset';
         modalBody.style.height = '600px';
         modalBody.style.maxHeight = '90vh';
+        showDetailsBtn.style.display = 'none';
+        modalInfoSection.classList.remove('collapsed');
     }
 }
 
@@ -1772,7 +1722,6 @@ async function initializeApp() {
         const urlParams = new URLSearchParams(window.location.search);
         const sellerId = urlParams.get('seller');
         if (sellerId) {
-            // Auto-select the seller if specified in URL
             setTimeout(() => selectSeller(parseInt(sellerId)), 500);
         }
 
@@ -1784,7 +1733,7 @@ async function initializeApp() {
 }
 
 function initializeEventListeners() {
-    // Search functionality
+    // Search functionality with enhanced debouncing
     const searchInput = document.getElementById('sellerSearch');
     searchInput.addEventListener('input', handleSearch);
 
@@ -1800,30 +1749,34 @@ function initializeEventListeners() {
         }
     });
 
-    // Touch gesture support for mobile
+    // Enhanced touch gesture support for mobile
     let touchStartX = 0;
     let touchStartY = 0;
+    let touchStartTime = 0;
 
     document.addEventListener('touchstart', function(e) {
         touchStartX = e.touches[0].clientX;
         touchStartY = e.touches[0].clientY;
-    });
+        touchStartTime = Date.now();
+    }, { passive: true });
 
     document.addEventListener('touchend', function(e) {
         if (!touchStartX || !touchStartY) return;
 
         const touchEndX = e.changedTouches[0].clientX;
         const touchEndY = e.changedTouches[0].clientY;
+        const touchEndTime = Date.now();
 
         const diffX = touchStartX - touchEndX;
         const diffY = touchStartY - touchEndY;
+        const timeDiff = touchEndTime - touchStartTime;
 
-        // Only handle horizontal swipes
-        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+        // Only handle swipes that are quick enough and primarily horizontal
+        if (timeDiff < 300 && Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
             const sellersPanel = document.getElementById('sellersPanel');
 
             // Swipe right to open panel (on mobile)
-            if (diffX < 0 && window.innerWidth <= 968 && !sellersPanel.classList.contains('mobile-active')) {
+            if (diffX < 0 && window.innerWidth <= 767 && !sellersPanel.classList.contains('mobile-active')) {
                 toggleMobileView();
             }
             // Swipe left to close panel
@@ -1834,7 +1787,38 @@ function initializeEventListeners() {
 
         touchStartX = 0;
         touchStartY = 0;
-    });
+        touchStartTime = 0;
+    }, { passive: true });
+
+    // Enhanced scroll performance
+    const postsGrid = document.getElementById('postsGrid');
+    if (postsGrid) {
+        postsGrid.addEventListener('scroll', throttle(handlePostsScroll, 100), { passive: true });
+    }
+}
+
+// Throttle function for performance
+function throttle(func, limit) {
+    let inThrottle;
+    return function() {
+        const args = arguments;
+        const context = this;
+        if (!inThrottle) {
+            func.apply(context, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
+    }
+}
+
+function handlePostsScroll() {
+    // Auto-load more posts when near bottom
+    const postsGrid = document.getElementById('postsGrid');
+    if (postsGrid.scrollTop + postsGrid.clientHeight >= postsGrid.scrollHeight - 200) {
+        if (app.hasMorePosts && !app.isLoading) {
+            loadMorePosts();
+        }
+    }
 }
 
 // REAL DATA LOADING - No Mock Fallback
@@ -1842,9 +1826,9 @@ async function loadSellers() {
     try {
         showSellersLoading(true);
 
-        // Add timeout to prevent hanging
+        // Enhanced timeout handling
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
 
         const response = await fetch('/public-api/stores', {
             signal: controller.signal
@@ -1859,7 +1843,6 @@ async function loadSellers() {
         const data = await response.json();
 
         if (data.success) {
-            // Accept empty array as valid response (empty database)
             app.sellers = (data.data || []).map(seller => ({
                 id: seller.id,
                 name: seller.name,
@@ -1891,8 +1874,6 @@ async function loadSellers() {
         }
     } catch (error) {
         console.error('Failed to load sellers:', error.message);
-
-        // Show error state instead of mock data
         app.sellers = [];
         app.filteredSellers = [];
         showErrorState(error.message);
@@ -1902,11 +1883,11 @@ async function loadSellers() {
 }
 
 function showSellersLoading(show) {
-    const loadingElement = document.querySelector('.loading-sellers');
     const sellersList = document.getElementById('sellersList');
 
     if (show) {
-        sellersList.innerHTML = '<div class="loading-sellers"><div class="loading-spinner"></div><p>Loading stores...</p></div>';
+        const skeletons = Array(4).fill(0).map(() => '<div class="skeleton skeleton-seller"></div>').join('');
+        sellersList.innerHTML = `<div style="padding: var(--spacing-lg);">${skeletons}</div>`;
     }
 }
 
@@ -1914,19 +1895,20 @@ function showEmptyDatabase() {
     const sellersList = document.getElementById('sellersList');
     sellersList.innerHTML = `
         <div style="text-align: center; padding: var(--spacing-xxl); color: var(--text-muted);">
-            <div style="font-size: clamp(32px, 8vw, 48px); margin-bottom: var(--spacing-lg); opacity: 0.5;">🏪</div>
+            <div style="font-size: clamp(36px, 10vw, 52px); margin-bottom: var(--spacing-lg); opacity: 0.5;">🏪</div>
             <h3 style="margin-bottom: var(--spacing-sm); color: var(--text-secondary); font-size: var(--font-lg);">No Stores Yet</h3>
-            <p style="font-size: var(--font-sm);">Your database is empty. Add some stores to see them here.</p>
+            <p style="font-size: var(--font-sm); line-height: 1.5;">Your database is empty. Add some stores to see them here.</p>
             <button onclick="refreshData()" style="
                 margin-top: var(--spacing-lg);
                 background: var(--primary-color);
                 color: white;
                 border: none;
-                padding: var(--spacing-sm) var(--spacing-lg);
-                border-radius: 20px;
+                padding: var(--spacing-md) var(--spacing-lg);
+                border-radius: 24px;
                 cursor: pointer;
                 font-size: var(--font-sm);
                 transition: all 0.2s ease;
+                min-height: var(--touch-target-min);
             " onmouseover="this.style.background='var(--primary-dark)'" onmouseout="this.style.background='var(--primary-color)'">Refresh</button>
         </div>
     `;
@@ -1936,20 +1918,21 @@ function showErrorState(errorMessage) {
     const sellersList = document.getElementById('sellersList');
     sellersList.innerHTML = `
         <div style="text-align: center; padding: var(--spacing-xxl); color: var(--text-muted);">
-            <div style="font-size: clamp(32px, 8vw, 48px); margin-bottom: var(--spacing-lg); opacity: 0.5;">⚠️</div>
+            <div style="font-size: clamp(36px, 10vw, 52px); margin-bottom: var(--spacing-lg); opacity: 0.5;">⚠️</div>
             <h3 style="margin-bottom: var(--spacing-sm); color: var(--text-secondary); font-size: var(--font-lg);">Connection Error</h3>
-            <p style="font-size: var(--font-sm); margin-bottom: var(--spacing-sm);">Failed to load stores:</p>
-            <p style="font-size: var(--font-xs); color: var(--text-muted); word-break: break-word;">${errorMessage}</p>
+            <p style="font-size: var(--font-sm); margin-bottom: var(--spacing-sm); line-height: 1.5;">Failed to load stores:</p>
+            <p style="font-size: var(--font-xs); color: var(--text-muted); word-break: break-word; max-width: 280px; margin: 0 auto;">${errorMessage}</p>
             <button onclick="refreshData()" style="
                 margin-top: var(--spacing-lg);
                 background: var(--primary-color);
                 color: white;
                 border: none;
-                padding: var(--spacing-sm) var(--spacing-lg);
-                border-radius: 20px;
+                padding: var(--spacing-md) var(--spacing-lg);
+                border-radius: 24px;
                 cursor: pointer;
                 font-size: var(--font-sm);
                 transition: all 0.2s ease;
+                min-height: var(--touch-target-min);
             " onmouseover="this.style.background='var(--primary-dark)'" onmouseout="this.style.background='var(--primary-color)'">Try Again</button>
         </div>
     `;
@@ -1983,7 +1966,7 @@ function renderSellers() {
         sellerCard.setAttribute('role', 'button');
         sellerCard.setAttribute('aria-label', `Select ${seller.name} store`);
 
-        // Add keyboard support
+        // Enhanced keyboard support
         sellerCard.onkeydown = (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
@@ -2034,7 +2017,6 @@ function renderSellers() {
         fragment.appendChild(sellerCard);
     });
 
-    // Single DOM update instead of multiple innerHTML calls
     sellersList.innerHTML = '';
     sellersList.appendChild(fragment);
 }
@@ -2051,6 +2033,11 @@ async function selectSeller(sellerId) {
         if (selectedCard) {
             selectedCard.classList.add('selected');
             selectedCard.setAttribute('aria-selected', 'true');
+
+            // Smooth scroll to selected card on mobile
+            if (window.innerWidth <= 767) {
+                selectedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
         }
 
         // Find seller data
@@ -2100,7 +2087,7 @@ function updateSelectedSellerInfo() {
     `;
 }
 
-// REAL POSTS LOADING - No Mock Fallback
+// Enhanced REAL POSTS LOADING
 async function loadSellerPosts(sellerId, page = 1) {
     try {
         if (page === 1) {
@@ -2111,8 +2098,14 @@ async function loadSellerPosts(sellerId, page = 1) {
 
         showPostsLoading(page === 1);
 
-        // Only try real API, no mock fallback
-        const response = await fetch(`/public-api/gallery/feed?seller_id=${sellerId}&page=${page}`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+        const response = await fetch(`/public-api/gallery/feed?seller_id=${sellerId}&page=${page}`, {
+            signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
 
         if (!response.ok) {
             throw new Error(`API response: ${response.status}`);
@@ -2143,7 +2136,6 @@ async function loadSellerPosts(sellerId, page = 1) {
             renderPosts();
             updatePostsCount();
 
-            // Show/hide load more button
             const loadMoreWrapper = document.getElementById('loadMoreWrapper');
             loadMoreWrapper.style.display = app.hasMorePosts ? 'block' : 'none';
 
@@ -2169,7 +2161,6 @@ function showPostsLoading(show) {
     const postsGrid = document.getElementById('postsGrid');
 
     if (show) {
-        // Show skeleton loading with responsive grid
         const skeletons = Array(6).fill(0).map(() => '<div class="skeleton skeleton-post"></div>').join('');
         postsGrid.innerHTML = skeletons;
     }
@@ -2197,7 +2188,7 @@ function renderPosts() {
             </div>
             <div class="post-info">
                 <div class="post-title" title="${post.caption || 'Store Post'}">
-                    ${post.caption ? (post.caption.length > 25 ? post.caption.substring(0, 25) + '...' : post.caption) : 'Store Post'}
+                    ${post.caption ? (post.caption.length > 20 ? post.caption.substring(0, 20) + '...' : post.caption) : 'Store Post'}
                 </div>
                 <div class="post-date">${post.time_ago}</div>
             </div>
@@ -2218,7 +2209,7 @@ function showNoPosts() {
     const postsGrid = document.getElementById('postsGrid');
     postsGrid.innerHTML = `
         <div style="grid-column: 1 / -1; text-align: center; padding: var(--spacing-xxl); color: var(--text-muted);">
-            <div style="font-size: clamp(32px, 8vw, 48px); margin-bottom: var(--spacing-lg); opacity: 0.5;">📷</div>
+            <div style="font-size: clamp(36px, 10vw, 52px); margin-bottom: var(--spacing-lg); opacity: 0.5;">📷</div>
             <h3 style="margin-bottom: var(--spacing-sm); color: var(--text-secondary); font-size: var(--font-lg);">No posts yet</h3>
             <p style="font-size: var(--font-sm);">This store hasn't shared any photos yet.</p>
         </div>
@@ -2229,9 +2220,9 @@ function showNoPostsError(errorMessage) {
     const postsGrid = document.getElementById('postsGrid');
     postsGrid.innerHTML = `
         <div style="grid-column: 1 / -1; text-align: center; padding: var(--spacing-xxl); color: var(--text-muted);">
-            <div style="font-size: clamp(32px, 8vw, 48px); margin-bottom: var(--spacing-lg); opacity: 0.5;">⚠️</div>
+            <div style="font-size: clamp(36px, 10vw, 52px); margin-bottom: var(--spacing-lg); opacity: 0.5;">⚠️</div>
             <h3 style="margin-bottom: var(--spacing-sm); color: var(--text-secondary); font-size: var(--font-lg);">Error Loading Posts</h3>
-            <p style="font-size: var(--font-sm); word-break: break-word;">Failed to load posts: ${errorMessage}</p>
+            <p style="font-size: var(--font-sm); word-break: break-word; max-width: 280px; margin: 0 auto;">Failed to load posts: ${errorMessage}</p>
         </div>
     `;
 }
@@ -2276,9 +2267,10 @@ function openPostDetail(postId) {
     // Adjust modal size for current viewport
     adjustModalSize();
 
-    // Focus management for accessibility
+    // Enhanced focus management for accessibility
     setTimeout(() => {
-        document.querySelector('.modal-close').focus();
+        const modalClose = document.querySelector('.modal-close');
+        if (modalClose) modalClose.focus();
     }, 100);
 }
 
@@ -2305,7 +2297,7 @@ async function loadMorePosts() {
         await loadSellerPosts(app.selectedSeller.id, app.currentPostsPage);
     } catch (error) {
         console.error('Error loading more posts:', error);
-        app.currentPostsPage--; // Revert page increment
+        app.currentPostsPage--;
     } finally {
         app.isLoading = false;
         loadText.style.display = 'block';
@@ -2314,7 +2306,7 @@ async function loadMorePosts() {
     }
 }
 
-// SEARCH AND FILTER - Real Data Only
+// Enhanced SEARCH AND FILTER
 function handleSearch() {
     clearTimeout(app.searchTimeout);
     const query = document.getElementById('sellerSearch').value.toLowerCase().trim();
@@ -2332,10 +2324,8 @@ function handleSearch() {
 
         renderSellers();
         updateSellersCount();
-
-        // Log search results for debugging
         console.log(`🔍 Search "${query}": ${app.filteredSellers.length} results`);
-    }, 300);
+    }, 200); // Reduced debounce time for better responsiveness
 }
 
 function handleFilter() {
@@ -2361,8 +2351,6 @@ function handleFilter() {
     app.filteredSellers = filtered;
     renderSellers();
     updateSellersCount();
-
-    // Log filter results for debugging
     console.log(`🔧 Filter "${filterValue}": ${app.filteredSellers.length} results`);
 }
 
@@ -2370,7 +2358,6 @@ function updateSellersCount() {
     const count = app.filteredSellers.length;
     document.getElementById('sellersCount').textContent = count;
 
-    // Also update mobile count badge
     const mobileCountBadge = document.getElementById('mobileStoresCount');
     if (mobileCountBadge) {
         mobileCountBadge.textContent = count;
@@ -2381,7 +2368,7 @@ function updatePostsCount() {
     document.getElementById('postsCount').textContent = app.selectedSellerPosts.length;
 }
 
-// MOBILE FUNCTIONS
+// Enhanced MOBILE FUNCTIONS
 function toggleMobileView() {
     const sellersPanel = document.getElementById('sellersPanel');
     const mobileBackdrop = document.getElementById('mobileBackdrop');
@@ -2389,15 +2376,16 @@ function toggleMobileView() {
     sellersPanel.classList.toggle('mobile-active');
     mobileBackdrop.classList.toggle('active');
 
-    // Prevent body scroll when modal is open
     if (sellersPanel.classList.contains('mobile-active')) {
         document.body.style.overflow = 'hidden';
 
-        // Focus management for accessibility
+        // Enhanced focus management
         const searchInput = document.getElementById('sellerSearch');
-        setTimeout(() => searchInput.focus(), 100);
+        setTimeout(() => {
+            if (searchInput) searchInput.focus();
+        }, 100);
 
-        // Add swipe gesture support
+        // Add enhanced swipe gesture support
         addSwipeGesture(sellersPanel);
     } else {
         document.body.style.overflow = '';
@@ -2412,10 +2400,13 @@ function closeMobilePanel() {
         sellersPanel.classList.remove('mobile-active');
         mobileBackdrop.classList.remove('active');
         document.body.style.overflow = '';
+
+        // Reset panel transform
+        sellersPanel.style.transform = '';
     }
 }
 
-// Add swipe gesture for mobile panel
+// Enhanced swipe gesture for mobile panel
 function addSwipeGesture(panel) {
     let startX = 0;
     let currentX = 0;
@@ -2424,6 +2415,7 @@ function addSwipeGesture(panel) {
     function handleTouchStart(e) {
         startX = e.touches[0].clientX;
         isSwping = true;
+        panel.style.transition = 'none';
     }
 
     function handleTouchMove(e) {
@@ -2433,7 +2425,8 @@ function addSwipeGesture(panel) {
 
         // Only allow left swipe (positive diffX)
         if (diffX > 0) {
-            panel.style.transform = `translateX(-${Math.min(diffX, panel.offsetWidth)}px)`;
+            const translateX = Math.min(diffX, panel.offsetWidth);
+            panel.style.transform = `translateX(-${translateX}px)`;
         }
     }
 
@@ -2442,7 +2435,9 @@ function addSwipeGesture(panel) {
         isSwping = false;
 
         const diffX = startX - currentX;
-        const threshold = panel.offsetWidth * 0.3; // 30% of panel width
+        const threshold = panel.offsetWidth * 0.25; // 25% threshold
+
+        panel.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
 
         if (diffX > threshold) {
             closeMobilePanel();
@@ -2451,7 +2446,7 @@ function addSwipeGesture(panel) {
         }
     }
 
-    // Remove existing listeners first
+    // Remove existing listeners
     panel.removeEventListener('touchstart', handleTouchStart);
     panel.removeEventListener('touchmove', handleTouchMove);
     panel.removeEventListener('touchend', handleTouchEnd);
@@ -2465,7 +2460,6 @@ function addSwipeGesture(panel) {
 // MODAL ACTIONS
 function visitStore() {
     if (app.selectedSeller) {
-        // Use public route
         window.location.href = `/public-api/seller/${app.selectedSeller.id}`;
     }
 }
@@ -2484,10 +2478,14 @@ function sharePost() {
             navigator.clipboard?.writeText(url).then(() => {
                 showToast('Link copied to clipboard!');
             }).catch(() => {
-                // Fallback for older browsers
+                // Enhanced fallback for older browsers
                 const textArea = document.createElement('textarea');
                 textArea.value = url;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                textArea.style.top = '-999999px';
                 document.body.appendChild(textArea);
+                textArea.focus();
                 textArea.select();
                 try {
                     document.execCommand('copy');
@@ -2501,7 +2499,7 @@ function sharePost() {
     }
 }
 
-// UTILITY FUNCTIONS
+// Enhanced UTILITY FUNCTIONS
 function handleImageError(img) {
     const fallbackColors = ['2E8B57', '3CB371', '228B22', '32CD32', '98FB98'];
     const color = fallbackColors[Math.floor(Math.random() * fallbackColors.length)];
@@ -2522,20 +2520,22 @@ function showToast(message, type = 'info') {
         right: 20px;
         background: ${type === 'error' ? '#e74c3c' : 'var(--primary-color)'};
         color: white;
-        padding: 12px 16px;
-        border-radius: 8px;
+        padding: 14px 18px;
+        border-radius: 12px;
         z-index: 10002;
         font-size: var(--font-sm);
         box-shadow: var(--shadow-medium);
         animation: slideInRight 0.3s ease;
         max-width: calc(100vw - 40px);
         word-wrap: break-word;
+        font-weight: 500;
     `;
 
     document.body.appendChild(toast);
 
     setTimeout(() => {
-        toast.remove();
+        toast.style.animation = 'slideOutRight 0.3s ease forwards';
+        setTimeout(() => toast.remove(), 300);
     }, 3000);
 }
 
@@ -2567,7 +2567,7 @@ function getRankIcon(points) {
     return '⭐';
 }
 
-// Add CSS animation for toast
+// Enhanced CSS animations for toast notifications
 const style = document.createElement('style');
 style.textContent = `
     @keyframes slideInRight {
@@ -2578,6 +2578,158 @@ style.textContent = `
         to {
             transform: translateX(0);
             opacity: 1;
+        }
+    }
+
+    @keyframes slideOutRight {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+
+    /* Enhanced scrollbar styling for better mobile experience */
+    .sellers-list::-webkit-scrollbar,
+    .posts-grid::-webkit-scrollbar,
+    .modal-info-section::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .sellers-list::-webkit-scrollbar-track,
+    .posts-grid::-webkit-scrollbar-track,
+    .modal-info-section::-webkit-scrollbar-track {
+        background: var(--hover-bg);
+        border-radius: 3px;
+    }
+
+    .sellers-list::-webkit-scrollbar-thumb,
+    .posts-grid::-webkit-scrollbar-thumb,
+    .modal-info-section::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 3px;
+        transition: background 0.2s ease;
+    }
+
+    .sellers-list::-webkit-scrollbar-thumb:hover,
+    .posts-grid::-webkit-scrollbar-thumb:hover,
+    .modal-info-section::-webkit-scrollbar-thumb:hover {
+        background: var(--text-muted);
+    }
+
+    /* Enhanced mobile scrolling performance */
+    .sellers-list,
+    .posts-grid,
+    .modal-info-section {
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+    }
+
+    /* Mobile-specific optimizations */
+    @media (max-width: 767.98px) {
+        /* Hide scrollbars on mobile for cleaner look */
+        .sellers-list::-webkit-scrollbar,
+        .posts-grid::-webkit-scrollbar,
+        .modal-info-section::-webkit-scrollbar {
+            display: none;
+        }
+
+        .sellers-list,
+        .posts-grid,
+        .modal-info-section {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Enhanced touch feedback */
+        .seller-card:active,
+        .post-thumbnail:active,
+        .action-btn:active,
+        .load-more-btn:active {
+            transform: scale(0.97);
+            transition: transform 0.1s ease;
+        }
+
+        /* Improved modal positioning on mobile */
+        .post-modal {
+            padding: var(--spacing-xs);
+            align-items: flex-start;
+            padding-top: max(var(--spacing-lg), env(safe-area-inset-top));
+        }
+
+        .modal-content {
+            width: calc(100vw - var(--spacing-md));
+            max-width: none;
+            margin-top: var(--spacing-md);
+        }
+
+        /* Better mobile backdrop */
+        .mobile-backdrop {
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        /* Enhanced mobile panel animation */
+        .sellers-panel {
+            will-change: transform;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+
+        /* Improved mobile grid spacing */
+        @media (max-width: 480px) {
+            .posts-grid {
+                padding: var(--spacing-md) var(--spacing-sm);
+            }
+        }
+
+        @media (max-width: 390px) {
+            .posts-grid {
+                gap: var(--spacing-xs);
+                padding: var(--spacing-sm);
+            }
+        }
+    }
+
+    /* Performance optimizations */
+    .seller-card,
+    .post-thumbnail,
+    .filter-toggle-btn,
+    .load-more-btn,
+    .action-btn {
+        will-change: transform;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+    }
+
+    /* Prevent text selection on interactive elements */
+    .seller-card,
+    .post-thumbnail,
+    .filter-toggle-btn,
+    .mobile-close-btn,
+    .load-more-btn,
+    .action-btn {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Enhanced dark mode support for future implementation */
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --panel-bg: #1a1a1a;
+            --card-bg: #2d2d2d;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --text-muted: #808080;
+            --border-color: #404040;
+            --hover-bg: #353535;
         }
     }
 `;

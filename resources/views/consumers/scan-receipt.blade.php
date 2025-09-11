@@ -27,7 +27,7 @@
             <h3>📱 QR Code Scanner</h3>
             <p>Position the QR code within the frame</p>
         </div>
-        
+
         <div class="scanner-wrapper">
             <div id="qr-reader"></div>
             <div class="scanner-overlay">
@@ -39,7 +39,7 @@
                     <div class="scan-line"></div>
                 </div>
             </div>
-            
+
             <!-- Camera Status Overlay - FIXED: Now properly hidden when camera loads -->
             <div id="camera-status" class="camera-status hidden">
                 <div class="status-icon">📷</div>
@@ -49,7 +49,7 @@
                 <button id="debug-camera" class="debug-btn" style="display: none;">Show Debug Info</button>
             </div>
         </div>
-        
+
         <div class="scanner-instructions">
             <p>💡 Hold your phone steady and make sure the QR code is clearly visible</p>
             <p style="margin-top: 0.5rem; font-size: 0.8rem; opacity: 0.7;">
@@ -70,11 +70,11 @@
         <div class="divider">
             <span>Or enter code manually</span>
         </div>
-        
+
         <form id="manual-code-form" class="input-group">
-            <input type="text" 
-                   id="receipt-code" 
-                   placeholder="Enter receipt code" 
+            <input type="text"
+                   id="receipt-code"
+                   placeholder="Enter receipt code"
                    class="receipt-input"
                    autocomplete="off">
             <button type="submit" class="submit-btn">
@@ -115,7 +115,7 @@
                     \Log::error('Recent claims query failed: ' . $e->getMessage());
                 }
             @endphp
-            
+
             @forelse($recentClaims as $claim)
                 <div class="recent-item">
                     <div class="recent-icon">🏪</div>
@@ -145,7 +145,7 @@
             <h2>📋 Receipt Details</h2>
             <button class="close-modal" type="button">&times;</button>
         </div>
-        
+
         <div class="modal-body">
             <!-- Store Info -->
             <div class="store-info">
@@ -155,7 +155,7 @@
                     <p id="store-address"></p>
                 </div>
             </div>
-            
+
             <!-- Items List -->
             <div class="receipt-items">
                 <h4>📦 Items</h4>
@@ -163,13 +163,13 @@
                     <!-- Items will be populated here -->
                 </div>
             </div>
-            
+
             <!-- Total Points -->
             <div class="receipt-total">
                 <span>Total Points:</span>
                 <span class="total-points" id="total-points">0</span>
             </div>
-            
+
             <!-- Action Buttons -->
             <div class="modal-actions">
                 <button class="cancel-btn" onclick="closeModal()">Cancel</button>
@@ -267,7 +267,7 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    
+
 }
 
 
@@ -542,13 +542,13 @@ body {
 }
 
 @keyframes scanLine {
-    0%, 100% { 
-        transform: translateY(0); 
-        opacity: 1; 
+    0%, 100% {
+        transform: translateY(0);
+        opacity: 1;
     }
-    50% { 
-        transform: translateY(216px); 
-        opacity: 0.8; 
+    50% {
+        transform: translateY(216px);
+        opacity: 0.8;
     }
 }
 
@@ -626,7 +626,7 @@ body {
         padding: 1.2rem;
         min-height: 52px;
     }
-    
+
     .submit-btn {
         min-height: 52px;
         padding: 1.2rem 1.5rem;
@@ -768,6 +768,7 @@ body {
 }
 
 /* Modal */
+
 .modal {
     display: none;
     position: fixed;
@@ -775,7 +776,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 1000;
+    z-index: 2001;
 }
 
 .modal-backdrop {
@@ -785,7 +786,8 @@ body {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(1.5px);
+    z-index: 2000;
 }
 
 .modal-content {
@@ -801,6 +803,7 @@ body {
     overflow: hidden;
     box-shadow: var(--shadow-xl);
     animation: modalSlideIn 0.3s ease-out;
+    z-index: 2001;
 }
 
 @keyframes modalSlideIn {
@@ -1212,39 +1215,39 @@ body {
     .scan-container {
         padding-bottom: 1rem;
     }
-    
+
     .scan-header {
         padding: 1rem;
     }
-    
+
     .header-title h1 {
         font-size: 1.25rem;
     }
-    
+
     .scanner-section, .manual-section, .recent-section {
         margin: 1rem 0.75rem;
     }
-    
+
     .scanner-wrapper {
         height: 350px;
     }
-    
+
     .camera-status {
         padding: 1.5rem;
         max-width: 280px;
         font-size: 0.9rem;
     }
-    
+
     .status-icon {
         font-size: 2.5rem;
         margin-bottom: 0.75rem;
     }
-    
+
     .status-message {
         font-size: 0.9rem;
         margin-bottom: 1rem;
     }
-    
+
     .retry-btn, .manual-btn, .debug-btn {
         padding: 0.6rem 1.25rem;
         font-size: 0.85rem;
@@ -1252,52 +1255,52 @@ body {
         width: 100%;
         margin: 0.25rem 0;
     }
-    
+
     .debug-btn {
         font-size: 0.75rem;
         padding: 0.5rem 1rem;
     }
-    
+
     .scanner-overlay {
         width: 180px;
         height: 180px;
     }
-    
+
     .corner {
         width: 24px;
         height: 24px;
         border-width: 2px;
     }
-    
+
     .scan-line {
         animation: scanLineMobile 2s ease-in-out infinite;
     }
-    
+
     @keyframes scanLineMobile {
-        0%, 100% { 
-            transform: translateY(0); 
-            opacity: 1; 
+        0%, 100% {
+            transform: translateY(0);
+            opacity: 1;
         }
-        50% { 
-            transform: translateY(176px); 
-            opacity: 0.8; 
+        50% {
+            transform: translateY(176px);
+            opacity: 0.8;
         }
     }
-    
+
     .modal-content {
         width: 95%;
         max-height: 90vh;
     }
-    
+
     .input-group {
         flex-direction: column;
         gap: 0.75rem;
     }
-    
+
     .submit-btn {
         width: 100%;
     }
-    
+
     .toast {
         top: 1rem;
         right: 1rem;
@@ -1306,23 +1309,23 @@ body {
         min-width: auto;
         transform: translateY(-100px);
     }
-    
+
     .toast.show {
         transform: translateY(0);
     }
-    
+
 }
 
 @media (max-width: 360px) {
     .header-content {
         gap: 0.5rem;
     }
-    
+
     .points-display {
         min-width: 60px;
         padding: 0.5rem;
     }
-    
+
     .points-value {
         font-size: 1.125rem;
     }
