@@ -341,7 +341,6 @@ async function initializeApp() {
     try {
         await loadStores();
         initializeEventListeners();
-        console.log('Gallery initialized successfully');
     } catch (error) {
         console.error('Failed to initialize app:', error);
         showErrorState('Failed to load stores');
@@ -436,20 +435,9 @@ async function loadStores() {
         const data = await response.json();
 
         if (data.success) {
-            console.log('Raw store data from API:', data.data.slice(0, 2)); // Debug first 2 stores
-
             app.stores = (data.data || []).map(store => {
-                // Try multiple fields to get the actual points
-                let actualPoints = 0;
-                if (store.points_reward !== undefined && store.points_reward !== null) {
-                    actualPoints = store.points_reward;
-                } else if (store.total_points !== undefined && store.total_points !== null) {
-                    actualPoints = store.total_points;
-                } else {
-                    actualPoints = 0;
-                }
-
-                console.log(`Store ${store.name}: actualPoints=${actualPoints}, original total_points=${store.total_points}, points_reward=${store.points_reward}`);
+                // Use the total_points directly from the API response
+                const actualPoints = parseInt(store.total_points) || 0;
 
                 const processedStore = {
                     id: store.id,
@@ -460,20 +448,21 @@ async function loadStores() {
                     total_points: actualPoints,
                     points_reward: actualPoints,
                     transaction_count: store.transaction_count || 0,
-                    rank_class: store.rank_class || getRankClass(actualPoints),
-                    rank_text: store.rank_text || getRankText(actualPoints),
-                    rank_icon: store.rank_icon || getRankIcon(actualPoints)
+                    rank_class: getRankClass(actualPoints),
+                    rank_text: getRankText(actualPoints),
+                    rank_icon: getRankIcon(actualPoints)
                 };
 
-                console.log(`Processed store ${store.name}: rank=${processedStore.rank_class}, points=${processedStore.total_points}`);
                 return processedStore;
             });
 
+            // Set initial filtered stores to show all stores by default
             app.filteredStores = [...app.stores];
+
+            // Render stores and update counts
             renderStores();
             updateStoresCount();
-            // Apply default filter state
-            applySearchAndFilter();
+
         } else {
             throw new Error(data.message || 'Failed to load stores');
         }
@@ -497,15 +486,16 @@ function showStoresLoading(show) {
 
     const emptyHTML = '<div class="p-4"></div>';
 
+    // Don't clear content if stores are already rendered
+    if (!show && app.filteredStores && app.filteredStores.length > 0) {
+        return;
+    }
+
     document.getElementById('storesList').innerHTML = show ? loadingHTML : emptyHTML;
     document.getElementById('mobileStoresList').innerHTML = show ? loadingHTML : emptyHTML;
 }
 
 function renderStores() {
-    console.log('=== RENDER STORES DEBUG ===');
-    console.log('Filtered stores to render:', app.filteredStores.length);
-    console.log('First store:', app.filteredStores[0]);
-
     if (app.filteredStores.length === 0) {
         const emptyHTML = `
             <div class="text-center p-4 text-muted">
@@ -514,51 +504,29 @@ function renderStores() {
         `;
         document.getElementById('storesList').innerHTML = emptyHTML;
         document.getElementById('mobileStoresList').innerHTML = emptyHTML;
-        console.log('Rendered empty state');
         return;
     }
 
-    // Simple test HTML first
-    const storesHTML = app.filteredStores.map(store => {
-        console.log(`Rendering store: ${store.name} (${store.rank_class})`);
-        return `
-            <div class="card mb-2 p-3" onclick="selectStore(${store.id})" data-store-id="${store.id}" style="cursor: pointer; border: 1px solid #dee2e6;">
-                <div class="d-flex align-items-center">
-                    <div class="me-3" style="width: 40px; height: 40px; background: #198754; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
-                        ${store.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div class="flex-grow-1">
-                        <h6 class="mb-1">${store.name}</h6>
-                        <small class="text-muted">${store.address || 'No address'}</small>
-                        <br>
-                        <small class="text-muted">${store.total_points} pts • ${store.rank_text}</small>
+    const storesHTML = app.filteredStores.map(store => `
+        <div class="store-card p-3" onclick="selectStore(${store.id})" data-store-id="${store.id}">
+            <div class="d-flex align-items-center">
+                <div class="store-avatar ${store.rank_class} me-3">
+                    ${store.name.charAt(0).toUpperCase()}
+                    <div class="rank-badge">
+                        ${store.rank_icon}
                     </div>
                 </div>
+                <div class="flex-grow-1">
+                    <h6 class="mb-1">${store.name}</h6>
+                    <small class="text-muted d-block">${store.address || 'No address'}</small>
+                    <small class="text-muted">${store.total_points} pts • ${store.rank_text}</small>
+                </div>
             </div>
-        `;
-    }).join('');
+        </div>
+    `).join('');
 
-    console.log('Generated HTML length:', storesHTML.length);
-    console.log('Setting innerHTML for storesList and mobileStoresList');
-
-    const storesListElement = document.getElementById('storesList');
-    const mobileStoresListElement = document.getElementById('mobileStoresList');
-
-    if (storesListElement) {
-        storesListElement.innerHTML = storesHTML;
-        console.log('Desktop stores list updated');
-    } else {
-        console.error('storesList element not found!');
-    }
-
-    if (mobileStoresListElement) {
-        mobileStoresListElement.innerHTML = storesHTML;
-        console.log('Mobile stores list updated');
-    } else {
-        console.error('mobileStoresList element not found!');
-    }
-
-    console.log('=== END RENDER DEBUG ===');
+    document.getElementById('storesList').innerHTML = storesHTML;
+    document.getElementById('mobileStoresList').innerHTML = storesHTML;
 }
 
 function selectStore(storeId) {
@@ -589,9 +557,9 @@ function selectStore(storeId) {
 
 function updateSelectedStoreInfo() {
     document.getElementById('selectedStoreInfo').innerHTML = `
-        <div class="store-avatar ${app.selectedStore.rank_class}" style="width: 40px; height: 40px; font-size: 16px;">
+        <div class="store-avatar ${app.selectedStore.rank_class}">
             ${app.selectedStore.name.charAt(0).toUpperCase()}
-            <div class="rank-badge" style="width: 16px; height: 16px; font-size: 8px;">
+            <div class="rank-badge">
                 ${app.selectedStore.rank_icon}
             </div>
         </div>
@@ -754,7 +722,6 @@ function showErrorState(message) {
 
 function visitStore() {
     if (app.selectedStore) {
-        // Use the protected route for authenticated users
         window.location.href = `/seller/${app.selectedStore.id}`;
     }
 }
@@ -825,7 +792,6 @@ function getRankIcon(points) {
     if (points >= 2000) return '👑';
     if (points >= 1000) return '🥇';
     if (points >= 500) return '🥈';
-    if (points >= 100) return '🥉';
     return '⭐';
 }
 </script>
