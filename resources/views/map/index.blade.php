@@ -1093,7 +1093,7 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            z-index: 10000;
+            z-index: 20000; /* Increased for higher focus */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1118,13 +1118,27 @@
             border-radius: 22px;
             width: 100%;
             max-width: 440px;
-            max-height: 92vh;
+            max-height: 80vh; /* Reduce max height for better fit */
             overflow-y: auto;
             position: relative;
             animation: modalSlideUp 0.3s ease;
-            margin: auto;
+            margin: 32px auto 24px auto; /* Add bottom margin */
             box-shadow: 0 8px 40px rgba(0,0,0,0.18);
             border: 1.5px solid #e9ecef;
+        }
+
+        @media (min-width: 600px) {
+            .modal-content {
+                margin-top: calc(var(--navbar-height, 70px) + 24px);
+                margin-bottom: 40px; /* More bottom margin on desktop */
+                max-height: 90vh; /* Even shorter on desktop */
+            }
+        }
+
+        @media (min-width: 600px) {
+            .modal-content {
+                margin-top: calc(var(--navbar-height, 70px) + 24px); /* Use navbar height if defined, else fallback */
+            }
         }
 
         @keyframes modalSlideUp {
