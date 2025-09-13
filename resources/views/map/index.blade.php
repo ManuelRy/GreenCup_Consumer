@@ -594,25 +594,39 @@
 
         .map-legend {
             position: absolute;
-            bottom: 15px;
-            left: 15px;
-            background: white;
-            padding: 10px;
+            bottom: 48px;
+            left: 16px;
+            background: #fff;
+            padding: 8px 14px;
             border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.10);
             z-index: 1000;
-            font-size: 11px;
+            font-size: 13px;
         }
 
         .legend-item {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             margin-bottom: 4px;
+            word-break: break-word;
         }
 
         .legend-item:last-child {
             margin-bottom: 0;
+        }
+
+        @media (max-width: 600px) {
+            .map-legend {
+                left: 8px;
+                bottom: 32px;
+                padding: 7px 10px;
+                font-size: 13px;
+            }
+            .legend-item {
+                gap: 6px;
+                font-size: 13px;
+            }
         }
 
         .legend-marker {
@@ -1077,16 +1091,17 @@
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
             z-index: 10000;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
+            padding: 32px 20px 32px 20px;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            box-sizing: border-box;
         }
 
         .modal-overlay {
@@ -1100,15 +1115,16 @@
 
         .modal-content {
             background: white;
-            border-radius: 16px;
+            border-radius: 22px;
             width: 100%;
-            max-width: 420px;
-            max-height: 90vh;
+            max-width: 440px;
+            max-height: 92vh;
             overflow-y: auto;
             position: relative;
             animation: modalSlideUp 0.3s ease;
             margin: auto;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+            border: 1.5px solid #e9ecef;
         }
 
         @keyframes modalSlideUp {
@@ -1571,27 +1587,29 @@
 
             /* Modal Responsive - Tablet */
             .store-modal {
-                padding: 15px;
+                padding: 8px 4px 16px 4px;
                 align-items: flex-start;
-                padding-top: calc(var(--navbar-height) + 20px);
+                padding-top: calc(var(--navbar-height) + 10px);
             }
 
             .modal-content {
-                max-height: calc(100vh - var(--navbar-height) - 40px);
-                max-width: calc(100% - 30px);
+                max-height: calc(100vh - var(--navbar-height) - 20px);
+                max-width: calc(100% - 10px);
                 margin-top: 0;
+                border-radius: 14px;
+                box-shadow: 0 4px 24px rgba(0,0,0,0.18);
             }
 
             .modal-header {
-                padding: 16px 18px;
+                padding: 14px 14px;
             }
 
             .modal-header h3 {
-                font-size: 16px;
+                font-size: 15px;
             }
 
             .modal-body {
-                padding: 16px 18px;
+                padding: 13px 12px;
             }
         }
 
@@ -1614,40 +1632,41 @@
 
             /* Modal Responsive - Mobile */
             .store-modal {
-                padding: 10px;
+                padding: 4px 2px 12px 2px;
                 align-items: flex-start;
-                padding-top: calc(var(--navbar-height) + 15px);
+                padding-top: calc(var(--navbar-height) + 6px);
             }
 
             .modal-content {
-                max-height: calc(100vh - var(--navbar-height) - 30px);
-                max-width: calc(100% - 20px);
-                border-radius: 12px;
+                max-height: calc(100vh - var(--navbar-height) - 10px);
+                max-width: calc(100% - 4px);
+                border-radius: 10px;
                 margin-top: 0;
+                box-shadow: 0 2px 16px rgba(0,0,0,0.18);
             }
 
             .modal-header {
-                padding: 14px 16px;
-                border-radius: 12px 12px 0 0;
+                padding: 10px 10px;
+                border-radius: 10px 10px 0 0;
             }
 
             .modal-header h3 {
-                font-size: 15px;
+                font-size: 14px;
             }
 
             .modal-close {
-                width: 28px;
-                height: 28px;
-                font-size: 20px;
+                width: 26px;
+                height: 26px;
+                font-size: 18px;
             }
 
             .modal-body {
-                padding: 14px 16px;
+                padding: 10px 8px;
             }
 
             .action-buttons {
                 flex-direction: column;
-                gap: 10px;
+                gap: 8px;
             }
 
             .btn-directions,
@@ -1655,25 +1674,25 @@
             .btn-share {
                 flex-direction: row;
                 justify-content: center;
-                padding: 12px;
-                font-size: 14px;
+                padding: 10px;
+                font-size: 13px;
             }
 
             .info-section h4 {
-                font-size: 14px;
+                font-size: 13px;
             }
 
             .info-row {
-                padding: 6px 0;
+                padding: 5px 0;
             }
 
             .store-rank-display {
-                margin-bottom: 16px;
+                margin-bottom: 12px;
             }
 
             .rank-badge-large {
-                padding: 10px 16px;
-                font-size: 14px;
+                padding: 8px 12px;
+                font-size: 13px;
             }
         }
     </style>
