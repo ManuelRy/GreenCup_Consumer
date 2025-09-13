@@ -341,6 +341,23 @@ async function initializeApp() {
     try {
         await loadStores();
         initializeEventListeners();
+
+        // Check for URL parameters to auto-select a store
+        const urlParams = new URLSearchParams(window.location.search);
+        const sellerId = urlParams.get('seller');
+
+        if (sellerId) {
+            // Find and select the store from URL parameter
+            const targetStore = app.stores.find(store => store.id == sellerId);
+            if (targetStore) {
+                console.log('Auto-selecting store from URL:', targetStore.name);
+                setTimeout(() => {
+                    selectStore(parseInt(sellerId));
+                }, 500); // Small delay to ensure stores are rendered
+            }
+        }
+
+        console.log('Gallery initialized successfully');
     } catch (error) {
         console.error('Failed to initialize app:', error);
         showErrorState('Failed to load stores');

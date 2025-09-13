@@ -1907,6 +1907,41 @@
                     console.log(`Store ${i + 1}: "${store.name}" - Initial: "${store.name.charAt(0).toUpperCase()}" - Rank: ${getRankText(store.points_reward)}`);
                 });
             }
+
+            // Check for storeId parameter in URL for auto-selection
+            checkForAutoSelection();
+        }
+
+        function checkForAutoSelection() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const storeId = urlParams.get('storeId');
+
+            if (storeId) {
+                console.log(`Auto-selecting store with ID: ${storeId}`);
+
+                // Find the store in the stores array
+                const store = app.stores.find(s => s.id.toString() === storeId.toString());
+
+                if (store) {
+                    console.log(`Found store: ${store.name}`);
+
+                    // Wait a moment for map to be fully loaded, then show store detail
+                    setTimeout(() => {
+                        showStoreDetail(store);
+
+                        // Also focus the map on the store location
+                        if (app.map) {
+                            app.map.flyTo({
+                                center: [store.longitude, store.latitude],
+                                zoom: 15,
+                                duration: 1500
+                            });
+                        }
+                    }, 1000);
+                } else {
+                    console.log(`Store with ID ${storeId} not found`);
+                }
+            }
         }
 
         // ENHANCED LOCATION FUNCTIONS
@@ -2622,7 +2657,12 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    const storeDetails = { ...data.data, points_reward: app.selectedStore.points_reward };
+                    // Preserve the distance from the original store object
+                    const storeDetails = {
+                        ...data.data,
+                        points_reward: app.selectedStore.points_reward,
+                        distance: app.selectedStore.distance
+                    };
                     populateStoreModal(storeDetails);
                 } else {
                     populateStoreModal(app.selectedStore);
@@ -2766,9 +2806,9 @@
                 return;
             }
 
-            // Navigate to the gallery with seller ID parameter
+            // Navigate to the gallery with seller ID parameter in the same tab
             const galleryUrl = `/gallery?seller=${app.selectedStore.id}`;
-            window.open(galleryUrl, '_blank');
+            window.location.href = galleryUrl;
         }
 
         function closeStoreModal() {
