@@ -2008,6 +2008,12 @@
         async function getCurrentLocationWithHighAccuracy() {
             const locationBtn = document.getElementById('locationBtn');
 
+            // Prevent multiple simultaneous location requests
+            if (locationBtn.disabled || app.isLoading) {
+                console.log('Location request already in progress, ignoring click');
+                return;
+            }
+
             if (!navigator.geolocation) {
                 showError('Geolocation is not supported by this browser');
                 return;
@@ -2168,13 +2174,26 @@
         }
 
         function changeMapStyle(styleUrl, button) {
+            // Prevent changing to the same style or if already loading
+            if (button.classList.contains('active') || app.isLoading) {
+                console.log('Style already active or map is loading, ignoring click');
+                return;
+            }
+
+            console.log('Changing map style to:', styleUrl);
             showLoading();
+            
             app.map.setStyle(styleUrl);
+            
+            // Update button states
             document.querySelectorAll('.style-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             button.classList.add('active');
+            
+            // Wait for style to load before re-adding markers
             app.map.once('styledata', () => {
+                console.log('Map style loaded, re-adding markers');
                 addMarkersToMap();
                 hideLoading();
             });
@@ -2886,13 +2905,20 @@
         }
 
         function showLoading() {
+            if (app.isLoading) {
+                console.log('Loading already active, ignoring showLoading call');
+                return;
+            }
+            
             app.isLoading = true;
             document.getElementById('loadingIndicator').style.display = 'flex';
+            console.log('Loading indicator shown');
         }
 
         function hideLoading() {
             app.isLoading = false;
             document.getElementById('loadingIndicator').style.display = 'none';
+            console.log('Loading indicator hidden');
         }
 
         function showError(message) {
