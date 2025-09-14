@@ -40,7 +40,7 @@
                 </div>
             </div>
 
-            <!-- Camera Status Overlay - FIXED: Now properly hidden when camera loads -->
+            <!-- Camera Status Overlay -->
             <div id="camera-status" class="camera-status hidden">
                 <div class="status-icon">📷</div>
                 <div class="status-message">Initializing camera...</div>
@@ -53,9 +53,9 @@
         <div class="scanner-instructions">
             <p>💡 Hold your phone steady and make sure the QR code is clearly visible</p>
             <p style="margin-top: 0.5rem; font-size: 0.8rem; opacity: 0.7;">
-                🧪 For testing: Enter "demo123" in manual input to see demo receipt<br>
-                ✅ Valid: Receipt QR codes from participating stores<br>
-                ❌ Invalid: Website URLs, social media codes, personal QR codes<br>
+                🧪 <strong>For testing:</strong> Enter "demo123" in manual input to see demo receipt<br>
+                ✅ <strong>Valid:</strong> Receipt QR codes from participating stores<br>
+                ❌ <strong>Invalid:</strong> Website URLs, social media codes, personal QR codes<br>
                 📱 <strong>Mobile Tips:</strong><br>
                 • Allow camera permissions when prompted<br>
                 • Close other camera apps if scanner fails<br>
@@ -93,7 +93,6 @@
         </div>
         <div class="recent-list">
             @php
-                // Use point_transactions table since pending_transactions might not exist yet
                 try {
                     $recentClaims = DB::table('point_transactions')
                         ->where('consumer_id', Auth::guard('consumer')->user()->id)
@@ -110,7 +109,6 @@
                         ->limit(5)
                         ->get();
                 } catch (\Exception $e) {
-                    // Handle case where tables don't exist or query fails
                     $recentClaims = collect([]);
                     \Log::error('Recent claims query failed: ' . $e->getMessage());
                 }
@@ -212,11 +210,12 @@
 </div>
 
 <style>
-/* Modern Color System */
+/* Green Cups Color System */
 :root {
-    --primary-green: #10b981;
-    --primary-green-dark: #059669;
+    --primary-green: #1dd1a1;
+    --primary-green-dark: #10ac84;
     --primary-green-light: #34d399;
+    --secondary-green: #2e8b57;
     --background: #f8fafc;
     --card-bg: #ffffff;
     --text-primary: #111827;
@@ -253,23 +252,12 @@ body {
 
 /* Header */
 .scan-header {
-    background: #1a1a1a;
+    background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
     color: white;
     padding: 1.5rem 1rem;
     position: relative;
     overflow: hidden;
 }
-
-.scan-header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-
-}
-
 
 .header-content {
     position: relative;
@@ -353,7 +341,7 @@ body {
 }
 
 .scanner-header {
-    background-color: #1a1a1a;
+    background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
     color: white;
     padding: 1.25rem;
     text-align: center;
@@ -386,7 +374,6 @@ body {
     height: 100%;
 }
 
-/* FIXED: Simplified video styling */
 #qr-reader video {
     width: 100% !important;
     height: 100% !important;
@@ -394,17 +381,9 @@ body {
     border-radius: 0 !important;
 }
 
-/* FIXED: Less aggressive element hiding */
 #qr-reader__dashboard_section_swaplink,
 #qr-reader__dashboard_section_csr {
     display: none !important;
-}
-
-/* Mobile-specific adjustments */
-@media (max-width: 768px) {
-    .scanner-wrapper {
-        height: 350px;
-    }
 }
 
 .scanner-overlay {
@@ -418,7 +397,6 @@ body {
     z-index: 10;
 }
 
-/* FIXED: Camera Status Overlay - starts hidden */
 .camera-status {
     position: absolute;
     top: 50%;
@@ -606,8 +584,6 @@ body {
     font-size: 1rem;
     transition: all 0.3s ease;
     background: var(--border-light);
-    -webkit-appearance: none;
-    -webkit-border-radius: 12px;
     min-height: 48px;
 }
 
@@ -615,22 +591,7 @@ body {
     outline: none;
     border-color: var(--primary-green);
     background: white;
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-    font-size: 16px;
-}
-
-/* Mobile input improvements */
-@media (max-width: 768px) {
-    .receipt-input {
-        font-size: 16px;
-        padding: 1.2rem;
-        min-height: 52px;
-    }
-
-    .submit-btn {
-        min-height: 52px;
-        padding: 1.2rem 1.5rem;
-    }
+    box-shadow: 0 0 0 3px rgba(29, 209, 161, 0.1);
 }
 
 .submit-btn, .claim-btn, .cancel-btn, .success-btn {
@@ -768,7 +729,6 @@ body {
 }
 
 /* Modal */
-
 .modal {
     display: none;
     position: fixed;
@@ -1011,7 +971,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.95) 0%, rgba(5, 150, 105, 0.95) 100%);
+    background: linear-gradient(135deg, rgba(29, 209, 161, 0.95) 0%, rgba(16, 172, 132, 0.95) 100%);
     z-index: 2000;
     backdrop-filter: blur(10px);
 }
@@ -1211,6 +1171,40 @@ body {
 }
 
 /* Responsive Design */
+@media (max-width: 768px) {
+    .scanner-wrapper {
+        height: 350px;
+    }
+
+    .scan-line {
+        animation: scanLineMobile 2s ease-in-out infinite;
+    }
+
+    @keyframes scanLineMobile {
+        0%, 100% {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        50% {
+            transform: translateY(176px);
+            opacity: 0.8;
+        }
+    }
+
+    .receipt-input {
+        font-size: 16px !important; /* Prevent zoom on iOS */
+    }
+
+    .input-group {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .submit-btn {
+        width: 100%;
+    }
+}
+
 @media (max-width: 480px) {
     .scan-container {
         padding-bottom: 1rem;
@@ -1226,10 +1220,6 @@ body {
 
     .scanner-section, .manual-section, .recent-section {
         margin: 1rem 0.75rem;
-    }
-
-    .scanner-wrapper {
-        height: 350px;
     }
 
     .camera-status {
@@ -1272,33 +1262,9 @@ body {
         border-width: 2px;
     }
 
-    .scan-line {
-        animation: scanLineMobile 2s ease-in-out infinite;
-    }
-
-    @keyframes scanLineMobile {
-        0%, 100% {
-            transform: translateY(0);
-            opacity: 1;
-        }
-        50% {
-            transform: translateY(176px);
-            opacity: 0.8;
-        }
-    }
-
     .modal-content {
         width: 95%;
         max-height: 90vh;
-    }
-
-    .input-group {
-        flex-direction: column;
-        gap: 0.75rem;
-    }
-
-    .submit-btn {
-        width: 100%;
     }
 
     .toast {
@@ -1313,7 +1279,6 @@ body {
     .toast.show {
         transform: translateY(0);
     }
-
 }
 
 @media (max-width: 360px) {
@@ -1334,6 +1299,7 @@ body {
 
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script>
+// PRESERVE ALL ORIGINAL JAVASCRIPT LOGIC EXACTLY
 let scanner = null;
 let isProcessing = false;
 let currentReceiptCode = null;
@@ -1350,12 +1316,15 @@ function showCameraStatus(message, icon = '📷', showRetry = false, showManual 
     manualBtn.style.display = showManual ? 'inline-block' : 'none';
     statusEl.classList.remove('hidden');
 }
+
 function hideCameraStatus() {
     document.getElementById('camera-status').classList.add('hidden');
 }
+
 function isInAppBrowser() {
     return /FBAV|FBAN|FB_IAB|FBOP|Instagram|Line|Messenger/i.test(navigator.userAgent);
 }
+
 async function initializeCamera() {
     if (!navigator.mediaDevices?.getUserMedia) {
         showCameraStatus(
@@ -1373,14 +1342,12 @@ async function initializeCamera() {
     }
     showCameraStatus('Starting camera...', '📷');
     try {
-        // Always try to access camera regardless of HTTPS or HTTP or IP
         const stream = await navigator.mediaDevices.getUserMedia({
             video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } }
         });
         stream.getTracks().forEach(track => track.stop());
         startScanner();
     } catch (err) {
-        // Browser will enforce HTTPS if required, else give error
         if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
             showCameraStatus(
                 '🚫 Camera permission denied.<br>Tap the camera icon in your browser\'s address bar and select "Allow", then refresh.<br>Or use manual input.',
@@ -1409,6 +1376,7 @@ async function initializeCamera() {
         }
     }
 }
+
 function startScanner() {
     if (scanner) {
         try { scanner.clear(); } catch (e) {}
@@ -1430,27 +1398,48 @@ function startScanner() {
         );
     });
 }
+
 function resumeScanner() {
     if (scanner && !isProcessing) {
         try { scanner.resume(); }
         catch { setTimeout(() => { initializeCamera(); }, 500); }
     }
 }
+
 function retryCamera() {
     if (scanner) { try { scanner.clear(); } catch (e) {} scanner = null; }
     showCameraStatus('Retrying camera...', '🔄');
     setTimeout(() => { initializeCamera(); }, 600);
 }
+
 function focusManualInput() {
     hideCameraStatus();
     document.querySelector('.manual-section').scrollIntoView({ behavior: 'smooth' });
     setTimeout(() => { document.getElementById('receipt-code').focus(); }, 500);
 }
-// ---- Modal, manual, API logic (unchanged, same as above) ---- //
-function showModal() { document.getElementById('receipt-modal').style.display = 'block'; document.body.style.overflow = 'hidden'; }
-function closeModal() { document.getElementById('receipt-modal').style.display = 'none'; document.body.style.overflow = 'auto'; document.getElementById('receipt-code').value = ''; resumeScanner(); }
-function setLoadingState(loading) { document.getElementById('claim-button').disabled = loading; }
-function showSuccess(points) { document.getElementById('points-amount').textContent = points; document.getElementById('success-overlay').style.display = 'block'; document.body.style.overflow = 'hidden'; }
+
+function showModal() {
+    document.getElementById('receipt-modal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+    document.getElementById('receipt-modal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+    document.getElementById('receipt-code').value = '';
+    resumeScanner();
+}
+
+function setLoadingState(loading) {
+    document.getElementById('claim-button').disabled = loading;
+}
+
+function showSuccess(points) {
+    document.getElementById('points-amount').textContent = points;
+    document.getElementById('success-overlay').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
 function showError(message) {
     const toast = document.getElementById('error-toast');
     const messageEl = document.getElementById('error-message');
@@ -1458,12 +1447,14 @@ function showError(message) {
     toast.classList.add('show');
     setTimeout(() => { toast.classList.remove('show'); }, 4000 + Math.min(message.length * 12, 3000));
 }
+
 function updatePointsDisplay(newBalance) {
     const pointsEl = document.getElementById('current-points');
     if (pointsEl && newBalance !== undefined) {
         pointsEl.textContent = newBalance;
     }
 }
+
 function extractReceiptCode(decodedText) {
     if (decodedText.includes('/')) {
         const parts = decodedText.split('/');
@@ -1475,12 +1466,14 @@ function extractReceiptCode(decodedText) {
     }
     return decodedText;
 }
+
 function isValidReceiptCode(code) {
     if (!code || typeof code !== 'string') return false;
     if (code.length < 3) return false;
     if (code.toLowerCase() === 'demo123') return true;
     return /^[a-zA-Z0-9-_]+$/.test(code);
 }
+
 function onScanSuccess(decodedText, decodedResult) {
     if (isProcessing) return;
     let receiptCode = extractReceiptCode(decodedText);
@@ -1490,6 +1483,7 @@ function onScanSuccess(decodedText, decodedResult) {
     }
     checkReceipt(receiptCode);
 }
+
 function checkReceipt(code) {
     if (isProcessing) return;
     if (!isValidReceiptCode(code)) {
@@ -1504,6 +1498,7 @@ function checkReceipt(code) {
     document.getElementById('store-name').textContent = 'Verifying receipt code...';
     document.getElementById('items-list').innerHTML = '';
     document.getElementById('total-points').textContent = '0';
+
     fetch('/api/receipt/check', {
         method: 'POST',
         headers: {
@@ -1550,11 +1545,13 @@ function checkReceipt(code) {
     })
     .finally(() => { isProcessing = false; setLoadingState(false); });
 }
+
 function displayReceipt(receipt) {
     document.getElementById('store-name').textContent = receipt.store_name;
     document.getElementById('store-address').textContent = receipt.store_address || '';
     const itemsList = document.getElementById('items-list');
     itemsList.innerHTML = '';
+
     if (receipt.items && receipt.items.length > 0) {
         receipt.items.forEach(item => {
             const itemDiv = document.createElement('div');
@@ -1571,9 +1568,11 @@ function displayReceipt(receipt) {
     } else {
         itemsList.innerHTML = '<div class="receipt-item"><div class="item-details"><div class="item-name">No items found</div></div></div>';
     }
+
     document.getElementById('total-points').textContent = receipt.total_points || 0;
     const claimButton = document.getElementById('claim-button');
     const btnText = claimButton.querySelector('.btn-text');
+
     if (receipt.status === 'pending') {
         claimButton.disabled = false; btnText.textContent = 'Claim Points';
         claimButton.classList.remove('claimed', 'expired');
@@ -1585,14 +1584,18 @@ function displayReceipt(receipt) {
         claimButton.classList.add('expired');
     }
 }
+
 function claimPoints() {
     if (!currentReceiptCode || isProcessing) return;
     if (currentReceiptCode === 'DEMO123') { claimDemoPoints(); return; }
+
     isProcessing = true;
     const claimButton = document.getElementById('claim-button');
     const btnText = claimButton.querySelector('.btn-text');
     const btnLoading = claimButton.querySelector('.btn-loading');
+
     claimButton.disabled = true; btnText.style.display = 'none'; btnLoading.style.display = 'flex';
+
     fetch('/api/receipt/claim', {
         method: 'POST',
         headers: {
@@ -1621,10 +1624,12 @@ function claimPoints() {
     })
     .finally(() => { isProcessing = false; });
 }
+
 function escapeHtml(text) {
     const map = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'};
     return text.replace(/[&<>"']/g, m => map[m]);
 }
+
 function showDemoReceipt() {
     const demoReceipt = {
         receipt_code: 'DEMO123',
@@ -1644,16 +1649,19 @@ function showDemoReceipt() {
     setLoadingState(false);
     displayReceipt(demoReceipt);
 }
+
 function claimDemoPoints() {
     closeModal();
     showSuccess(5);
     const currentPoints = parseInt(document.getElementById('current-points').textContent) || 0;
     updatePointsDisplay(currentPoints + 5);
 }
+
 document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
     setTimeout(() => { initializeCamera(); }, 100);
 });
+
 function setupEventListeners() {
     document.getElementById('manual-code-form').addEventListener('submit', function(e) {
         e.preventDefault();
@@ -1666,17 +1674,21 @@ function setupEventListeners() {
             checkReceipt(code);
         }
     });
+
     document.getElementById('retry-camera').addEventListener('click', retryCamera);
     document.getElementById('use-manual').addEventListener('click', focusManualInput);
     document.querySelector('.close-modal').addEventListener('click', closeModal);
     document.querySelector('.modal-backdrop').addEventListener('click', closeModal);
+
     document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+
     document.addEventListener('visibilitychange', function() {
         if (!document.hidden && !isProcessing) {
             setTimeout(() => { initializeCamera(); }, 1000);
         }
     });
 }
+
 window.addEventListener('beforeunload', function() {
     if (scanner) { try { scanner.clear(); } catch (error) {} }
 });

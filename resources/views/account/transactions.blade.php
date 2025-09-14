@@ -1,1093 +1,534 @@
 @extends('master')
 
 @section('content')
-<div class="transactions-page-container page-content">
-    <div class="transactions-container">
-        <!-- Header with back button -->
-        <div class="transactions-header">
-            <div class="header-nav">
-                <a href="{{ route('account') }}" class="back-btn" aria-label="Back to Account">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="m15 18-6-6 6-6"/>
-                    </svg>
-                </a>
-                <div class="header-title">
-                    <h1>Transaction History</h1>
-                    @if(isset($consumer) && $consumer)
-                        <p class="user-info">{{ $consumer->name ?? $consumer->email ?? 'Consumer' }}</p>
-                    @endif
-                </div>
-                <div class="placeholder-btn"></div>
-            </div>
-        </div>
+<div class="container-fluid bg-light min-vh-100 py-3">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10 col-xl-8">
 
-        <!-- Filter Section -->
-        <div class="filter-section">
-            <form method="GET" action="{{ route('account.transactions') }}" class="filter-form">
-                <div class="filter-row">
-                    <div class="filter-group">
-                        <label for="type">Type</label>
-                        <select name="type" id="type">
-                            <option value="">All Types</option>
-                            <option value="earn" {{ request('type') == 'earn' ? 'selected' : '' }}>Earned</option>
-                            <option value="spend" {{ request('type') == 'spend' ? 'selected' : '' }}>Spent</option>
-                        </select>
-                    </div>
+            <!-- Main Card -->
+            <div class="card shadow-sm border-0 rounded-3 overflow-hidden">
 
-                    <div class="filter-group">
-                        <label for="store">Store</label>
-                        <select name="store" id="store">
-                            <option value="">All Stores</option>
-                            @foreach($stores as $store)
-                                <option value="{{ $store->id }}" {{ request('store') == $store->id ? 'selected' : '' }}>
-                                    {{ $store->business_name }}
-                                </option>
-                            @endforeach
-                        </select>
+                <!-- Header -->
+                <div class="card-header bg-gradient-primary text-white p-0">
+                    <div class="d-flex align-items-center justify-content-between p-3">
+                        <a href="{{ route('account') }}"
+                           class="btn btn-light btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center text-decoration-none"
+                           style="width: 40px; height: 40px;"
+                           aria-label="Back to Account">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+
+                        <div class="text-center flex-grow-1 mx-3">
+                            <h1 class="h5 mb-0 fw-semibold">Transaction History</h1>
+                            @if(isset($consumer) && $consumer)
+                                <small class="opacity-75">{{ $consumer->name ?? $consumer->email ?? 'Consumer' }}</small>
+                            @endif
+                        </div>
+
+                        <div style="width: 40px; height: 40px;"></div> <!-- Spacer -->
                     </div>
                 </div>
 
-                <div class="filter-row">
-                    <div class="filter-group">
-                        <label for="date_from">From Date</label>
-                        <input type="date" name="date_from" id="date_from" value="{{ request('date_from') }}">
-                    </div>
+                <!-- Filter Section -->
+                <div class="card-body bg-light border-bottom p-0">
+                    <div class="p-3 p-md-4">
+                        <form method="GET" action="{{ route('account.transactions') }}" class="row g-3">
 
-                    <div class="filter-group">
-                        <label for="date_to">To Date</label>
-                        <input type="date" name="date_to" id="date_to" value="{{ request('date_to') }}">
-                    </div>
-                </div>
-
-                <div class="filter-actions">
-                    <button type="submit" class="btn-filter">Apply Filters</button>
-                    <a href="{{ route('account.transactions') }}" class="btn-clear">Clear</a>
-                </div>
-            </form>
-        </div>
-
-        <!-- Transaction List -->
-        <div class="transactions-section">
-            <div class="transactions-header">
-                <h3>Transactions ({{ $transactions->total() }})</h3>
-            </div>
-
-            @forelse($transactions as $transaction)
-                <div class="transaction-card" onclick="showTransactionDetail({{ json_encode($transaction) }})">
-                    <div class="transaction-info">
-                        <div class="transaction-details">
-                            <div class="transaction-title">
-                                {{ $transaction->description ?: 'Transaction' }}
-                                <!-- Debug: Check transaction data -->
-                                @if(config('app.debug'))
-                                    <small style="display: block; color: #999; font-size: 10px;">
-                                        Debug: description: "{{ $transaction->description ?? 'NULL' }}", type: "{{ $transaction->type ?? 'NULL' }}"
-                                    </small>
-                                @endif
+                            <!-- Filter Row 1 -->
+                            <div class="col-12 col-md-6">
+                                <label for="type" class="form-label fw-medium text-dark">Type</label>
+                                <select name="type" id="type" class="form-select">
+                                    <option value="">All Types</option>
+                                    <option value="earn" {{ request('type') == 'earn' ? 'selected' : '' }}>Earned</option>
+                                    <option value="spend" {{ request('type') == 'spend' ? 'selected' : '' }}>Spent</option>
+                                </select>
                             </div>
-                            <div class="transaction-subtitle">
-                                {{ $transaction->store_name ?: 'Unknown Store' }}
-                                @if($transaction->store_location)
-                                    • {{ $transaction->store_location }}
-                                @endif
+
+                            <div class="col-12 col-md-6">
+                                <label for="store" class="form-label fw-medium text-dark">Store</label>
+                                <select name="store" id="store" class="form-select">
+                                    <option value="">All Stores</option>
+                                    @foreach($stores as $store)
+                                        <option value="{{ $store->id }}" {{ request('store') == $store->id ? 'selected' : '' }}>
+                                            {{ $store->business_name }}
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
-                            <div class="transaction-date">
-                                @if($transaction->transaction_date)
-                                    {{ \Carbon\Carbon::parse($transaction->transaction_date)->format('M d, Y • h:i A') }}
-                                @else
-                                    {{ \Carbon\Carbon::parse($transaction->created_at)->format('M d, Y • h:i A') }}
-                                @endif
+
+                            <!-- Filter Row 2 -->
+                            <div class="col-12 col-md-6">
+                                <label for="date_from" class="form-label fw-medium text-dark">From Date</label>
+                                <input type="date" name="date_from" id="date_from"
+                                       value="{{ request('date_from') }}"
+                                       class="form-control">
                             </div>
-                            @if($transaction->receipt_code)
-                                <div class="transaction-receipt">
-                                    Receipt: {{ $transaction->receipt_code }}
+
+                            <div class="col-12 col-md-6">
+                                <label for="date_to" class="form-label fw-medium text-dark">To Date</label>
+                                <input type="date" name="date_to" id="date_to"
+                                       value="{{ request('date_to') }}"
+                                       class="form-control">
+                            </div>
+
+                            <!-- Filter Actions -->
+                            <div class="col-12">
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <a href="{{ route('account.transactions') }}"
+                                       class="btn btn-outline-secondary">
+                                        <i class="fas fa-times me-1"></i>
+                                        Clear
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-filter me-1"></i>
+                                        Apply Filters
+                                    </button>
                                 </div>
-                            @endif
-                        </div>
-                        <div class="transaction-amount">
-                            <div class="amount {{ $transaction->type ?? 'earn' }}">
-                                @if(($transaction->type ?? 'earn') === 'earn')
-                                    +{{ number_format($transaction->points ?? 0) }}
-                                @else
-                                    -{{ number_format($transaction->points ?? 0) }}
-                                @endif
                             </div>
-                            <div class="amount-label">PTS</div>
-                        </div>
-                    </div>
-                    <div class="transaction-actions">
-                        <div class="view-indicator">›</div>
+                        </form>
                     </div>
                 </div>
-            @empty
-                <div class="no-transactions-card">
-                    <div class="empty-state">
-                        <div class="empty-icon">📊</div>
-                        <div class="empty-title">No transactions found</div>
-                        <div class="empty-subtitle">
-                            @if(request()->anyFilled(['type', 'store', 'date_from', 'date_to']))
-                                Try adjusting your filters or
-                                <a href="{{ route('account.transactions') }}" class="clear-filters-link">clear all filters</a>
-                            @else
-                                Start scanning QR codes to earn points!
-                            @endif
+
+                <!-- Transactions Section -->
+                <div class="card-body p-0">
+                    <!-- Section Header -->
+                    <div class="p-3 p-md-4 border-bottom">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-receipt text-primary me-2"></i>
+                            <h3 class="h6 mb-0 fw-semibold">Transactions ({{ $transactions->total() }})</h3>
                         </div>
-                        @if(!request()->anyFilled(['type', 'store', 'date_from', 'date_to']))
-                            <div style="margin-top: 20px;">
-                                <a href="{{ route('dashboard') }}" class="empty-link">
-                                    Go to Dashboard →
-                                </a>
+                    </div>
+
+                    <!-- Transaction List -->
+                    <div class="p-3 p-md-4">
+                        @forelse($transactions as $transaction)
+                            <div class="card border transaction-card mb-3 cursor-pointer"
+                                 onclick="showTransactionDetail({{ json_encode($transaction) }})">
+                                <div class="card-body p-3">
+                                    <div class="row align-items-start">
+                                        <!-- Transaction Details -->
+                                        <div class="col">
+                                            <div class="d-flex align-items-start justify-content-between">
+                                                <div class="flex-grow-1 me-3">
+                                                    <h6 class="card-title mb-1 fw-semibold text-truncate">
+                                                        {{ $transaction->description ?: 'Transaction' }}
+                                                    </h6>
+
+                                                    <div class="text-muted small mb-1">
+                                                        <i class="fas fa-store me-1"></i>
+                                                        {{ $transaction->store_name ?: 'Unknown Store' }}
+                                                        @if($transaction->store_location)
+                                                            <span class="text-secondary"> • {{ $transaction->store_location }}</span>
+                                                        @endif
+                                                    </div>
+
+                                                    <div class="text-muted small mb-1">
+                                                        <i class="far fa-calendar me-1"></i>
+                                                        @if($transaction->transaction_date)
+                                                            {{ \Carbon\Carbon::parse($transaction->transaction_date)->format('M d, Y • h:i A') }}
+                                                        @else
+                                                            {{ \Carbon\Carbon::parse($transaction->created_at)->format('M d, Y • h:i A') }}
+                                                        @endif
+                                                    </div>
+
+                                                    @if($transaction->receipt_code)
+                                                        <div class="small">
+                                                            <span class="badge bg-light text-dark font-monospace">
+                                                                <i class="fas fa-receipt me-1"></i>
+                                                                {{ $transaction->receipt_code }}
+                                                            </span>
+                                                        </div>
+                                                    @endif
+
+                                                    @if(config('app.debug'))
+                                                        <small class="text-muted d-block mt-1" style="font-size: 0.7em;">
+                                                            Debug: description: "{{ $transaction->description ?? 'NULL' }}", type: "{{ $transaction->type ?? 'NULL' }}"
+                                                        </small>
+                                                    @endif
+                                                </div>
+
+                                                <!-- Points Display -->
+                                                <div class="text-end flex-shrink-0 d-flex align-items-center">
+                                                    <div class="me-2">
+                                                        <div class="fw-bold {{ ($transaction->type ?? 'earn') === 'earn' ? 'text-success' : 'text-danger' }}">
+                                                            @if(($transaction->type ?? 'earn') === 'earn')
+                                                                +{{ number_format($transaction->points ?? 0) }}
+                                                            @else
+                                                                -{{ number_format($transaction->points ?? 0) }}
+                                                            @endif
+                                                        </div>
+                                                        <small class="text-muted">PTS</small>
+                                                    </div>
+                                                    <i class="fas fa-chevron-right text-muted"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <!-- Empty State -->
+                            <div class="text-center py-5">
+                                <div class="mb-4">
+                                    <i class="fas fa-chart-bar fa-4x text-muted opacity-50"></i>
+                                </div>
+                                <h5 class="fw-semibold text-dark mb-3">No transactions found</h5>
+                                <p class="text-muted mb-4">
+                                    @if(request()->anyFilled(['type', 'store', 'date_from', 'date_to']))
+                                        Try adjusting your filters or
+                                        <a href="{{ route('account.transactions') }}" class="text-decoration-none fw-semibold">
+                                            clear all filters
+                                        </a>
+                                    @else
+                                        Start scanning QR codes to earn points!
+                                    @endif
+                                </p>
+                                @if(!request()->anyFilled(['type', 'store', 'date_from', 'date_to']))
+                                    <a href="{{ route('dashboard') }}" class="btn btn-primary">
+                                        <i class="fas fa-qrcode me-2"></i>
+                                        Go to Dashboard
+                                    </a>
+                                @endif
+                            </div>
+                        @endforelse
+
+                        <!-- Pagination -->
+                        @if($transactions->hasPages())
+                            <div class="d-flex justify-content-center mt-4">
+                                {{ $transactions->appends(request()->query())->links() }}
                             </div>
                         @endif
                     </div>
-                </div>
-            @endforelse
-
-            <!-- Pagination -->
-            @if($transactions->hasPages())
-                <div class="pagination-wrapper">
-                    {{ $transactions->appends(request()->query())->links() }}
-                </div>
-            @endif
-        </div>
-    </div>
-
-    <!-- Transaction Detail Modal (reuse from account page) -->
-    <div id="transactionModal" class="transaction-modal" style="display: none;">
-        <div class="modal-overlay" onclick="closeTransactionDetail()"></div>
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Transaction Receipt</h3>
-                <button onclick="closeTransactionDetail()" class="modal-close">×</button>
-            </div>
-
-            <div class="modal-body">
-                <!-- Transaction Status -->
-                <div class="transaction-status">
-                    <div class="status-icon">✅</div>
-                    <div class="status-text">Transaction Completed</div>
-                </div>
-
-                <!-- Points Display -->
-                <div class="points-display">
-                    <div class="points-amount" id="modalPointsAmount">+0</div>
-                    <div class="points-label">Points</div>
-                </div>
-
-                <!-- Transaction Details -->
-                <div class="detail-section">
-                    <h4 class="detail-header">Transaction Details</h4>
-
-                    <div class="detail-row">
-                        <span class="detail-label">Item</span>
-                        <span class="detail-value" id="modalItemName">-</span>
-                    </div>
-
-                    <div class="detail-row">
-                        <span class="detail-label">Store</span>
-                        <span class="detail-value" id="modalStoreName">-</span>
-                    </div>
-
-                    <div class="detail-row">
-                        <span class="detail-label">Location</span>
-                        <span class="detail-value" id="modalStoreLocation">-</span>
-                    </div>
-
-                    <div class="detail-row">
-                        <span class="detail-label">Date & Time</span>
-                        <span class="detail-value" id="modalDateTime">-</span>
-                    </div>
-
-                    <div class="detail-row">
-                        <span class="detail-label">Transaction ID</span>
-                        <span class="detail-value" id="modalTransactionId">-</span>
-                    </div>
-
-                    <div class="detail-row">
-                        <span class="detail-label">Units Scanned</span>
-                        <span class="detail-value" id="modalUnitsScanned">-</span>
-                    </div>
-                </div>
-
-                <!-- QR Code Info -->
-                <div class="detail-section">
-                    <h4 class="detail-header">Receipt Information</h4>
-
-                    <div class="detail-row">
-                        <span class="detail-label">Receipt Code</span>
-                        <span class="detail-value qr-code" id="modalReceiptCode">-</span>
-                    </div>
-
-                    <div class="detail-row">
-                        <span class="detail-label">Points per Unit</span>
-                        <span class="detail-value" id="modalPointsPerUnit">-</span>
-                    </div>
-                </div>
-
-                <!-- Action Button -->
-                <div class="modal-actions">
-                    <button onclick="shareTransaction()" class="btn-share">
-                        Share Receipt
-                    </button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Transaction Detail Modal -->
+<div class="modal fade" id="transactionModal" tabindex="-1" aria-labelledby="transactionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title" id="transactionModalLabel">
+                    <i class="fas fa-receipt text-primary me-2"></i>
+                    Transaction Receipt
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Transaction Status -->
+                <div class="text-center py-3 mb-4 bg-light rounded-3">
+                    <div class="mb-2">
+                        <i class="fas fa-check-circle fa-3x text-success"></i>
+                    </div>
+                    <h6 class="fw-semibold text-success mb-0">Transaction Completed</h6>
+                </div>
+
+                <!-- Points Display -->
+                <div class="text-center py-3 mb-4 border-top border-bottom">
+                    <div class="fw-bold text-primary mb-1" style="font-size: 2rem;" id="modalPointsAmount">+0</div>
+                    <small class="text-muted fw-semibold">POINTS</small>
+                </div>
+
+                <!-- Transaction Details -->
+                <div class="mb-4">
+                    <h6 class="fw-semibold text-dark mb-3 pb-2 border-bottom">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Transaction Details
+                    </h6>
+
+                    <div class="row g-2 small">
+                        <div class="col-4 col-md-3 text-muted">Item:</div>
+                        <div class="col-8 col-md-9 fw-medium" id="modalItemName">-</div>
+
+                        <div class="col-4 col-md-3 text-muted">Store:</div>
+                        <div class="col-8 col-md-9 fw-medium" id="modalStoreName">-</div>
+
+                        <div class="col-4 col-md-3 text-muted">Location:</div>
+                        <div class="col-8 col-md-9 fw-medium" id="modalStoreLocation">-</div>
+
+                        <div class="col-4 col-md-3 text-muted">Date & Time:</div>
+                        <div class="col-8 col-md-9 fw-medium" id="modalDateTime">-</div>
+
+                        <div class="col-4 col-md-3 text-muted">Transaction ID:</div>
+                        <div class="col-8 col-md-9 fw-medium font-monospace" id="modalTransactionId">-</div>
+
+                        <div class="col-4 col-md-3 text-muted">Units Scanned:</div>
+                        <div class="col-8 col-md-9 fw-medium" id="modalUnitsScanned">-</div>
+                    </div>
+                </div>
+
+                <!-- Receipt Information -->
+                <div class="mb-4">
+                    <h6 class="fw-semibold text-dark mb-3 pb-2 border-bottom">
+                        <i class="fas fa-qrcode me-2"></i>
+                        Receipt Information
+                    </h6>
+
+                    <div class="row g-2 small">
+                        <div class="col-4 col-md-3 text-muted">Receipt Code:</div>
+                        <div class="col-8 col-md-9">
+                            <span class="badge bg-light text-dark font-monospace" id="modalReceiptCode">-</span>
+                        </div>
+
+                        <div class="col-4 col-md-3 text-muted">Points per Unit:</div>
+                        <div class="col-8 col-md-9 fw-medium text-success" id="modalPointsPerUnit">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer border-top-0 pt-0">
+                <button type="button" class="btn btn-primary w-100" onclick="shareTransaction()">
+                    <i class="fas fa-share-alt me-2"></i>
+                    Share Receipt
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
-/* CSS Variables for Responsive Design */
+/* Custom CSS for enhanced styling */
 :root {
-    --primary-color: #1dd1a1;
-    --primary-dark: #10ac84;
-    --secondary-color: #2e8b57;
-    --background-color: #f8f9fa;
-    --card-bg: #ffffff;
-    --text-primary: #2c3e50;
-    --text-secondary: #7f8c8d;
-    --text-muted: #95a5a6;
-    --border-color: #e8eaed;
-    --hover-bg: #f8f9fa;
-    --shadow-light: 0 2px 4px rgba(0,0,0,0.08);
-    --shadow-medium: 0 4px 12px rgba(0,0,0,0.12);
-    --border-radius: 12px;
-    --border-radius-lg: 16px;
-
-    /* Responsive spacing */
-    --spacing-xs: clamp(4px, 1vw, 8px);
-    --spacing-sm: clamp(8px, 2vw, 12px);
-    --spacing-md: clamp(12px, 3vw, 16px);
-    --spacing-lg: clamp(16px, 4vw, 24px);
-    --spacing-xl: clamp(24px, 5vw, 32px);
-
-    /* Responsive font sizes */
-    --font-xs: clamp(10px, 2vw, 12px);
-    --font-sm: clamp(12px, 2.5vw, 14px);
-    --font-base: clamp(14px, 3vw, 16px);
-    --font-lg: clamp(16px, 3.5vw, 18px);
-    --font-xl: clamp(18px, 4vw, 22px);
-    --font-xxl: clamp(20px, 5vw, 24px);
+    --bs-primary: #1dd1a1;
+    --bs-primary-rgb: 29, 209, 161;
 }
 
-/* Reset and Base Styles */
-* {
-    box-sizing: border-box;
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #1dd1a1, #10ac84) !important;
 }
 
-/* Main Container */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-/* Universal box-sizing */
-* {
-    box-sizing: border-box;
-}
-
-/* Prevent horizontal overflow */
-body, html {
-    overflow-x: hidden;
-    width: 100%;
-}
-
-/* Base Styles */
-.transactions-page-container {
-    padding: var(--spacing-lg);
-    min-height: 100vh;
-    background: var(--bg-light);
-}
-
-.transactions-container {
-    max-width: 800px;
-    margin: 0 auto;
-    background: white;
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-sm);
-    overflow: hidden;
-}
-
-/* Header */
-.transactions-header {
-    background: white;
-    border-bottom: 1px solid var(--border-color);
-    padding: var(--spacing-lg);
-    position: sticky;
-    top: 0;
-    z-index: 10;
-}
-
-.header-nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--spacing-md);
-    max-width: 100%;
-}
-
-.back-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: var(--hover-bg);
-    color: var(--text-primary);
-    text-decoration: none;
-    transition: all 0.2s ease;
-    flex-shrink: 0;
-}
-
-.back-btn:hover {
-    background: var(--border-color);
-    transform: translateY(-1px);
-    color: var(--text-primary);
-    text-decoration: none;
-}
-
-.header-title {
-    flex: 1;
-    text-align: center;
-    min-width: 0;
-}
-
-.header-title h1 {
-    margin: 0;
-    font-size: var(--font-xl);
-    font-weight: 600;
-    color: var(--text-primary);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.user-info {
-    margin: 0;
-    font-size: var(--font-sm);
-    color: var(--text-muted);
-    margin-top: var(--spacing-xs);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.placeholder-btn {
-    width: 44px;
-    height: 44px;
-    flex-shrink: 0;
-}
-
-/* Filter Section */
-.filter-section {
-    background: var(--hover-bg);
-    border-bottom: 1px solid var(--border-color);
-    padding: var(--spacing-xl);
-}
-
-.filter-form {
-    width: 100%;
-}
-
-.filter-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-lg);
-}
-
-.filter-group {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-}
-
-.filter-group label {
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-sm);
-    font-size: var(--font-base);
-}
-
-.filter-group select,
-.filter-group input {
-    padding: var(--spacing-md);
-    border: 2px solid var(--border-color);
-    border-radius: var(--border-radius);
-    font-size: var(--font-base);
-    background: white;
-    transition: all 0.2s ease;
-    min-height: 44px;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.filter-group select:focus,
-.filter-group input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(29, 209, 161, 0.1);
-}
-
-.filter-actions {
-    display: flex;
-    gap: var(--spacing-md);
-    justify-content: flex-end;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.btn-filter,
-.btn-clear {
-    padding: var(--spacing-md) var(--spacing-lg);
-    border-radius: var(--border-radius);
-    font-size: var(--font-base);
-    font-weight: 600;
-    text-decoration: none;
-    text-align: center;
-    transition: all 0.2s ease;
-    cursor: pointer;
+.btn-primary {
+    background: linear-gradient(135deg, #1dd1a1, #10ac84);
     border: none;
-    min-height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    white-space: nowrap;
-    min-width: 100px;
+    transition: all 0.3s ease;
 }
 
-.btn-filter {
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-    color: white;
-}
-
-.btn-filter:hover {
+.btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(29, 209, 161, 0.3);
-    color: white;
-    text-decoration: none;
+    box-shadow: 0 8px 25px rgba(29, 209, 161, 0.3);
+    background: linear-gradient(135deg, #10ac84, #0e8e71);
 }
 
-.btn-clear {
-    background: var(--hover-bg);
-    color: var(--text-secondary);
-    border: 2px solid var(--border-color);
+.btn-primary:active {
+    transform: translateY(0);
 }
 
-.btn-clear:hover {
-    background: var(--border-color);
-    color: var(--text-primary);
-    text-decoration: none;
+.btn-outline-secondary {
+    transition: all 0.3s ease;
 }
 
-/* Transactions Section */
-.transactions-section {
-    padding: var(--spacing-xl);
+.btn-outline-secondary:hover {
+    transform: translateY(-1px);
 }
 
-.transactions-section .transactions-header {
-    background: none;
-    padding: 0 0 var(--spacing-lg) 0;
-    color: var(--text-primary);
-    position: static;
-    border-bottom: 2px solid var(--border-color);
-    margin-bottom: var(--spacing-lg);
+.form-control:focus,
+.form-select:focus {
+    border-color: #1dd1a1;
+    box-shadow: 0 0 0 0.2rem rgba(29, 209, 161, 0.25);
 }
 
-.transactions-section h3 {
-    margin: 0;
-    font-size: var(--font-lg);
-    font-weight: 600;
+.card {
+    border-radius: 1rem !important;
 }
 
-/* Transaction Cards */
 .transaction-card {
-    background: var(--card-bg);
-    border: 2px solid var(--border-color);
-    border-radius: var(--border-radius);
-    padding: var(--spacing-lg);
-    margin-bottom: var(--spacing-md);
+    transition: all 0.3s ease;
     cursor: pointer;
-    transition: all 0.2s ease;
-    position: relative;
+    border: 2px solid var(--bs-border-color) !important;
 }
 
 .transaction-card:hover {
-    border-color: var(--primary-color);
-    box-shadow: var(--shadow-medium);
+    border-color: #1dd1a1 !important;
     transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 
 .transaction-card:active {
     transform: translateY(0);
 }
 
-.transaction-info {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: var(--spacing-md);
+/* Loading states */
+.btn:disabled {
+    opacity: 0.6;
+    transform: none !important;
 }
 
-.transaction-details {
-    flex: 1;
-    min-width: 0;
-}
-
-.transaction-title {
-    font-size: var(--font-base);
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-xs);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.transaction-subtitle {
-    font-size: var(--font-sm);
-    color: var(--text-secondary);
-    margin-bottom: var(--spacing-xs);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.transaction-date {
-    font-size: var(--font-xs);
-    color: var(--text-muted);
-    margin-bottom: var(--spacing-xs);
-}
-
-.transaction-receipt {
-    font-size: var(--font-xs);
-    color: var(--text-muted);
-    font-family: monospace;
-    background: var(--hover-bg);
-    padding: 4px 8px;
-    border-radius: 4px;
-    display: inline-block;
-}
-
-.transaction-amount {
-    text-align: right;
-    flex-shrink: 0;
-}
-
-.amount {
-    font-size: var(--font-lg);
-    font-weight: 700;
-    margin-bottom: 2px;
-}
-
-.amount.earn {
-    color: #27ae60;
-}
-
-.amount.spend {
-    color: #e74c3c;
-}
-
-.amount-label {
-    font-size: var(--font-xs);
-    color: var(--text-muted);
-    font-weight: 600;
-}
-
-.transaction-actions {
-    position: absolute;
-    right: var(--spacing-md);
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-muted);
-    font-size: 20px;
-    font-weight: 300;
-}
-
-/* Empty State */
-.no-transactions-card {
-    background: var(--card-bg);
-    border: 2px dashed var(--border-color);
-    border-radius: var(--border-radius-lg);
-    padding: var(--spacing-xl);
-    text-align: center;
-}
-
-.empty-state {
-    max-width: 300px;
-    margin: 0 auto;
-}
-
-.empty-icon {
-    font-size: 48px;
-    margin-bottom: var(--spacing-lg);
-}
-
-.empty-title {
-    font-size: var(--font-lg);
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-sm);
-}
-
-.empty-subtitle {
-    font-size: var(--font-sm);
-    color: var(--text-secondary);
-    line-height: 1.5;
-}
-
-.clear-filters-link,
-.empty-link {
-    color: var(--primary-color);
-    text-decoration: none;
-    font-weight: 600;
-}
-
-.clear-filters-link:hover,
-.empty-link:hover {
-    color: var(--primary-dark);
-    text-decoration: underline;
-}
-
-/* Modal Styles */
-.transaction-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--spacing-lg);
-}
-
-.modal-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
-}
-
-.modal-content {
-    background: var(--card-bg);
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-medium);
-    max-width: 500px;
-    width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
-    position: relative;
-    z-index: 1;
-}
-
-.modal-header {
-    padding: var(--spacing-lg);
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.modal-header h3 {
-    margin: 0;
-    font-size: var(--font-lg);
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-.modal-close {
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    color: var(--text-muted);
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    transition: all 0.2s ease;
-}
-
-.modal-close:hover {
-    background: var(--hover-bg);
-    color: var(--text-primary);
-}
-
+/* Custom scrollbar for modal */
 .modal-body {
-    padding: var(--spacing-lg);
+    scrollbar-width: thin;
+    scrollbar-color: #1dd1a1 #f1f3f4;
 }
 
-.transaction-status {
-    text-align: center;
-    padding: var(--spacing-lg) 0;
-    border-bottom: 1px solid var(--border-color);
-    margin-bottom: var(--spacing-lg);
+.modal-body::-webkit-scrollbar {
+    width: 6px;
 }
 
-.status-icon {
-    font-size: 48px;
-    margin-bottom: var(--spacing-sm);
+.modal-body::-webkit-scrollbar-track {
+    background: #f1f3f4;
 }
 
-.status-text {
-    font-size: var(--font-lg);
-    font-weight: 600;
-    color: var(--text-primary);
+.modal-body::-webkit-scrollbar-thumb {
+    background: #1dd1a1;
+    border-radius: 3px;
 }
 
-.points-display {
-    text-align: center;
-    padding: var(--spacing-lg) 0;
-    border-bottom: 1px solid var(--border-color);
-    margin-bottom: var(--spacing-lg);
-}
-
-.points-amount {
-    font-size: var(--font-xxl);
-    font-weight: 700;
-    color: var(--primary-color);
-}
-
-.points-label {
-    font-size: var(--font-sm);
-    color: var(--text-muted);
-    margin-top: var(--spacing-xs);
-}
-
-.detail-section {
-    margin-bottom: var(--spacing-lg);
-}
-
-.detail-header {
-    font-size: var(--font-base);
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-md);
-    padding-bottom: var(--spacing-sm);
-    border-bottom: 1px solid var(--border-color);
-}
-
-.detail-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--spacing-sm) 0;
-    border-bottom: 1px solid var(--hover-bg);
-}
-
-.detail-row:last-child {
-    border-bottom: none;
-}
-
-.detail-label {
-    font-size: var(--font-sm);
-    color: var(--text-secondary);
-    flex-shrink: 0;
-}
-
-.detail-value {
-    font-size: var(--font-sm);
-    color: var(--text-primary);
-    font-weight: 500;
-    text-align: right;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    margin-left: var(--spacing-md);
-}
-
-.detail-value.qr-code {
-    font-family: monospace;
-    background: var(--hover-bg);
-    padding: 4px 8px;
-    border-radius: 4px;
-}
-
-.modal-actions {
-    padding-top: var(--spacing-lg);
-    border-top: 1px solid var(--border-color);
-    text-align: center;
-}
-
-.btn-share {
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-    color: white;
-    border: none;
-    padding: var(--spacing-md) var(--spacing-xl);
-    border-radius: var(--border-radius);
-    font-size: var(--font-base);
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    min-height: 48px;
-}
-
-.btn-share:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(29, 209, 161, 0.3);
-}
-
-/* Pagination */
-.pagination-wrapper {
-    margin-top: var(--spacing-xl);
-    display: flex;
-    justify-content: center;
-}
-
-/* Responsive Design */
-@media (max-width: 991.98px) {
-    .transactions-page-container {
-        padding: var(--spacing-md);
+/* Mobile optimizations */
+@media (max-width: 576px) {
+    .container-fluid {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
     }
 
-    .filter-row {
-        grid-template-columns: repeat(2, 1fr);
-        gap: var(--spacing-md);
+    .transaction-card .card-body {
+        padding: 1rem !important;
     }
 
-    .filter-actions {
-        margin-top: var(--spacing-md);
-    }
-}
-
-@media (max-width: 767.98px) {
-    .transactions-page-container {
-        padding: var(--spacing-sm);
-    }
-
-    .transactions-container {
-        border-radius: var(--border-radius);
-        margin: 0;
-    }
-
-    .transactions-header {
-        padding: var(--spacing-md);
-    }
-
-    .header-nav {
-        padding: 0 var(--spacing-xs);
-    }
-
-    .header-title h1 {
-        font-size: var(--font-lg);
-    }
-
-    .filter-section,
-    .transactions-section {
-        padding: var(--spacing-md);
-    }
-
-    .filter-row {
-        grid-template-columns: 1fr;
-        gap: var(--spacing-sm);
-    }
-
-    .filter-group {
-        width: 100%;
-    }
-
-    .filter-actions {
-        flex-direction: column;
-        gap: var(--spacing-sm);
-        margin-top: var(--spacing-md);
-    }
-
-    .btn-filter,
-    .btn-clear {
-        width: 100%;
-        min-height: 48px;
-        font-size: var(--font-base);
-        padding: var(--spacing-md);
-    }
-
-    .filter-group select,
-    .filter-group input {
-        min-height: 48px;
-        padding: var(--spacing-md);
-        font-size: var(--font-base);
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    .transaction-card {
-        padding: var(--spacing-md);
-        margin-bottom: var(--spacing-sm);
-    }
-
-    .transaction-info {
-        flex-direction: column;
-        align-items: stretch;
-        gap: var(--spacing-sm);
-    }
-
-    .transaction-details {
-        flex: 1;
-    }
-
-    .transaction-amount {
-        text-align: left;
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-        justify-content: space-between;
-    }
-
-    .transaction-actions {
-        position: static;
-        transform: none;
-        align-self: center;
-        margin-top: 0;
-    }
-
-    .modal-content {
-        margin: var(--spacing-sm);
-        width: calc(100% - calc(var(--spacing-sm) * 2));
-        max-height: calc(100vh - calc(var(--spacing-sm) * 2));
-        overflow-y: auto;
-    }
-
-    .modal-header {
-        padding: var(--spacing-md);
-    }
-
-    .modal-body {
-        padding: var(--spacing-md);
-    }
-
-    .detail-row {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--spacing-xs);
-        padding: var(--spacing-sm) 0;
-    }
-
-    .detail-value {
-        text-align: left;
-        margin-left: 0;
-        width: 100%;
-        word-wrap: break-word;
-    }
-}
-
-@media (max-width: 575.98px) {
-    .transactions-page-container {
-        padding: var(--spacing-xs);
-    }
-
-    .header-title h1 {
-        font-size: var(--font-base);
-    }
-
-    .user-info {
-        font-size: var(--font-xs);
-    }
-
-    .filter-section,
-    .transactions-section {
-        padding: var(--spacing-sm);
-    }
-
-    .filter-group label {
-        font-size: var(--font-sm);
-        margin-bottom: var(--spacing-xs);
-    }
-
-    .filter-group select,
-    .filter-group input {
-        font-size: var(--font-sm);
-        min-height: 44px;
-    }
-
-    .transaction-card {
-        padding: var(--spacing-sm);
-    }
-
-    .transaction-title {
-        font-size: var(--font-sm);
-        line-height: 1.4;
-    }
-
-    .transaction-subtitle,
-    .transaction-date {
-        font-size: var(--font-xs);
-    }
-
-    .amount {
-        font-size: var(--font-lg);
-    }
-
-    .amount-label {
-        font-size: var(--font-xs);
-    }
-
-    .empty-icon {
-        font-size: 36px;
-    }
-
-    .modal-content {
-        margin: var(--spacing-xs);
-        width: calc(100% - calc(var(--spacing-xs) * 2));
-        border-radius: var(--spacing-sm);
-    }
-
-    .modal-header h3 {
-        font-size: var(--font-base);
-    }
-
-    .points-amount {
-        font-size: var(--font-xl);
-    }
-}
-
-@media (max-width: 390px) {
-    .header-nav {
-        padding: 0;
-    }
-
-    .back-btn,
-    .placeholder-btn {
-        width: 36px;
-        height: 36px;
-    }
-
-    .header-title h1 {
-        font-size: var(--font-sm);
-    }
-
-    .filter-section,
-    .transactions-section {
-        padding: var(--spacing-xs);
-    }
-
-    .transaction-card {
-        border-radius: var(--spacing-xs);
-    }
-
-    .btn-filter,
-    .btn-clear {
-        min-height: 40px;
-        font-size: var(--font-sm);
-        padding: var(--spacing-sm);
+    .modal-dialog {
+        margin: 0.75rem;
     }
 }
 
 /* Animation for smooth interactions */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.transactions-container {
-    animation: fadeIn 0.3s ease;
+.card {
+    animation: slideUp 0.4s ease-out;
 }
 
-.transaction-modal {
-    animation: fadeIn 0.2s ease;
+/* Better focus indicators for accessibility */
+.btn:focus,
+.form-control:focus,
+.form-select:focus {
+    outline: 2px solid #1dd1a1;
+    outline-offset: 2px;
 }
 
+/* Enhanced hover states */
+@media (hover: hover) {
+    .form-control:hover,
+    .form-select:hover {
+        border-color: #1dd1a1;
+    }
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+/* Success/Error text colors */
+.text-success {
+    color: #27ae60 !important;
+}
+
+.text-danger {
+    color: #e74c3c !important;
+}
+
+/* Font monospace for codes */
+.font-monospace {
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+}
 </style>
+
+<!-- Bootstrap JS (if not already included) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Font Awesome (if not already included) -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+<script>
+function showTransactionDetail(transaction) {
+    // Populate modal with transaction data
+    document.getElementById('modalPointsAmount').textContent =
+        (transaction.type === 'spend' ? '-' : '+') + (transaction.points || 0);
+
+    document.getElementById('modalItemName').textContent =
+        transaction.description || 'Transaction';
+
+    document.getElementById('modalStoreName').textContent =
+        transaction.store_name || 'Unknown Store';
+
+    document.getElementById('modalStoreLocation').textContent =
+        transaction.store_location || 'N/A';
+
+    // Format date
+    const date = transaction.transaction_date || transaction.created_at;
+    if (date) {
+        const formattedDate = new Date(date).toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        document.getElementById('modalDateTime').textContent = formattedDate;
+    }
+
+    document.getElementById('modalTransactionId').textContent =
+        transaction.id || 'N/A';
+
+    document.getElementById('modalUnitsScanned').textContent =
+        transaction.units_scanned || '1';
+
+    document.getElementById('modalReceiptCode').textContent =
+        transaction.receipt_code || 'N/A';
+
+    document.getElementById('modalPointsPerUnit').textContent =
+        transaction.points_per_unit || (transaction.points || 0);
+
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('transactionModal'));
+    modal.show();
+}
+
+function shareTransaction() {
+    if (navigator.share) {
+        const pointsAmount = document.getElementById('modalPointsAmount').textContent;
+        const storeName = document.getElementById('modalStoreName').textContent;
+        const receiptCode = document.getElementById('modalReceiptCode').textContent;
+
+        navigator.share({
+            title: 'Transaction Receipt',
+            text: `I earned ${pointsAmount} points at ${storeName}! Receipt: ${receiptCode}`,
+            url: window.location.href
+        });
+    } else {
+        // Fallback for browsers that don't support Web Share API
+        alert('Sharing not supported on this device');
+    }
+}
+
+// Enhanced mobile experience
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-resize inputs on mobile
+    if (window.innerWidth <= 768) {
+        const inputs = document.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                setTimeout(() => {
+                    this.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 300);
+            });
+        });
+    }
+
+    // Initialize tooltips if needed
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
 @endsection

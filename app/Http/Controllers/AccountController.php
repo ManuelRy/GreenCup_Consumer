@@ -99,7 +99,7 @@ class AccountController extends Controller
             $id = Auth::id();
             $data = $request->validate([
                 'full_name'     => 'required|string|max:255',
-                'phone_number'  => 'nullable|string|max:20',
+                'phone_number'  => 'nullable|string|min:8|max:20',
                 'gender'        => 'required|in:male,female,other',
                 'date_of_birth' => 'nullable|date|before:today',
             ]);
