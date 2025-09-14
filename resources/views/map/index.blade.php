@@ -2182,15 +2182,15 @@
 
             console.log('Changing map style to:', styleUrl);
             showLoading();
-            
+
             app.map.setStyle(styleUrl);
-            
+
             // Update button states
             document.querySelectorAll('.style-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             button.classList.add('active');
-            
+
             // Wait for style to load before re-adding markers
             app.map.once('styledata', () => {
                 console.log('Map style loaded, re-adding markers');
@@ -2909,7 +2909,7 @@
                 console.log('Loading already active, ignoring showLoading call');
                 return;
             }
-            
+
             app.isLoading = true;
             document.getElementById('loadingIndicator').style.display = 'flex';
             console.log('Loading indicator shown');

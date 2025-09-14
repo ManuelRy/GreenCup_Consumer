@@ -77,11 +77,11 @@
                     <div class="transaction-info">
                         <div class="transaction-details">
                             <div class="transaction-title">
-                                {{ $transaction->item_name ?: 'Unknown Item' }}
+                                {{ $transaction->description ?: 'Transaction' }}
                                 <!-- Debug: Check transaction data -->
                                 @if(config('app.debug'))
                                     <small style="display: block; color: #999; font-size: 10px;">
-                                        Debug: item_name: "{{ $transaction->item_name ?? 'NULL' }}", description: "{{ $transaction->description ?? 'NULL' }}"
+                                        Debug: description: "{{ $transaction->description ?? 'NULL' }}", type: "{{ $transaction->type ?? 'NULL' }}"
                                     </small>
                                 @endif
                             </div>
