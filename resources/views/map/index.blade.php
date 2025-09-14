@@ -1858,6 +1858,7 @@
                 const hasValue = e.target.value.length > 0;
                 clearBtn.style.display = hasValue ? 'block' : 'none';
                 searchBtn.style.right = hasValue ? '40px' : '5px';
+                handleSearch();
             });
 
             // Sort and filter controls
@@ -2394,7 +2395,13 @@
 
         async function handleSearch() {
             const query = document.getElementById('searchInput').value.trim();
-            if (!query) return;
+            if (!query) {
+                // If input is empty, reset to all stores
+                app.filteredStores = [...app.stores];
+                updateStoreDisplay();
+                focusMapOnResults(app.filteredStores);
+                return;
+            }
 
             try {
                 showLoading();
@@ -2427,8 +2434,11 @@
                     const currentSort = document.getElementById('sortSelect').value;
                     if (currentSort && currentSort !== 'nearest') {
                         sortStores(currentSort);
+                        // Do not focus map here, let sort logic handle
                     } else {
                         updateStoreDisplay();
+                        // Only focus map if not sorting by distance
+                        focusMapOnResults(app.filteredStores);
                     }
                 } else {
                     throw new Error(data.message || 'Search failed');
@@ -2438,6 +2448,33 @@
                 showError('Search failed. Please try again.');
             } finally {
                 hideLoading();
+            }
+        }
+
+        // Focus map on search results
+        function focusMapOnResults(stores) {
+            if (!app.map || !stores) return;
+            if (stores.length === 0) {
+                showError('No stores found for your search.');
+                return;
+            }
+            if (stores.length === 1) {
+                // Center and zoom to the single store
+                const s = stores[0];
+                if (s.longitude && s.latitude) {
+                    app.map.flyTo({ center: [s.longitude, s.latitude], zoom: 16 });
+                }
+            } else {
+                // Fit bounds to all stores
+                const bounds = new mapboxgl.LngLatBounds();
+                stores.forEach(s => {
+                    if (s.longitude && s.latitude) {
+                        bounds.extend([s.longitude, s.latitude]);
+                    }
+                });
+                if (!bounds.isEmpty()) {
+                    app.map.fitBounds(bounds, { padding: 80, maxZoom: 16 });
+                }
             }
         }
 

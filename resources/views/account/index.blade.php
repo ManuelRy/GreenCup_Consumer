@@ -1,7 +1,7 @@
 @extends('master')
 
 @section('content')
-<div class="container-fluid bg-light min-vh-100 py-3">
+<div class="container-fluid min-vh-100 py-3">
     <div class="row justify-content-center">
         <div class="col-12 col-lg-10 col-xl-8">
 
@@ -530,10 +530,29 @@
     .points-circle {
         width: 120px !important;
         height: 120px !important;
+        max-width: 60vw;
+        max-height: 60vw;
+        min-width: 80px;
+        min-height: 80px;
+        box-sizing: border-box;
     }
 
     .points-circle .fw-bold {
         font-size: 1.75rem !important;
+    }
+
+    @media (max-width: 576px) {
+        .points-circle {
+            width: 38vw !important;
+            height: 38vw !important;
+            min-width: 70px;
+            min-height: 70px;
+            max-width: 90vw;
+            max-height: 90vw;
+        }
+        .points-circle .fw-bold {
+            font-size: 1.2rem !important;
+        }
     }
 
     .modal-dialog {

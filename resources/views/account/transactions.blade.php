@@ -1,7 +1,7 @@
 @extends('master')
 
 @section('content')
-<div class="container-fluid bg-light min-vh-100 py-3">
+<div class="container-fluid min-vh-100 py-3">
     <div class="row justify-content-center">
         <div class="col-12 col-lg-10 col-xl-8">
 

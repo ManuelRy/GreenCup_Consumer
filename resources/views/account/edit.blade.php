@@ -1,7 +1,7 @@
 @extends('master')
 
 @section('content')
-<div class="container-fluid bg-light min-vh-100 py-3">
+<div class="container-fluid min-vh-100 py-3">
     <div class="row justify-content-center">
         <div class="col-12 col-md-8 col-lg-6 col-xl-5">
             <!-- Main Card -->

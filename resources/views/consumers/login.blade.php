@@ -852,7 +852,7 @@
 
       <form id="loginForm" action="{{ route('login.store') }}" method="POST" novalidate class="login-form">
         @csrf
-        
+
         <!-- Email Address -->
         <div class="form-group">
           <label for="email" class="form-label">
@@ -860,14 +860,14 @@
             Email Address
           </label>
           <div class="form-input-wrapper">
-            <input 
-              type="email" 
-              id="email" 
-              name="email" 
+            <input
+              type="email"
+              id="email"
+              name="email"
               value="{{ old('email', session('registration_email')) }}"
               class="form-input @error('email') error @enderror"
               placeholder="Enter your email address"
-              required 
+              required
               autocomplete="email"
               aria-describedby="email-error"
             />
@@ -887,18 +887,18 @@
             Password
           </label>
           <div class="form-input-wrapper">
-            <input 
-              type="password" 
-              id="password" 
+            <input
+              type="password"
+              id="password"
               name="password"
               class="form-input password-input @error('password') error @enderror"
-              placeholder="Enter your password" 
-              required 
+              placeholder="Enter your password"
+              required
               autocomplete="current-password"
               aria-describedby="password-error"
             />
-            <button 
-              type="button" 
+            <button
+              type="button"
               onclick="togglePassword('password')"
               class="password-toggle"
               aria-label="Toggle password visibility"
@@ -916,22 +916,23 @@
 
         <!-- Remember Me -->
         <div class="checkbox-container">
-          <input 
-            type="checkbox" 
-            id="remember_me" 
-            name="remember_me" 
-            class="checkbox-custom" 
+          <input
+            type="checkbox"
+            id="remember"
+            name="remember"
+            class="checkbox-custom"
             aria-describedby="remember-help"
+            {{ old('remember') ? 'checked' : '' }}
           />
-          <label for="remember_me" class="checkbox-label">Remember me</label>
+          <label for="remember" class="checkbox-label">Remember me</label>
           <div id="remember-help" class="sr-only">Keep me signed in on this device</div>
         </div>
 
         <!-- Submit Button -->
-        <button 
-          id="loginSubmit" 
-          name="loginSubmit" 
-          type="submit" 
+        <button
+          id="loginSubmit"
+          name="loginSubmit"
+          type="submit"
           aria-label="Sign In"
           class="submit-button"
         >
@@ -993,7 +994,7 @@
     function initializeFormEnhancements() {
       const form = document.getElementById('loginForm');
       const inputs = form.querySelectorAll('input');
-      
+
       // Add real-time validation feedback
       inputs.forEach(input => {
         input.addEventListener('blur', validateField);
@@ -1069,7 +1070,7 @@
         const field = document.querySelector(`[name="${fieldName}"]`);
         field.parentNode.parentNode.appendChild(errorElement);
       }
-      
+
       errorElement.querySelector('p').textContent = message;
       errorElement.style.display = 'flex';
     }
@@ -1194,7 +1195,7 @@
       if (e.key === 'Tab') {
         const focusableElements = document.querySelectorAll('input, button, [tabindex]:not([tabindex="-1"])');
         const currentIndex = Array.from(focusableElements).indexOf(document.activeElement);
-        
+
         if (e.shiftKey) {
           // Shift+Tab (backwards)
           if (currentIndex === 0) {
@@ -1230,7 +1231,7 @@
         animation: ripple-animation 0.6s linear;
         pointer-events: none;
       }
-      
+
       @keyframes ripple-animation {
         to {
           transform: scale(4);

@@ -1,371 +1,455 @@
 @extends('master')
 
 @section('content')
-<div class="scan-container">
+<div class="scan-app">
     <!-- Header -->
-    <div class="scan-header">
-        <div class="header-content">
-            <a href="{{ route('dashboard') }}" class="back-button">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <div class="app-header">
+        <div class="header-container">
+            <a href="{{ route('dashboard') }}" class="back-btn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M19 12H5M12 19l-7-7 7-7"/>
                 </svg>
             </a>
-            <div class="header-title">
+            <div class="header-info">
                 <h1>Scan Receipt</h1>
-                <p>Scan seller's QR code to earn points</p>
+                <p>Scan QR code to earn points</p>
             </div>
-            <div class="points-display">
-                <span class="points-value" id="current-points">{{ Auth::guard('consumer')->user()->getAvailablePoints() ?? 0 }}</span>
-                <span class="points-label">points</span>
+            <div class="points-chip">
+                <span id="current-points">{{ Auth::guard('consumer')->user()->getAvailablePoints() ?? 0 }}</span>
             </div>
         </div>
     </div>
 
-    <!-- Scanner Section -->
-    <div class="scanner-section">
-        <div class="scanner-header">
-            <h3>📱 QR Code Scanner</h3>
-            <p>Position the QR code within the frame</p>
-        </div>
-
-        <div class="scanner-wrapper">
-            <div id="qr-reader"></div>
-            <div class="scanner-overlay">
-                <div class="scanner-frame">
-                    <div class="corner tl"></div>
-                    <div class="corner tr"></div>
-                    <div class="corner bl"></div>
-                    <div class="corner br"></div>
-                    <div class="scan-line"></div>
+    <!-- Main Content -->
+    <div class="app-content">
+        <!-- Scanner Card -->
+        <div class="scanner-card">
+            <div class="card-header">
+                <div class="scanner-title">
+                    <div class="title-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <path d="M21 15l-5-5L5 21"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2>QR Scanner</h2>
+                        <p>Position QR code in the center</p>
+                    </div>
                 </div>
             </div>
 
-            <!-- Camera Status Overlay -->
-            <div id="camera-status" class="camera-status hidden">
-                <div class="status-icon">📷</div>
-                <div class="status-message">Initializing camera...</div>
-                <button id="retry-camera" class="retry-btn" style="display: none;">Try Again</button>
-                <button id="use-manual" class="manual-btn" style="display: none;">Use Manual Input</button>
-                <button id="debug-camera" class="debug-btn" style="display: none;">Show Debug Info</button>
-            </div>
-        </div>
+            <div class="scanner-viewport">
+                <div id="qr-reader"></div>
 
-        <div class="scanner-instructions">
-            <p>💡 Hold your phone steady and make sure the QR code is clearly visible</p>
-            <p style="margin-top: 0.5rem; font-size: 0.8rem; opacity: 0.7;">
-                🧪 <strong>For testing:</strong> Enter "demo123" in manual input to see demo receipt<br>
-                ✅ <strong>Valid:</strong> Receipt QR codes from participating stores<br>
-                ❌ <strong>Invalid:</strong> Website URLs, social media codes, personal QR codes<br>
-                📱 <strong>Mobile Tips:</strong><br>
-                • Allow camera permissions when prompted<br>
-                • Close other camera apps if scanner fails<br>
-                • Use "Try Again" if camera doesn't start<br>
-                • Manual input works on all devices
-            </p>
-        </div>
-    </div>
+                <!-- Scanner Frame -->
+                <div class="scanner-frame">
+                    <div class="frame-corner tl"></div>
+                    <div class="frame-corner tr"></div>
+                    <div class="frame-corner bl"></div>
+                    <div class="frame-corner br"></div>
+                    <div class="scan-beam"></div>
+                </div>
 
-    <!-- Manual Input Section -->
-    <div class="manual-section">
-        <div class="divider">
-            <span>Or enter code manually</span>
-        </div>
-
-        <form id="manual-code-form" class="input-group">
-            <input type="text"
-                   id="receipt-code"
-                   placeholder="Enter receipt code"
-                   class="receipt-input"
-                   autocomplete="off">
-            <button type="submit" class="submit-btn">
-                <span class="btn-text">Verify</span>
-                <span class="btn-loading" style="display: none;">
-                    <div class="loading-spinner"></div>
-                </span>
-            </button>
-        </form>
-    </div>
-
-    <!-- Recent Claims -->
-    <div class="recent-section">
-        <div class="recent-header">
-            <h3>🎁 Recent Claims</h3>
-        </div>
-        <div class="recent-list">
-            @php
-                try {
-                    $recentClaims = DB::table('point_transactions')
-                        ->where('consumer_id', Auth::guard('consumer')->user()->id)
-                        ->where('type', 'earn')
-                        ->join('sellers', 'point_transactions.seller_id', '=', 'sellers.id')
-                        ->select(
-                            'point_transactions.points as total_points',
-                            'point_transactions.description',
-                            'point_transactions.scanned_at as claimed_at',
-                            'point_transactions.created_at',
-                            'sellers.business_name'
-                        )
-                        ->orderBy('point_transactions.scanned_at', 'desc')
-                        ->limit(5)
-                        ->get();
-                } catch (\Exception $e) {
-                    $recentClaims = collect([]);
-                    \Log::error('Recent claims query failed: ' . $e->getMessage());
-                }
-            @endphp
-
-            @forelse($recentClaims as $claim)
-                <div class="recent-item">
-                    <div class="recent-icon">🏪</div>
-                    <div class="recent-details">
-                        <p class="recent-store">{{ $claim->business_name }}</p>
-                        <div class="recent-meta">
-                            <span class="points-badge">+{{ $claim->total_points }} pts</span>
-                            <span>{{ \Carbon\Carbon::parse($claim->claimed_at)->diffForHumans() }}</span>
+                <!-- Camera Status -->
+                <div id="camera-status" class="camera-overlay hidden">
+                    <div class="status-content">
+                        <div class="status-icon">📷</div>
+                        <div class="status-text">Starting camera...</div>
+                        <div class="status-actions">
+                            <button id="retry-camera" class="status-btn primary hidden">Try Again</button>
+                            <button id="use-manual" class="status-btn secondary hidden">Manual Input</button>
                         </div>
                     </div>
                 </div>
-            @empty
-                <div class="no-claims">
-                    <div class="no-claims-icon">📱</div>
-                    <p><strong>No claims yet</strong><br>Start scanning to earn your first points!</p>
+            </div>
+
+            <div class="scanner-footer">
+                <div class="tip">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                        <point cx="12" cy="17"/>
+                    </svg>
+                    Hold steady and ensure good lighting
                 </div>
-            @endforelse
+            </div>
+        </div>
+
+        <!-- Manual Input -->
+        <div class="input-section">
+            <div class="divider">
+                <span>Or enter manually</span>
+            </div>
+
+            <form id="manual-code-form" class="manual-form">
+                <div class="input-wrapper">
+                    <input
+                        type="text"
+                        id="receipt-code"
+                        placeholder="Enter receipt code"
+                        class="code-input"
+                        autocomplete="off"
+                    >
+                    <button type="submit" class="submit-button">
+                        <span class="btn-content">Verify</span>
+                        <div class="btn-loader hidden">
+                            <div class="spinner"></div>
+                        </div>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="activity-card">
+            <div class="card-header">
+                <h3>Recent Claims</h3>
+            </div>
+
+            <div class="activity-list">
+                @php
+                    try {
+                        $recentClaims = DB::table('point_transactions')
+                            ->where('consumer_id', Auth::guard('consumer')->user()->id)
+                            ->where('type', 'earn')
+                            ->join('sellers', 'point_transactions.seller_id', '=', 'sellers.id')
+                            ->select(
+                                'point_transactions.points as total_points',
+                                'point_transactions.description',
+                                'point_transactions.scanned_at as claimed_at',
+                                'point_transactions.created_at',
+                                'sellers.business_name'
+                            )
+                            ->orderBy('point_transactions.scanned_at', 'desc')
+                            ->limit(5)
+                            ->get();
+                    } catch (\Exception $e) {
+                        $recentClaims = collect([]);
+                        \Log::error('Recent claims query failed: ' . $e->getMessage());
+                    }
+                @endphp
+
+                @forelse($recentClaims as $claim)
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                                <polyline points="9,22 9,12 15,12 15,22"/>
+                            </svg>
+                        </div>
+                        <div class="activity-details">
+                            <div class="store-name">{{ $claim->business_name }}</div>
+                            <div class="activity-meta">
+                                <span class="points">+{{ $claim->total_points }}</span>
+                                <span class="time">{{ \Carbon\Carbon::parse($claim->claimed_at)->diffForHumans() }}</span>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                <circle cx="8.5" cy="8.5" r="1.5"/>
+                                <path d="M21 15l-5-5L5 21"/>
+                            </svg>
+                        </div>
+                        <h4>No claims yet</h4>
+                        <p>Start scanning to earn your first points</p>
+                    </div>
+                @endforelse
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Receipt Preview Modal -->
-<div id="receipt-modal" class="modal">
-    <div class="modal-backdrop"></div>
-    <div class="modal-content">
+<!-- Receipt Modal -->
+<div id="receipt-modal" class="modal-overlay hidden">
+    <div class="modal-container">
         <div class="modal-header">
-            <h2>📋 Receipt Details</h2>
-            <button class="close-modal" type="button">&times;</button>
+            <h3>Receipt Preview</h3>
+            <button class="close-btn">&times;</button>
         </div>
 
         <div class="modal-body">
-            <!-- Store Info -->
-            <div class="store-info">
-                <div class="store-avatar">🏪</div>
-                <div class="store-details">
-                    <h3 id="store-name">Loading...</h3>
+            <div class="store-card">
+                <div class="store-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                        <polyline points="9,22 9,12 15,12 15,22"/>
+                    </svg>
+                </div>
+                <div class="store-info">
+                    <h4 id="store-name">Loading...</h4>
                     <p id="store-address"></p>
                 </div>
             </div>
 
-            <!-- Items List -->
-            <div class="receipt-items">
-                <h4>📦 Items</h4>
-                <div id="items-list" class="items-container">
-                    <!-- Items will be populated here -->
+            <div class="items-section">
+                <h4>Items</h4>
+                <div id="items-list" class="items-grid">
+                    <!-- Populated by JS -->
                 </div>
             </div>
 
-            <!-- Total Points -->
-            <div class="receipt-total">
-                <span>Total Points:</span>
-                <span class="total-points" id="total-points">0</span>
+            <div class="total-card">
+                <span>Total Points</span>
+                <span id="total-points" class="total-amount">0</span>
             </div>
+        </div>
 
-            <!-- Action Buttons -->
-            <div class="modal-actions">
-                <button class="cancel-btn" onclick="closeModal()">Cancel</button>
-                <button class="claim-btn" id="claim-button" onclick="claimPoints()">
-                    <span class="btn-text">Claim Points</span>
-                    <span class="btn-loading" style="display: none;">
-                        <div class="loading-spinner"></div>
-                    </span>
-                </button>
-            </div>
+        <div class="modal-footer">
+            <button class="btn secondary" onclick="closeModal()">Cancel</button>
+            <button id="claim-button" class="btn primary" onclick="claimPoints()">
+                <span class="btn-content">Claim Points</span>
+                <div class="btn-loader hidden">
+                    <div class="spinner"></div>
+                </div>
+            </button>
         </div>
     </div>
 </div>
 
 <!-- Success Animation -->
-<div id="success-overlay" class="success-overlay">
+<div id="success-overlay" class="success-screen hidden">
     <div class="success-content">
         <div class="success-animation">
-            <div class="success-icon">✓</div>
-            <div class="success-rings">
-                <div class="ring ring-1"></div>
-                <div class="ring ring-2"></div>
-                <div class="ring ring-3"></div>
+            <div class="checkmark">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                    <path d="m9 12 2 2 4-4"/>
+                </svg>
             </div>
+            <div class="ripple-ring"></div>
+            <div class="ripple-ring delay-1"></div>
+            <div class="ripple-ring delay-2"></div>
         </div>
-        <h2>Points Claimed!</h2>
-        <p class="success-message">
-            🎉 You earned <span class="points-earned" id="points-amount">0</span> points!
-        </p>
-        <button class="success-btn" onclick="location.reload()">Scan Another Receipt</button>
+        <h2>Success!</h2>
+        <p>You earned <strong id="points-amount">0</strong> points</p>
+        <button class="btn primary large" onclick="location.reload()">Scan Another</button>
     </div>
 </div>
 
-<!-- Error Toast -->
-<div id="error-toast" class="toast error-toast">
+<!-- Toast Notification -->
+<div id="error-toast" class="toast hidden">
     <div class="toast-content">
-        <span class="toast-icon">⚠️</span>
-        <span class="toast-message" id="error-message">Something went wrong</span>
+        <div class="toast-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="15" y1="9" x2="9" y2="15"/>
+                <line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+        </div>
+        <div class="toast-message" id="error-message">Error message</div>
     </div>
 </div>
 
 <style>
-/* Green Cups Color System */
+/* Design System */
 :root {
-    --primary-green: #1dd1a1;
-    --primary-green-dark: #10ac84;
-    --primary-green-light: #34d399;
-    --secondary-green: #2e8b57;
-    --background: #f8fafc;
-    --card-bg: #ffffff;
-    --text-primary: #111827;
-    --text-secondary: #6b7280;
-    --text-muted: #9ca3af;
-    --border: #e5e7eb;
-    --border-light: #f3f4f6;
+    /* Colors */
+    --primary: #1dd1a1;
+    --primary-dark: #10ac84;
+    --primary-light: #7fffd4;
+    --secondary: #6c757d;
+    --success: #28a745;
+    --danger: #dc3545;
+    --warning: #ffc107;
+    --info: #17a2b8;
+
+    /* Neutrals */
+    --white: #ffffff;
+    --gray-50: #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-300: #cbd5e1;
+    --gray-400: #94a3b8;
+    --gray-500: #64748b;
+    --gray-600: #475569;
+    --gray-700: #334155;
+    --gray-800: #1e293b;
+    --gray-900: #0f172a;
+
+    /* Spacing */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    --space-12: 48px;
+    --space-16: 64px;
+
+    /* Border Radius */
+    --radius-sm: 6px;
+    --radius: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-2xl: 24px;
+
+    /* Shadows */
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+    /* Typography */
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    --font-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
 }
 
-/* Base Styles */
+/* Reset & Base */
 * {
     box-sizing: border-box;
-}
-
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    line-height: 1.5;
-    color: var(--text-primary);
-    background: var(--background);
     margin: 0;
     padding: 0;
 }
 
-/* Container */
-.scan-container {
+body {
+    font-family: var(--font-sans);
+    line-height: 1.5;
+    color: var(--gray-800);
+    background: var(--gray-50);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* App Layout */
+.scan-app {
     min-height: 100vh;
-    background: var(--background);
-    padding-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    overflow-x: hidden;
 }
 
 /* Header */
-.scan-header {
-    background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
-    color: white;
-    padding: 1.5rem 1rem;
+.app-header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: var(--white);
+    padding: var(--space-6) var(--space-4);
     position: relative;
-    overflow: hidden;
+    width: 100%;
+    z-index: 100;
+    box-shadow: var(--shadow-md);
 }
 
-.header-content {
-    position: relative;
-    z-index: 2;
+.header-container {
+    max-width: 480px;
+    margin: 0 auto;
     display: flex;
     align-items: center;
-    gap: 1rem;
-    max-width: 500px;
-    margin: 0 auto;
+    gap: var(--space-4);
 }
 
-.back-button {
+.back-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
-    text-decoration: none;
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
     width: 44px;
     height: 44px;
-    border-radius: 12px;
-    transition: all 0.3s ease;
-    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-lg);
+    color: var(--white);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(10px);
 }
 
-.back-button:hover {
-    background: rgba(255, 255, 255, 0.3);
+.back-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
     transform: translateX(-2px);
+    color: var(--white);
 }
 
-.header-title {
+.header-info {
     flex: 1;
     text-align: center;
 }
 
-.header-title h1 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin: 0;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.header-title p {
-    font-size: 0.875rem;
-    margin: 0.25rem 0 0;
-    opacity: 0.9;
-}
-
-.points-display {
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
-    border-radius: 12px;
-    padding: 0.75rem;
-    text-align: center;
-    min-width: 70px;
-    flex-shrink: 0;
-}
-
-.points-value {
-    display: block;
-    font-size: 1.25rem;
-    font-weight: 800;
-    line-height: 1;
-}
-
-.points-label {
-    display: block;
-    font-size: 0.75rem;
-    opacity: 0.8;
-    margin-top: 2px;
-}
-
-/* Scanner Section */
-.scanner-section {
-    margin: 1.5rem 1rem;
-    background: var(--card-bg);
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: var(--shadow-lg);
-}
-
-.scanner-header {
-    background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
-    color: white;
-    padding: 1.25rem;
-    text-align: center;
-}
-
-.scanner-header h3 {
-    margin: 0;
-    font-size: 1.25rem;
+.header-info h1 {
+    font-size: 18px;
     font-weight: 600;
+    margin-bottom: 2px;
 }
 
-.scanner-header p {
-    margin: 0.5rem 0 0;
+.header-info p {
+    font-size: 14px;
     opacity: 0.9;
-    font-size: 0.875rem;
 }
 
-.scanner-wrapper {
-    position: relative;
-    background: #000;
-    height: 400px;
+.points-chip {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-xl);
+    padding: var(--space-2) var(--space-4);
+    font-size: 16px;
+    font-weight: 700;
+    backdrop-filter: blur(10px);
+    min-width: 60px;
+    text-align: center;
+}
+
+/* Content */
+.app-content {
+    flex: 1;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: var(--space-6) var(--space-4);
+    width: 100%;
+}
+
+/* Scanner Card */
+.scanner-card {
+    background: var(--white);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-lg);
+    margin-bottom: var(--space-8);
+    overflow: hidden;
+}
+
+.card-header {
+    padding: var(--space-6);
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.scanner-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+.title-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    border-radius: var(--radius-lg);
     display: flex;
     align-items: center;
     justify-content: center;
+    color: var(--white);
+}
+
+.scanner-title h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 2px;
+}
+
+.scanner-title p {
+    font-size: 14px;
+    color: var(--gray-500);
+}
+
+/* Scanner Viewport */
+.scanner-viewport {
+    position: relative;
+    height: 320px;
+    background: var(--gray-900);
     overflow: hidden;
 }
 
@@ -378,7 +462,6 @@ body {
     width: 100% !important;
     height: 100% !important;
     object-fit: cover !important;
-    border-radius: 0 !important;
 }
 
 #qr-reader__dashboard_section_swaplink,
@@ -386,174 +469,180 @@ body {
     display: none !important;
 }
 
-.scanner-overlay {
+/* Scanner Frame */
+.scanner-frame {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 220px;
-    height: 220px;
+    width: 200px;
+    height: 200px;
     pointer-events: none;
     z-index: 10;
 }
 
-.camera-status {
+.frame-corner {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    color: white;
-    background: rgba(0, 0, 0, 0.8);
-    padding: 2rem;
-    border-radius: 16px;
-    z-index: 15;
-    backdrop-filter: blur(10px);
-    max-width: 300px;
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--primary);
 }
 
-.camera-status.hidden {
-    display: none !important;
-}
-
-.status-icon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    opacity: 0.8;
-}
-
-.status-message {
-    font-size: 1rem;
-    margin-bottom: 1.5rem;
-    opacity: 0.9;
-    line-height: 1.4;
-}
-
-.retry-btn, .manual-btn, .debug-btn {
-    background: var(--primary-green);
-    color: white;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    pointer-events: auto;
-    margin: 0.25rem;
-}
-
-.retry-btn:hover, .manual-btn:hover, .debug-btn:hover {
-    background: var(--primary-green-dark);
-    transform: translateY(-1px);
-}
-
-.manual-btn {
-    background: var(--text-secondary);
-}
-
-.manual-btn:hover {
-    background: var(--text-primary);
-}
-
-.debug-btn {
-    background: #6366f1;
-    font-size: 0.8rem;
-    padding: 0.5rem 1rem;
-}
-
-.debug-btn:hover {
-    background: #4f46e5;
-}
-
-.scanner-frame {
-    width: 100%;
-    height: 100%;
-    position: relative;
-}
-
-.corner {
-    position: absolute;
-    width: 30px;
-    height: 30px;
-    border: 3px solid var(--primary-green);
-    border-radius: 4px;
-}
-
-.corner.tl {
+.frame-corner.tl {
     top: 0;
     left: 0;
     border-right: none;
     border-bottom: none;
+    border-radius: var(--radius-sm) 0 0 0;
 }
 
-.corner.tr {
+.frame-corner.tr {
     top: 0;
     right: 0;
     border-left: none;
     border-bottom: none;
+    border-radius: 0 var(--radius-sm) 0 0;
 }
 
-.corner.bl {
+.frame-corner.bl {
     bottom: 0;
     left: 0;
     border-right: none;
     border-top: none;
+    border-radius: 0 0 0 var(--radius-sm);
 }
 
-.corner.br {
+.frame-corner.br {
     bottom: 0;
     right: 0;
     border-left: none;
     border-top: none;
+    border-radius: 0 0 var(--radius-sm) 0;
 }
 
-.scan-line {
+.scan-beam {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     height: 2px;
-    background: var(--primary-green);
-    box-shadow: 0 0 10px var(--primary-green);
-    animation: scanLine 2s ease-in-out infinite;
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    animation: scanBeam 2s ease-in-out infinite;
+    opacity: 0.8;
 }
 
-@keyframes scanLine {
+@keyframes scanBeam {
     0%, 100% {
         transform: translateY(0);
-        opacity: 1;
+        opacity: 0.8;
     }
     50% {
-        transform: translateY(216px);
-        opacity: 0.8;
+        transform: translateY(196px);
+        opacity: 1;
     }
 }
 
-.scanner-instructions {
-    padding: 1.5rem;
+/* Camera Status */
+.camera-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    z-index: 20;
+}
+
+.camera-overlay.hidden {
+    display: none;
+}
+
+.status-content {
     text-align: center;
-    background: var(--border-light);
-    color: var(--text-secondary);
-    font-size: 0.875rem;
+    color: var(--white);
+    max-width: 280px;
+    padding: var(--space-6);
+}
+
+.status-icon {
+    font-size: 48px;
+    margin-bottom: var(--space-4);
+    opacity: 0.8;
+}
+
+.status-text {
+    font-size: 16px;
+    margin-bottom: var(--space-6);
+    line-height: 1.5;
+}
+
+.status-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.status-btn {
+    padding: var(--space-3) var(--space-6);
+    border: none;
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.status-btn.primary {
+    background: var(--primary);
+    color: var(--white);
+}
+
+.status-btn.primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+}
+
+.status-btn.secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--white);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.status-btn.secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.status-btn.hidden {
+    display: none;
+}
+
+/* Scanner Footer */
+.scanner-footer {
+    padding: var(--space-4) var(--space-6);
+    background: var(--gray-50);
+    border-top: 1px solid var(--gray-100);
+}
+
+.tip {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: 14px;
+    color: var(--gray-600);
+    justify-content: center;
 }
 
 /* Manual Input */
-.manual-section {
-    margin: 1.5rem 1rem;
-    background: var(--card-bg);
-    border-radius: 16px;
-    padding: 1.5rem;
-    box-shadow: var(--shadow);
+.input-section {
+    margin-bottom: var(--space-8);
 }
 
 .divider {
     display: flex;
     align-items: center;
-    margin: 0 0 1.5rem;
-    color: var(--text-muted);
-    font-size: 0.875rem;
-    text-align: center;
+    margin-bottom: var(--space-6);
+    font-size: 14px;
+    color: var(--gray-500);
 }
 
 .divider::before,
@@ -561,464 +650,509 @@ body {
     content: '';
     flex: 1;
     height: 1px;
-    background: var(--border);
+    background: var(--gray-200);
 }
 
 .divider span {
-    padding: 0 1rem;
-    background: var(--card-bg);
-    font-weight: 500;
+    margin: 0 var(--space-4);
+    background: var(--gray-50);
+    padding: 0 var(--space-2);
 }
 
-.input-group {
-    display: flex;
-    gap: 0.75rem;
-    align-items: stretch;
-}
-
-.receipt-input {
-    flex: 1;
-    padding: 1rem;
-    border: 2px solid var(--border);
-    border-radius: 12px;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    background: var(--border-light);
-    min-height: 48px;
-}
-
-.receipt-input:focus {
-    outline: none;
-    border-color: var(--primary-green);
-    background: white;
-    box-shadow: 0 0 0 3px rgba(29, 209, 161, 0.1);
-}
-
-.submit-btn, .claim-btn, .cancel-btn, .success-btn {
-    position: relative;
-    padding: 1rem 1.5rem;
-    border: none;
-    border-radius: 12px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-}
-
-.submit-btn {
-    background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
-    color: white;
+.manual-form {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    padding: var(--space-6);
     box-shadow: var(--shadow);
 }
 
-.submit-btn:hover:not(:disabled) {
-    transform: translateY(-1px);
+.input-wrapper {
+    display: flex;
+    gap: var(--space-3);
+}
+
+.code-input {
+    flex: 1;
+    padding: var(--space-4);
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    font-size: 16px;
+    font-family: var(--font-mono);
+    transition: all 0.2s ease;
+    background: var(--gray-50);
+}
+
+.code-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: var(--white);
+    box-shadow: 0 0 0 3px rgba(29, 209, 161, 0.1);
+}
+
+.submit-button {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: var(--white);
+    border: none;
+    border-radius: var(--radius-lg);
+    padding: var(--space-4) var(--space-6);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    min-width: 100px;
+}
+
+.submit-button:hover:not(:disabled) {
+    transform: translateY(-2px);
     box-shadow: var(--shadow-lg);
 }
 
-.submit-btn:disabled {
+.submit-button:disabled {
     opacity: 0.6;
     cursor: not-allowed;
     transform: none;
 }
 
-/* Recent Claims */
-.recent-section {
-    margin: 1.5rem 1rem;
-    background: var(--card-bg);
-    border-radius: 16px;
-    overflow: hidden;
+/* Activity Card */
+.activity-card {
+    background: var(--white);
+    border-radius: var(--radius-xl);
     box-shadow: var(--shadow);
+    overflow: hidden;
 }
 
-.recent-header {
-    padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid var(--border-light);
-    background: linear-gradient(135deg, var(--border-light) 0%, var(--card-bg) 100%);
+.activity-card .card-header {
+    padding: var(--space-5) var(--space-6);
 }
 
-.recent-header h3 {
-    margin: 0;
-    font-size: 1.125rem;
+.activity-card h3 {
+    font-size: 18px;
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--gray-800);
 }
 
-.recent-list {
-    max-height: 280px;
+.activity-list {
+    max-height: 300px;
     overflow-y: auto;
 }
 
-.recent-item {
+.activity-item {
     display: flex;
     align-items: center;
-    padding: 1rem 1.5rem;
-    transition: all 0.3s ease;
-    border-bottom: 1px solid var(--border-light);
+    padding: var(--space-4) var(--space-6);
+    border-bottom: 1px solid var(--gray-100);
+    transition: all 0.2s ease;
 }
 
-.recent-item:hover {
-    background: var(--border-light);
-    transform: translateX(4px);
+.activity-item:hover {
+    background: var(--gray-50);
 }
 
-.recent-item:last-child {
+.activity-item:last-child {
     border-bottom: none;
 }
 
-.recent-icon {
-    width: 44px;
-    height: 44px;
-    background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
-    border-radius: 12px;
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    border-radius: var(--radius-lg);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.25rem;
-    margin-right: 1rem;
-    flex-shrink: 0;
+    color: var(--white);
+    margin-right: var(--space-4);
 }
 
-.recent-details {
+.activity-details {
     flex: 1;
     min-width: 0;
 }
 
-.recent-store {
-    font-size: 1rem;
+.store-name {
     font-weight: 600;
-    color: var(--text-primary);
-    margin: 0 0 0.25rem;
-    white-space: nowrap;
+    color: var(--gray-800);
+    margin-bottom: 2px;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-.recent-meta {
+.activity-meta {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    font-size: 0.875rem;
-    color: var(--text-secondary);
+    gap: var(--space-3);
+    font-size: 14px;
 }
 
-.points-badge {
-    background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
-    color: white;
-    padding: 0.25rem 0.75rem;
-    border-radius: 12px;
-    font-size: 0.8rem;
+.points {
+    color: var(--success);
     font-weight: 600;
-    flex-shrink: 0;
+    background: rgba(40, 167, 69, 0.1);
+    padding: 2px var(--space-2);
+    border-radius: var(--radius-sm);
 }
 
-.no-claims {
+.time {
+    color: var(--gray-500);
+}
+
+/* Empty State */
+.empty-state {
     text-align: center;
-    padding: 3rem 1.5rem;
-    color: var(--text-secondary);
+    padding: var(--space-12) var(--space-6);
 }
 
-.no-claims-icon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    opacity: 0.5;
+.empty-icon {
+    margin: 0 auto var(--space-6);
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gray-100);
+    border-radius: 50%;
+    color: var(--gray-400);
+}
+
+.empty-state h4 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: var(--space-2);
+}
+
+.empty-state p {
+    color: var(--gray-500);
 }
 
 /* Modal */
-.modal {
-    display: none;
+.modal-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 2001;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-4);
+    z-index: 1000;
+    backdrop-filter: blur(4px);
 }
 
-.modal-backdrop {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(1.5px);
-    z-index: 2000;
+.modal-overlay.hidden {
+    display: none;
 }
 
-.modal-content {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: var(--card-bg);
-    border-radius: 20px;
-    width: 90%;
-    max-width: 420px;
+.modal-container {
+    background: var(--white);
+    border-radius: var(--radius-2xl);
+    width: 100%;
+    max-width: 400px;
     max-height: 80vh;
     overflow: hidden;
     box-shadow: var(--shadow-xl);
-    animation: modalSlideIn 0.3s ease-out;
-    z-index: 2001;
+    animation: modalSlide 0.3s ease-out;
 }
 
-@keyframes modalSlideIn {
+@keyframes modalSlide {
     from {
         opacity: 0;
-        transform: translate(-50%, -60%);
+        transform: translateY(20px) scale(0.95);
     }
     to {
         opacity: 1;
-        transform: translate(-50%, -50%);
+        transform: translateY(0) scale(1);
     }
 }
 
 .modal-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 1.5rem;
-    border-bottom: 1px solid var(--border-light);
-    background: linear-gradient(135deg, var(--border-light) 0%, var(--card-bg) 100%);
+    justify-content: space-between;
+    padding: var(--space-6);
+    border-bottom: 1px solid var(--gray-100);
 }
 
-.modal-header h2 {
-    margin: 0;
-    font-size: 1.25rem;
+.modal-header h3 {
+    font-size: 18px;
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--gray-800);
 }
 
-.close-modal {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    color: var(--text-muted);
-    cursor: pointer;
-    padding: 0.25rem;
+.close-btn {
     width: 32px;
     height: 32px;
+    border: none;
+    background: var(--gray-100);
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 8px;
-    transition: all 0.3s ease;
+    font-size: 18px;
+    color: var(--gray-500);
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-.close-modal:hover {
-    background: var(--border-light);
-    color: var(--text-secondary);
+.close-btn:hover {
+    background: var(--gray-200);
+    color: var(--gray-700);
 }
 
 .modal-body {
-    padding: 1.5rem;
-    max-height: 60vh;
+    padding: var(--space-6);
+    max-height: 50vh;
     overflow-y: auto;
 }
 
-.store-info {
+/* Store Card */
+.store-card {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-    background: var(--border-light);
-    border-radius: 12px;
+    gap: var(--space-4);
+    padding: var(--space-4);
+    background: var(--gray-50);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-6);
 }
 
-.store-avatar {
+.store-icon {
     width: 48px;
     height: 48px;
-    background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
-    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    border-radius: var(--radius-lg);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.25rem;
-    flex-shrink: 0;
+    color: var(--white);
 }
 
-.store-details h3 {
-    margin: 0;
-    font-size: 1.125rem;
+.store-info h4 {
+    font-size: 16px;
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--gray-800);
+    margin-bottom: 2px;
 }
 
-.store-details p {
-    margin: 0.25rem 0 0;
-    color: var(--text-secondary);
-    font-size: 0.875rem;
+.store-info p {
+    font-size: 14px;
+    color: var(--gray-500);
 }
 
-.receipt-items {
-    margin-bottom: 1.5rem;
+/* Items Section */
+.items-section {
+    margin-bottom: var(--space-6);
 }
 
-.receipt-items h4 {
-    margin: 0 0 1rem;
-    font-size: 1rem;
+.items-section h4 {
+    font-size: 16px;
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--gray-800);
+    margin-bottom: var(--space-4);
 }
 
-.items-container {
-    border: 1px solid var(--border-light);
-    border-radius: 12px;
+.items-grid {
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
     overflow: hidden;
 }
 
 .receipt-item {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 1rem;
-    border-bottom: 1px solid var(--border-light);
-    background: var(--card-bg);
-    transition: background-color 0.3s ease;
+    justify-content: space-between;
+    padding: var(--space-4);
+    border-bottom: 1px solid var(--gray-200);
+    background: var(--white);
+    transition: background 0.2s ease;
+}
+
+.receipt-item:hover {
+    background: var(--gray-50);
 }
 
 .receipt-item:last-child {
     border-bottom: none;
 }
 
-.receipt-item:hover {
-    background: var(--border-light);
-}
-
-.item-details {
-    flex: 1;
-}
-
-.item-name {
+.item-details .item-name {
     font-weight: 600;
-    color: var(--text-primary);
-    margin: 0;
+    color: var(--gray-800);
+    margin-bottom: 2px;
 }
 
-.item-qty {
-    color: var(--text-secondary);
-    font-size: 0.875rem;
-    margin: 0.25rem 0 0;
+.item-details .item-qty {
+    font-size: 14px;
+    color: var(--gray-500);
 }
 
 .item-points {
     font-weight: 700;
-    color: var(--primary-green);
-    font-size: 1.125rem;
+    color: var(--primary);
+    font-size: 16px;
 }
 
-.receipt-total {
+/* Total Card */
+.total-card {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 1.25rem;
-    background: linear-gradient(135deg, var(--primary-green-light) 0%, var(--primary-green) 100%);
-    color: white;
-    border-radius: 12px;
-    margin-bottom: 1.5rem;
-    font-size: 1.125rem;
+    justify-content: space-between;
+    padding: var(--space-5);
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: var(--white);
+    border-radius: var(--radius-lg);
     font-weight: 600;
 }
 
-.total-points {
-    font-size: 1.5rem;
+.total-amount {
+    font-size: 24px;
     font-weight: 800;
 }
 
-.modal-actions {
+/* Modal Footer */
+.modal-footer {
     display: flex;
-    gap: 0.75rem;
+    gap: var(--space-3);
+    padding: var(--space-6);
+    border-top: 1px solid var(--gray-100);
+    background: var(--gray-50);
 }
 
-.cancel-btn {
+/* Buttons */
+.btn {
+    border: none;
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    position: relative;
+    font-family: inherit;
+    font-size: 14px;
+    padding: var(--space-3) var(--space-6);
+}
+
+.btn.secondary {
+    background: var(--gray-200);
+    color: var(--gray-700);
     flex: 1;
-    background: var(--border);
-    color: var(--text-secondary);
 }
 
-.cancel-btn:hover {
-    background: var(--text-muted);
-    color: white;
+.btn.secondary:hover {
+    background: var(--gray-300);
 }
 
-.claim-btn {
+.btn.primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: var(--white);
     flex: 2;
-    background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
-    color: white;
 }
 
-.claim-btn:hover:not(:disabled) {
+.btn.primary:hover:not(:disabled) {
     transform: translateY(-1px);
     box-shadow: var(--shadow-lg);
 }
 
-.claim-btn:disabled {
+.btn.large {
+    padding: var(--space-4) var(--space-8);
+    font-size: 16px;
+}
+
+.btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
     transform: none;
 }
 
-/* Success Overlay */
-.success-overlay {
+.btn-content {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.btn-loader {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.btn-loader.hidden {
     display: none;
+}
+
+/* Spinner */
+.spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid var(--white);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Success Screen */
+.success-screen {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, rgba(29, 209, 161, 0.95) 0%, rgba(16, 172, 132, 0.95) 100%);
+    inset: 0;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     z-index: 2000;
     backdrop-filter: blur(10px);
 }
 
+.success-screen.hidden {
+    display: none;
+}
+
 .success-content {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     text-align: center;
-    color: white;
-    padding: 2rem;
+    color: var(--white);
+    padding: var(--space-8);
 }
 
 .success-animation {
     position: relative;
-    margin: 0 auto 2rem;
+    margin: 0 auto var(--space-8);
     width: 120px;
     height: 120px;
 }
 
-.success-icon {
+.checkmark {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     width: 80px;
     height: 80px;
-    background: white;
-    color: var(--primary-green);
+    background: var(--white);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2.5rem;
-    font-weight: bold;
+    color: var(--primary);
     z-index: 3;
-    animation: successBounce 0.6s ease-out;
+    animation: checkmarkBounce 0.6s ease-out;
 }
 
-@keyframes successBounce {
+@keyframes checkmarkBounce {
     0% {
         transform: translate(-50%, -50%) scale(0);
         opacity: 0;
     }
     50% {
-        transform: translate(-50%, -50%) scale(1.2);
+        transform: translate(-50%, -50%) scale(1.1);
         opacity: 1;
     }
     100% {
@@ -1026,253 +1160,162 @@ body {
     }
 }
 
-.success-rings {
+.ripple-ring {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-}
-
-.ring {
-    position: absolute;
     border: 3px solid rgba(255, 255, 255, 0.3);
     border-radius: 50%;
     animation: ripple 2s ease-out infinite;
 }
 
-.ring-1 {
+.ripple-ring {
     width: 80px;
     height: 80px;
-    margin: -40px 0 0 -40px;
-    animation-delay: 0s;
 }
 
-.ring-2 {
+.ripple-ring.delay-1 {
     width: 100px;
     height: 100px;
-    margin: -50px 0 0 -50px;
     animation-delay: 0.3s;
 }
 
-.ring-3 {
+.ripple-ring.delay-2 {
     width: 120px;
     height: 120px;
-    margin: -60px 0 0 -60px;
     animation-delay: 0.6s;
 }
 
 @keyframes ripple {
     0% {
-        transform: scale(0);
+        transform: translate(-50%, -50%) scale(0);
         opacity: 1;
     }
     100% {
-        transform: scale(1);
+        transform: translate(-50%, -50%) scale(1);
         opacity: 0;
     }
 }
 
 .success-content h2 {
-    font-size: 2rem;
+    font-size: 32px;
     font-weight: 700;
-    margin: 0 0 0.5rem;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: var(--space-4);
 }
 
-.success-message {
-    font-size: 1.125rem;
-    margin: 0 0 2rem;
+.success-content p {
+    font-size: 18px;
+    margin-bottom: var(--space-8);
     opacity: 0.95;
 }
 
-.points-earned {
+.success-content strong {
+    font-size: 24px;
     font-weight: 800;
-    font-size: 1.5rem;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.success-btn {
-    background: white;
-    color: var(--primary-green);
-    border-radius: 12px;
-    font-weight: 600;
-    box-shadow: var(--shadow-lg);
-}
-
-.success-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-xl);
-}
-
-/* Loading Spinner */
-.loading-spinner {
-    width: 20px;
-    height: 20px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    border-top-color: white;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-.btn-loading {
-    display: none;
 }
 
 /* Toast */
 .toast {
     position: fixed;
-    top: 2rem;
-    right: 2rem;
-    background: var(--card-bg);
-    border-radius: 12px;
-    padding: 1rem;
-    box-shadow: var(--shadow-lg);
+    top: var(--space-6);
+    right: var(--space-6);
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    box-shadow: var(--shadow-xl);
+    border-left: 4px solid var(--danger);
+    max-width: 320px;
     z-index: 3000;
     transform: translateX(400px);
     transition: transform 0.3s ease;
-    max-width: 350px;
-    min-width: 280px;
+}
+
+.toast.hidden {
+    display: none;
 }
 
 .toast.show {
     transform: translateX(0);
 }
 
-.toast.error-toast {
-    background: #fee2e2;
-    border-left: 4px solid #dc2626;
-}
-
 .toast-content {
     display: flex;
     align-items: flex-start;
-    gap: 0.75rem;
+    gap: var(--space-3);
 }
 
 .toast-icon {
-    font-size: 1.25rem;
+    color: var(--danger);
     flex-shrink: 0;
-    margin-top: 0.125rem;
+    margin-top: 2px;
 }
 
 .toast-message {
     font-weight: 500;
-    color: var(--text-primary);
+    color: var(--gray-800);
     line-height: 1.4;
-    word-wrap: break-word;
-}
-
-.toast-message br {
-    margin-bottom: 0.5rem;
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
-    .scanner-wrapper {
-        height: 350px;
+@media (max-width: 640px) {
+    .app-content {
+        padding: var(--space-4);
     }
 
-    .scan-line {
-        animation: scanLineMobile 2s ease-in-out infinite;
+    .scanner-viewport {
+        height: 280px;
     }
 
-    @keyframes scanLineMobile {
+    .scan-beam {
+        animation: scanBeamMobile 2s ease-in-out infinite;
+    }
+
+    @keyframes scanBeamMobile {
         0%, 100% {
             transform: translateY(0);
-            opacity: 1;
-        }
-        50% {
-            transform: translateY(176px);
             opacity: 0.8;
         }
+        50% {
+            transform: translateY(156px);
+            opacity: 1;
+        }
     }
 
-    .receipt-input {
-        font-size: 16px !important; /* Prevent zoom on iOS */
+    .scanner-frame {
+        width: 160px;
+        height: 160px;
     }
 
-    .input-group {
-        flex-direction: column;
-        gap: 0.75rem;
-    }
-
-    .submit-btn {
-        width: 100%;
-    }
-}
-
-@media (max-width: 480px) {
-    .scan-container {
-        padding-bottom: 1rem;
-    }
-
-    .scan-header {
-        padding: 1rem;
-    }
-
-    .header-title h1 {
-        font-size: 1.25rem;
-    }
-
-    .scanner-section, .manual-section, .recent-section {
-        margin: 1rem 0.75rem;
-    }
-
-    .camera-status {
-        padding: 1.5rem;
-        max-width: 280px;
-        font-size: 0.9rem;
-    }
-
-    .status-icon {
-        font-size: 2.5rem;
-        margin-bottom: 0.75rem;
-    }
-
-    .status-message {
-        font-size: 0.9rem;
-        margin-bottom: 1rem;
-    }
-
-    .retry-btn, .manual-btn, .debug-btn {
-        padding: 0.6rem 1.25rem;
-        font-size: 0.85rem;
-        display: block;
-        width: 100%;
-        margin: 0.25rem 0;
-    }
-
-    .debug-btn {
-        font-size: 0.75rem;
-        padding: 0.5rem 1rem;
-    }
-
-    .scanner-overlay {
-        width: 180px;
-        height: 180px;
-    }
-
-    .corner {
-        width: 24px;
-        height: 24px;
+    .frame-corner {
+        width: 20px;
+        height: 20px;
         border-width: 2px;
     }
 
-    .modal-content {
-        width: 95%;
-        max-height: 90vh;
+    .input-wrapper {
+        flex-direction: column;
+        gap: var(--space-4);
+    }
+
+    .submit-button {
+        width: 100%;
+    }
+
+    .code-input {
+        font-size: 16px; /* Prevent zoom on iOS */
+    }
+
+    .modal-container {
+        margin: var(--space-4);
+        width: calc(100% - var(--space-8));
     }
 
     .toast {
-        top: 1rem;
-        right: 1rem;
-        left: 1rem;
+        top: var(--space-4);
+        right: var(--space-4);
+        left: var(--space-4);
         max-width: none;
-        min-width: auto;
         transform: translateY(-100px);
     }
 
@@ -1281,19 +1324,51 @@ body {
     }
 }
 
-@media (max-width: 360px) {
-    .header-content {
-        gap: 0.5rem;
+@media (max-width: 480px) {
+    .app-header {
+        padding: var(--space-4);
     }
 
-    .points-display {
-        min-width: 60px;
-        padding: 0.5rem;
+    .header-info h1 {
+        font-size: 16px;
     }
 
-    .points-value {
-        font-size: 1.125rem;
+    .header-info p {
+        font-size: 13px;
     }
+
+    .points-chip {
+        font-size: 14px;
+        min-width: 50px;
+    }
+
+    .success-content {
+        padding: var(--space-6) var(--space-4);
+    }
+
+    .success-content h2 {
+        font-size: 24px;
+    }
+
+    .success-content p {
+        font-size: 16px;
+    }
+
+    .success-content strong {
+        font-size: 20px;
+    }
+}
+
+/* Hidden utility */
+.hidden {
+    display: none !important;
+}
+
+/* Smooth transitions */
+* {
+    transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
 }
 </style>
 
@@ -1306,14 +1381,26 @@ let currentReceiptCode = null;
 
 function showCameraStatus(message, icon = '📷', showRetry = false, showManual = false) {
     const statusEl = document.getElementById('camera-status');
-    const messageEl = statusEl.querySelector('.status-message');
+    const messageEl = statusEl.querySelector('.status-text');
     const iconEl = statusEl.querySelector('.status-icon');
     const retryBtn = document.getElementById('retry-camera');
     const manualBtn = document.getElementById('use-manual');
+
     messageEl.innerHTML = message.replace(/\n/g, '<br>');
     iconEl.textContent = icon;
-    retryBtn.style.display = showRetry ? 'inline-block' : 'none';
-    manualBtn.style.display = showManual ? 'inline-block' : 'none';
+
+    if (showRetry) {
+        retryBtn.classList.remove('hidden');
+    } else {
+        retryBtn.classList.add('hidden');
+    }
+
+    if (showManual) {
+        manualBtn.classList.remove('hidden');
+    } else {
+        manualBtn.classList.add('hidden');
+    }
+
     statusEl.classList.remove('hidden');
 }
 
@@ -1350,7 +1437,7 @@ async function initializeCamera() {
     } catch (err) {
         if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
             showCameraStatus(
-                '🚫 Camera permission denied.<br>Tap the camera icon in your browser\'s address bar and select "Allow", then refresh.<br>Or use manual input.',
+                'Camera permission denied.<br>Tap the camera icon in your browser\'s address bar and select "Allow", then refresh.<br>Or use manual input.',
                 '🚫', false, true
             );
         } else if (err.name === "NotFoundError" || err.name === "DevicesNotFoundError") {
@@ -1387,7 +1474,7 @@ function startScanner() {
     scanner = new Html5Qrcode("qr-reader");
     scanner.start(
         { facingMode: "environment" },
-        { fps: 12, qrbox: { width: 220, height: 220 } },
+        { fps: 12, qrbox: { width: 200, height: 200 } },
         (decodedText, decodedResult) => { if (!isProcessing) onScanSuccess(decodedText, decodedResult); },
         () => {}
     ).then(hideCameraStatus)
@@ -1414,29 +1501,40 @@ function retryCamera() {
 
 function focusManualInput() {
     hideCameraStatus();
-    document.querySelector('.manual-section').scrollIntoView({ behavior: 'smooth' });
+    document.querySelector('.input-section').scrollIntoView({ behavior: 'smooth' });
     setTimeout(() => { document.getElementById('receipt-code').focus(); }, 500);
 }
 
 function showModal() {
-    document.getElementById('receipt-modal').style.display = 'block';
+    document.getElementById('receipt-modal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 }
 
 function closeModal() {
-    document.getElementById('receipt-modal').style.display = 'none';
+    document.getElementById('receipt-modal').classList.add('hidden');
     document.body.style.overflow = 'auto';
     document.getElementById('receipt-code').value = '';
     resumeScanner();
 }
 
-function setLoadingState(loading) {
-    document.getElementById('claim-button').disabled = loading;
+function setLoadingState(button, loading) {
+    const content = button.querySelector('.btn-content');
+    const loader = button.querySelector('.btn-loader');
+
+    button.disabled = loading;
+
+    if (loading) {
+        content.style.opacity = '0';
+        loader.classList.remove('hidden');
+    } else {
+        content.style.opacity = '1';
+        loader.classList.add('hidden');
+    }
 }
 
 function showSuccess(points) {
     document.getElementById('points-amount').textContent = points;
-    document.getElementById('success-overlay').style.display = 'block';
+    document.getElementById('success-overlay').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 }
 
@@ -1444,8 +1542,14 @@ function showError(message) {
     const toast = document.getElementById('error-toast');
     const messageEl = document.getElementById('error-message');
     messageEl.innerHTML = message.replace(/\n/g, '<br>');
-    toast.classList.add('show');
-    setTimeout(() => { toast.classList.remove('show'); }, 4000 + Math.min(message.length * 12, 3000));
+
+    toast.classList.remove('hidden');
+    setTimeout(() => toast.classList.add('show'), 10);
+
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.classList.add('hidden'), 300);
+    }, 4000 + Math.min(message.length * 12, 3000));
 }
 
 function updatePointsDisplay(newBalance) {
@@ -1494,7 +1598,10 @@ function checkReceipt(code) {
     isProcessing = true;
     currentReceiptCode = code;
     showModal();
-    setLoadingState(true);
+
+    const claimButton = document.getElementById('claim-button');
+    setLoadingState(claimButton, true);
+
     document.getElementById('store-name').textContent = 'Verifying receipt code...';
     document.getElementById('items-list').innerHTML = '';
     document.getElementById('total-points').textContent = '0';
@@ -1516,34 +1623,41 @@ function checkReceipt(code) {
         return response.json();
     })
     .then(data => {
-        if (data.success) displayReceipt(data.receipt);
-        else {
+        if (data.success) {
+            displayReceipt(data.receipt);
+        } else {
             let msg = data.message || 'Unknown error occurred';
             if (msg.includes('not found') || msg.includes('invalid')) {
-                msg = `❌ Receipt "${code}" not found. Maybe:\n• Expired\n• Invalid\n• From another system`;
+                msg = `Receipt "${code}" not found. Maybe:\n• Expired\n• Invalid\n• From another system`;
             } else if (msg.includes('claimed')) {
-                msg = `⚠️ Receipt "${code}" has already been claimed`;
+                msg = `Receipt "${code}" has already been claimed`;
             } else if (msg.includes('expired')) {
-                msg = `⏰ Receipt "${code}" has expired`;
+                msg = `Receipt "${code}" has expired`;
             }
             showError(msg);
-            closeModal(); resumeScanner();
+            closeModal();
+            resumeScanner();
         }
     })
     .catch(error => {
         closeModal();
         let errorMessage = '';
-        if (error.message === 'API_NOT_FOUND')
-            errorMessage = '🚧 Scanning feature not ready. Try later or contact support.';
-        else if (error.message === 'INVALID_CODE')
-            errorMessage = `❌ Invalid receipt code "${code}".`;
-        else if (error.message.includes('HTTP_'))
-            errorMessage = `🌐 Server error. Try again.\n${error.message}`;
-        else
-            errorMessage = `❌ Error checking "${code}". Try again.`;
-        showError(errorMessage); resumeScanner();
+        if (error.message === 'API_NOT_FOUND') {
+            errorMessage = 'Scanning feature not ready. Try later or contact support.';
+        } else if (error.message === 'INVALID_CODE') {
+            errorMessage = `Invalid receipt code "${code}".`;
+        } else if (error.message.includes('HTTP_')) {
+            errorMessage = `Server error. Try again.\n${error.message}`;
+        } else {
+            errorMessage = `Error checking "${code}". Try again.`;
+        }
+        showError(errorMessage);
+        resumeScanner();
     })
-    .finally(() => { isProcessing = false; setLoadingState(false); });
+    .finally(() => {
+        isProcessing = false;
+        setLoadingState(document.getElementById('claim-button'), false);
+    });
 }
 
 function displayReceipt(receipt) {
@@ -1571,30 +1685,33 @@ function displayReceipt(receipt) {
 
     document.getElementById('total-points').textContent = receipt.total_points || 0;
     const claimButton = document.getElementById('claim-button');
-    const btnText = claimButton.querySelector('.btn-text');
+    const btnContent = claimButton.querySelector('.btn-content');
 
     if (receipt.status === 'pending') {
-        claimButton.disabled = false; btnText.textContent = 'Claim Points';
+        claimButton.disabled = false;
+        btnContent.textContent = 'Claim Points';
         claimButton.classList.remove('claimed', 'expired');
     } else if (receipt.status === 'claimed') {
-        claimButton.disabled = true; btnText.textContent = 'Already Claimed';
+        claimButton.disabled = true;
+        btnContent.textContent = 'Already Claimed';
         claimButton.classList.add('claimed');
     } else {
-        claimButton.disabled = true; btnText.textContent = 'Receipt Expired';
+        claimButton.disabled = true;
+        btnContent.textContent = 'Receipt Expired';
         claimButton.classList.add('expired');
     }
 }
 
 function claimPoints() {
     if (!currentReceiptCode || isProcessing) return;
-    if (currentReceiptCode === 'DEMO123') { claimDemoPoints(); return; }
+    if (currentReceiptCode === 'DEMO123') {
+        claimDemoPoints();
+        return;
+    }
 
     isProcessing = true;
     const claimButton = document.getElementById('claim-button');
-    const btnText = claimButton.querySelector('.btn-text');
-    const btnLoading = claimButton.querySelector('.btn-loading');
-
-    claimButton.disabled = true; btnText.style.display = 'none'; btnLoading.style.display = 'flex';
+    setLoadingState(claimButton, true);
 
     fetch('/api/receipt/claim', {
         method: 'POST',
@@ -1615,14 +1732,16 @@ function claimPoints() {
             updatePointsDisplay(data.new_balance);
         } else {
             showError(data.message || 'Failed to claim points');
-            claimButton.disabled = false; btnText.style.display = 'inline'; btnLoading.style.display = 'none';
+            setLoadingState(claimButton, false);
         }
     })
     .catch(error => {
         showError('Network error. Please try again.');
-        claimButton.disabled = false; btnText.style.display = 'inline'; btnLoading.style.display = 'none';
+        setLoadingState(claimButton, false);
     })
-    .finally(() => { isProcessing = false; });
+    .finally(() => {
+        isProcessing = false;
+    });
 }
 
 function escapeHtml(text) {
@@ -1646,7 +1765,7 @@ function showDemoReceipt() {
     };
     currentReceiptCode = 'DEMO123';
     showModal();
-    setLoadingState(false);
+    setLoadingState(document.getElementById('claim-button'), false);
     displayReceipt(demoReceipt);
 }
 
@@ -1657,38 +1776,58 @@ function claimDemoPoints() {
     updatePointsDisplay(currentPoints + 5);
 }
 
+// Event Listeners
 document.addEventListener('DOMContentLoaded', function() {
-    setupEventListeners();
-    setTimeout(() => { initializeCamera(); }, 100);
-});
-
-function setupEventListeners() {
+    // Form submission
     document.getElementById('manual-code-form').addEventListener('submit', function(e) {
         e.preventDefault();
         const code = document.getElementById('receipt-code').value.trim();
         if (code && !isProcessing) {
+            const submitButton = this.querySelector('.submit-button');
+            setLoadingState(submitButton, true);
+
             if (code.toLowerCase() === 'demo123') {
-                showDemoReceipt();
+                setTimeout(() => {
+                    setLoadingState(submitButton, false);
+                    showDemoReceipt();
+                }, 500);
                 return;
             }
-            checkReceipt(code);
+
+            setTimeout(() => {
+                setLoadingState(submitButton, false);
+                checkReceipt(code);
+            }, 500);
         }
     });
 
+    // Camera controls
     document.getElementById('retry-camera').addEventListener('click', retryCamera);
     document.getElementById('use-manual').addEventListener('click', focusManualInput);
-    document.querySelector('.close-modal').addEventListener('click', closeModal);
-    document.querySelector('.modal-backdrop').addEventListener('click', closeModal);
 
-    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+    // Modal controls
+    document.querySelector('.close-btn').addEventListener('click', closeModal);
+    document.getElementById('receipt-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
 
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeModal();
+    });
+
+    // Visibility change handler
     document.addEventListener('visibilitychange', function() {
         if (!document.hidden && !isProcessing) {
             setTimeout(() => { initializeCamera(); }, 1000);
         }
     });
-}
 
+    // Initialize camera
+    setTimeout(() => { initializeCamera(); }, 100);
+});
+
+// Cleanup
 window.addEventListener('beforeunload', function() {
     if (scanner) { try { scanner.clear(); } catch (error) {} }
 });
