@@ -27,7 +27,7 @@
                     <option value="nearest">📍 Nearest First</option>
                     <option value="farthest">📍 Farthest First</option>
                     <option value="name">🔤 Name A-Z</option>
-                    <option value="rank">👑 Best Rank</option>
+                    <option value="rank">🏆 Highest Score</option>
                     <option value="popular">🔥 Most Popular</option>
                 </select>
                 <select id="radiusSelect" class="radius-select">
@@ -856,6 +856,15 @@
             color: #999;
             align-items: center;
             flex-wrap: wrap;
+        }
+
+        .store-score {
+            background: linear-gradient(135deg, #2E8B57, #3CB371);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 10px;
         }
 
         .store-rank-text {
@@ -2302,6 +2311,7 @@
                                     <span>${rankIcon}</span>
                                     <span>${rankText}</span>
                                 </div>
+                                <span class="store-score">🏆 ${store.points_reward || 0} pts</span>
                                 <span>📊 ${store.transaction_count} visits</span>
                             </div>
                         </div>
@@ -2484,8 +2494,15 @@
                             app.filteredStores.sort((a, b) => {
                                 const pointsA = parseFloat(a.points_reward) || 0;
                                 const pointsB = parseFloat(b.points_reward) || 0;
-                                return pointsB - pointsA; // Highest first
+                                return pointsB - pointsA; // Highest score first
                             });
+
+                            // Debug: Show top scores after sorting
+                            console.log('Top 5 stores by score:', app.filteredStores.slice(0, 5).map(s => ({
+                                name: s.name,
+                                score: s.points_reward || 0,
+                                rank: s.rank_class
+                            })));
                             break;
 
                         case 'popular':

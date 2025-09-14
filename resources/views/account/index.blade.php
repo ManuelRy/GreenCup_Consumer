@@ -1257,13 +1257,13 @@
         function shareTransaction() {
             if (navigator.share) {
                 navigator.share({
-                    title: 'Green Cup Transaction',
+                    title: 'Green Cups Transaction',
                     text: 'Check out my eco-friendly purchase!',
                     url: window.location.href
                 }).catch(console.error);
             } else {
                 // Fallback
-                const receiptText = `Green Cup Transaction\nID: ${document.getElementById('modalTransactionId').textContent}\nPoints: ${document.getElementById('modalPointsAmount').textContent}`;
+                const receiptText = `Green Cups Transaction\nID: ${document.getElementById('modalTransactionId').textContent}\nPoints: ${document.getElementById('modalPointsAmount').textContent}`;
 
                 if (navigator.clipboard) {
                     navigator.clipboard.writeText(receiptText).then(() => {

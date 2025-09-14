@@ -11,7 +11,7 @@
         <!-- Brand -->
         <a class="navbar-brand d-flex align-items-center gap-2" href="{{ route('dashboard') }}">
             <i class="bi bi-cup-hot"></i>
-            <span class="fw-semibold">Green Cup</span>
+            <span class="fw-semibold">Green Cups</span>
         </a>
 
         <!-- Mobile Right: points + toggler -->
@@ -212,7 +212,7 @@
 <nav class="navbar navbar-expand-lg bg-white fixed-top shadow-sm border-bottom py-1">
     <div class="container-fluid px-3">
         <a class="navbar-brand d-flex align-items-center gap-2" href="{{ route('home') }}">
-            <i class="bi bi-cup-hot"></i><span class="fw-semibold">Green Cup</span>
+            <i class="bi bi-cup-hot"></i><span class="fw-semibold">Green Cups</span>
         </a>
 
         <!-- Guest mobile toggler -> #guestNav -->
