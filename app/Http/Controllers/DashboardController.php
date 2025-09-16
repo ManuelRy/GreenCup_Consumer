@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Repository\ConsumerPointRepository;
 use App\Repository\PointTransactionRepository;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -11,10 +12,12 @@ use Illuminate\Support\Facades\DB;
 class DashboardController extends Controller
 {
     private PointTransactionRepository $pTRepo;
+    private ConsumerPointRepository $cPRepo;
 
-    public function __construct(PointTransactionRepository $pTRepo)
+    public function __construct(PointTransactionRepository $pTRepo, ConsumerPointRepository $cPRepo)
     {
         $this->pTRepo = $pTRepo;
+        $this->cPRepo = $cPRepo;
     }
     public function index(Request $request)
     {
@@ -26,26 +29,20 @@ class DashboardController extends Controller
         $monthNumber = Carbon::parse("1 $selectedMonth $year")->month;
 
         try {
+
+            $currentTotal = $this->cPRepo->getTotalByConsumerId($consumer->id);
+
             $availablePoints = $this->pTRepo->current($consumer->id);
 
-            $monthlyData = $this->pTRepo->monthly($consumer->id, $monthNumber, $year);
             // $monthlyData = $this->getMonthlyData($consumer->id, $monthNumber, $year);
             // Get recent activity data (NEW)
             $recentActivity = $this->getRecentActivityForDashboard($consumer->id);
         } catch (\Exception $e) {
-            $monthlyData = [
-                'points_in' => 0,
-                'points_out' => 0,
-                'prev_points_in' => 0,
-                'prev_points_out' => 0,
-                'all_activities' => 0,
-                'net_flow' => 0,
-                'prev_month_name' => Carbon::now()->subMonth()->format('M')
-            ];
+          
             $recentActivity = collect([]);
         }
 
-        return view('dashboard', compact('consumer', 'availablePoints', 'monthlyData', 'selectedMonth', 'recentActivity'));
+        return view('dashboard', compact('consumer', 'currentTotal', 'availablePoints',  'selectedMonth', 'recentActivity'));
     }
 
     // private function getMonthlyData($consumerId, $month, $year)
