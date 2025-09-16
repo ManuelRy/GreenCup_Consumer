@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Repository\ConsumerPointRepository;
 use App\Repository\ConsumerRepository;
 use App\Repository\PointTransactionRepository;
 use Illuminate\Http\Request;
@@ -9,26 +10,24 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
-use App\Models\Consumer;
-
 
 class AccountController extends Controller
 {
     private ConsumerRepository $cRepo;
-    private PointTransactionRepository $pTRepo;
+    private ConsumerPointRepository $cPRepo;
 
-    public function __construct(ConsumerRepository $cRepo, PointTransactionRepository $pTRepo)
+    public function __construct(ConsumerRepository $cRepo, PointTransactionRepository $pTRepo, ConsumerPointRepository $cPRepo)
     {
         $this->cRepo = $cRepo;
-        $this->pTRepo = $pTRepo;
+        $this->cPRepo = $cPRepo;
     }
     public function index()
     {
         try {
             $consumer = Auth::user();
-            $totalPointsEarned = $this->pTRepo->earn($consumer->id);
-            $totalPointsSpent = $this->pTRepo->spent($consumer->id);
-            $availablePoints = $totalPointsEarned - $totalPointsSpent;
+
+            $wallets  = $this->cPRepo->listByConsumerId($consumer->id);
+            $total = $this->cPRepo->getTotalByConsumerId($consumer->id);
 
             // Get transaction history with receipt system data
             $transactions = $this->getTransactionHistory($consumer->id);
@@ -38,9 +37,8 @@ class AccountController extends Controller
 
         return view('account.index', compact(
             'consumer',
-            'totalPointsEarned',
-            'totalPointsSpent',
-            'availablePoints',
+            'wallets',
+            'total',
             'transactions'
         ));
     }
