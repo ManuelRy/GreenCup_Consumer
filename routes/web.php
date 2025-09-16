@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\{AccountController, AuthController, ConsumerController, DashboardController, LoginController, StoreController, ReceiptController, RegisterController};
 
 /*
@@ -142,6 +143,8 @@ Route::prefix('public-api')->name('public.api.')->group(function () {
     // Store profiles (for gallery browser)
     Route::get('/seller/{id}', [StoreController::class, 'show'])->name('seller.show');
     Route::get('/store/{id}', [StoreController::class, 'show'])->name('store.show');
+    Route::get('/report', [ReportController::class, 'index'])->name('report.index');
+
 });
 
 /*
