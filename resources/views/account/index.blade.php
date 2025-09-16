@@ -88,7 +88,7 @@
                     <div class="p-4 text-center">
                         <div class="row justify-content-center">
                             <div class="col-auto">
-                                <div class="points-circle bg-white border border-3 border-primary rounded-circle d-flex align-items-center justify-content-center shadow-sm mx-auto mb-4"
+                                <div class="points-circle bg-white border border-primary rounded-circle d-flex align-items-center justify-content-center shadow-sm mx-auto mb-4"
                                      style="width: 140px; height: 140px;">
                                     <div class="text-center">
                                         <div class="text-uppercase small text-muted fw-semibold mb-1" style="letter-spacing: 1px; font-size: 0.7em;">
@@ -117,6 +117,237 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Shop Wallets Section - NEW -->
+                <div class="card-body border-top p-0">
+                    <div class="p-4">
+                        <div class="mb-3">
+                            <h5 class="fw-semibold text-dark mb-0">
+                                <i class="fas fa-store text-primary me-2"></i>
+                                Shop Wallets
+                            </h5>
+                        </div>
+
+                        <div class="row g-3">
+                            <!-- Starbucks Wallet -->
+                            <div class="col-md-6 col-lg-4">
+                                <div class="card border shop-wallet-card h-100 cursor-pointer">
+                                    <div class="card-body p-3">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="shop-logo-small bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3"
+                                                 style="width: 45px; height: 45px;">
+                                                <i class="fas fa-coffee"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="fw-semibold text-dark mb-0">Starbucks</h6>
+                                                <small class="text-muted">Premium Member</small>
+                                            </div>
+                                            <span class="badge bg-light text-success small">Active</span>
+                                        </div>
+
+                                        <div class="text-center mb-3">
+                                            <div class="fw-bold text-primary mb-1" style="font-size: 1.5rem;">2,450</div>
+                                            <small class="text-muted">Points Available</small>
+                                        </div>
+
+                                        <div class="row g-2 text-center">
+                                            <div class="col-4">
+                                                <small class="text-muted d-block">Earned</small>
+                                                <span class="fw-semibold text-dark small">340</span>
+                                            </div>
+                                            <div class="col-4">
+                                                <small class="text-muted d-block">Spent</small>
+                                                <span class="fw-semibold text-dark small">120</span>
+                                            </div>
+                                            <div class="col-4">
+                                                <small class="text-muted d-block">Visits</small>
+                                                <span class="fw-semibold text-dark small">15</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- McDonald's Wallet -->
+                            <div class="col-md-6 col-lg-4">
+                                <div class="card border shop-wallet-card h-100 cursor-pointer">
+                                    <div class="card-body p-3">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="shop-logo-small bg-warning text-white rounded-circle d-flex align-items-center justify-content-center me-3"
+                                                 style="width: 45px; height: 45px;">
+                                                <i class="fas fa-hamburger"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="fw-semibold text-dark mb-0">McDonald's</h6>
+                                                <small class="text-muted">Regular Member</small>
+                                            </div>
+                                            <span class="badge bg-light text-success small">Active</span>
+                                        </div>
+
+                                        <div class="text-center mb-3">
+                                            <div class="fw-bold text-primary mb-1" style="font-size: 1.5rem;">1,850</div>
+                                            <small class="text-muted">Points Available</small>
+                                        </div>
+
+                                        <div class="row g-2 text-center">
+                                            <div class="col-4">
+                                                <small class="text-muted d-block">Earned</small>
+                                                <span class="fw-semibold text-dark small">280</span>
+                                            </div>
+                                            <div class="col-4">
+                                                <small class="text-muted d-block">Spent</small>
+                                                <span class="fw-semibold text-dark small">95</span>
+                                            </div>
+                                            <div class="col-4">
+                                                <small class="text-muted d-block">Visits</small>
+                                                <span class="fw-semibold text-dark small">12</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- KFC Wallet -->
+                            <div class="col-md-6 col-lg-4">
+                                <div class="card border shop-wallet-card h-100 cursor-pointer">
+                                    <div class="card-body p-3">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="shop-logo-small bg-danger text-white rounded-circle d-flex align-items-center justify-content-center me-3"
+                                                 style="width: 45px; height: 45px;">
+                                                <i class="fas fa-drumstick-bite"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="fw-semibold text-dark mb-0">KFC</h6>
+                                                <small class="text-muted">VIP Member</small>
+                                            </div>
+                                            <span class="badge bg-light text-warning small">Premium</span>
+                                        </div>
+
+                                        <div class="text-center mb-3">
+                                            <div class="fw-bold text-primary mb-1" style="font-size: 1.5rem;">1,320</div>
+                                            <small class="text-muted">Points Available</small>
+                                        </div>
+
+                                        <div class="row g-2 text-center">
+                                            <div class="col-4">
+                                                <small class="text-muted d-block">Earned</small>
+                                                <span class="fw-semibold text-dark small">190</span>
+                                            </div>
+                                            <div class="col-4">
+                                                <small class="text-muted d-block">Spent</small>
+                                                <span class="fw-semibold text-dark small">50</span>
+                                            </div>
+                                            <div class="col-4">
+                                                <small class="text-muted d-block">Visits</small>
+                                                <span class="fw-semibold text-dark small">8</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Subway Wallet -->
+                            <div class="col-md-6 col-lg-4">
+                                <div class="card border shop-wallet-card h-100 cursor-pointer">
+                                    <div class="card-body p-3">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="shop-logo-small bg-info text-white rounded-circle d-flex align-items-center justify-content-center me-3"
+                                                 style="width: 45px; height: 45px;">
+                                                <i class="fas fa-subway"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="fw-semibold text-dark mb-0">Subway</h6>
+                                                <small class="text-muted">Regular Member</small>
+                                            </div>
+                                            <span class="badge bg-light text-success small">Active</span>
+                                        </div>
+
+                                        <div class="text-center mb-3">
+                                            <div class="fw-bold text-primary mb-1" style="font-size: 1.5rem;">980</div>
+                                            <small class="text-muted">Points Available</small>
+                                        </div>
+
+                                        <div class="row g-2 text-center">
+                                            <div class="col-4">
+                                                <small class="text-muted d-block">Earned</small>
+                                                <span class="fw-semibold text-dark small">150</span>
+                                            </div>
+                                            <div class="col-4">
+                                                <small class="text-muted d-block">Spent</small>
+                                                <span class="fw-semibold text-dark small">75</span>
+                                            </div>
+                                            <div class="col-4">
+                                                <small class="text-muted d-block">Visits</small>
+                                                <span class="fw-semibold text-dark small">10</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Pizza Hut Wallet -->
+                            <div class="col-md-6 col-lg-4">
+                                <div class="card border shop-wallet-card h-100 cursor-pointer">
+                                    <div class="card-body p-3">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="shop-logo-small bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-3"
+                                                 style="width: 45px; height: 45px;">
+                                                <i class="fas fa-pizza-slice"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="fw-semibold text-dark mb-0">Pizza Hut</h6>
+                                                <small class="text-muted">Regular Member</small>
+                                            </div>
+                                            <span class="badge bg-light text-success small">Active</span>
+                                        </div>
+
+                                        <div class="text-center mb-3">
+                                            <div class="fw-bold text-primary mb-1" style="font-size: 1.5rem;">1,200</div>
+                                            <small class="text-muted">Points Available</small>
+                                        </div>
+
+                                        <div class="row g-2 text-center">
+                                            <div class="col-4">
+                                                <small class="text-muted d-block">Earned</small>
+                                                <span class="fw-semibold text-dark small">180</span>
+                                            </div>
+                                            <div class="col-4">
+                                                <small class="text-muted d-block">Spent</small>
+                                                <span class="fw-semibold text-dark small">60</span>
+                                            </div>
+                                            <div class="col-4">
+                                                <small class="text-muted d-block">Visits</small>
+                                                <span class="fw-semibold text-dark small">7</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Explore More Shops Placeholder -->
+                            <div class="col-md-6 col-lg-4">
+                                <div class="card border-dashed h-100 cursor-pointer" style="border: 2px dashed #dee2e6;">
+                                    <div class="card-body p-3 d-flex align-items-center justify-content-center">
+                                        <div class="text-center text-muted">
+                                            <i class="fas fa-search fa-2x mb-2"></i>
+                                            <div class="fw-semibold mb-1">Explore More Shops</div>
+                                            <small>Discover partner stores</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        @if(count($wallets ?? []) > 6)
+                            <div class="text-center mt-3">
+                                <button class="btn btn-outline-primary">
+                                    <i class="fas fa-eye me-2"></i>
+                                    View All Wallets
+                                </button>
+                            </div>
+                        @endif
                     </div>
                 </div>
 
@@ -485,6 +716,36 @@
     cursor: pointer;
 }
 
+/* Shop Wallet Cards Styling */
+.shop-wallet-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px solid var(--bs-border-color) !important;
+}
+
+.shop-wallet-card:hover {
+    border-color: #1dd1a1 !important;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.shop-wallet-card:active {
+    transform: translateY(-1px);
+}
+
+.border-dashed:hover {
+    border-color: #1dd1a1 !important;
+    background-color: rgba(29, 209, 161, 0.02);
+}
+
+.shop-logo-small {
+    transition: all 0.3s ease;
+}
+
+.shop-wallet-card:hover .shop-logo-small {
+    transform: scale(1.1);
+}
+
 /* Animation for smooth interactions */
 @keyframes slideUp {
     from {
@@ -557,6 +818,15 @@
 
     .modal-dialog {
         margin: 0.75rem;
+    }
+
+    .shop-wallet-card .card-body {
+        padding: 0.75rem !important;
+    }
+
+    .shop-logo-small {
+        width: 35px !important;
+        height: 35px !important;
     }
 }
 
@@ -714,6 +984,37 @@ document.addEventListener('DOMContentLoaded', function() {
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
+});
+
+// NEW: Shop wallet interactions
+document.addEventListener('DOMContentLoaded', function() {
+    // Add click handlers for shop wallet cards
+    const walletCards = document.querySelectorAll('.shop-wallet-card');
+    walletCards.forEach(card => {
+        card.addEventListener('click', function() {
+            // Add visual feedback
+            this.style.transform = 'translateY(-3px) scale(1.02)';
+            setTimeout(() => {
+                this.style.transform = 'translateY(-3px)';
+            }, 150);
+
+            // Get shop name from card
+            const shopName = this.querySelector('h6').textContent;
+            console.log(`Clicked on ${shopName} wallet`);
+
+            // You can add navigation or modal logic here
+            // Example: window.location.href = `/wallet/${shopName.toLowerCase()}`;
+        });
+    });
+
+    // Handle "Connect Store" button
+    const connectBtn = document.querySelector('.btn-outline-primary[data-action="connect"]');
+    if (connectBtn) {
+        connectBtn.addEventListener('click', function() {
+            console.log('Connect new store clicked');
+            // Add your connect store modal or navigation logic here
+        });
+    }
 });
 
 // CSS animation for fade out
