@@ -23,13 +23,13 @@ class ReportController extends Controller
 
     public function create()
     {
-        return view('report.index');
+        $reports = $this->rRepo->getByReporterId(Auth::id());
+        return view('report.index', compact('reports'));
     }
 
     public function index()
     {
-        $reports = $this->rRepo->getByReporterId(Auth::id());
-        return view('report.list', compact('reports'));
+        return view('report.create');
     }
 
     public function store(Request $request)

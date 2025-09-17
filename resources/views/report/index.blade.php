@@ -3,263 +3,231 @@
 @section('content')
   <div class="container-fluid min-vh-100 py-3">
     <div class="row justify-content-center">
-      <div class="col-12 col-xl-8">
+      <div class="col-12 col-xl-10">
 
         <!-- Page Header -->
         <div class="row mb-4">
           <div class="col-12">
             <div class="card border-0 shadow-sm bg-gradient-primary text-white rounded-4">
-              <div class="card-body py-4 text-center">
-                <div class="mb-3">
-                  <i class="fas fa-exclamation-triangle fa-3x opacity-90"></i>
+              <div class="card-body py-4">
+                <div class="d-flex align-items-center justify-content-between">
+                  <div>
+                    <div class="mb-3">
+                      <i class="fas fa-list-alt fa-3x opacity-90"></i>
+                    </div>
+                    <h2 class="fw-bold mb-2">My Reports</h2>
+                    <p class="fw-light opacity-90 mb-0">Track the status of your submitted reports</p>
+                  </div>
+                  <div class="text-end">
+                    <a href="{{ route('report.create') }}" class="btn btn-light btn-lg">
+                      <i class="fas fa-plus me-2"></i>New Report
+                    </a>
+                  </div>
                 </div>
-                <h2 class="fw-bold mb-2">Report an Issue</h2>
-                <p class="fw-light opacity-90 mb-0">Help us improve your Green Cups experience</p>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Report Form -->
+        <!-- Success Message -->
+        @if(session('success'))
+          <div class="row mb-4">
+            <div class="col-12">
+              <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            </div>
+          </div>
+        @endif
+
+        <!-- Reports List -->
         <div class="row">
           <div class="col-12">
-            <div class="card border-0 shadow-sm rounded-3">
-              <div class="card-header bg-white border-0 pb-0">
-                <h5 class="fw-semibold text-dark mb-0">
-                  <i class="fas fa-edit text-primary me-2"></i>
-                  Submit Report
-                </h5>
+            @if($reports && $reports->count() > 0)
+              <div class="row g-4">
+                @foreach($reports as $report)
+                  <div class="col-12">
+                    <div class="card border-0 shadow-sm rounded-3 report-card">
+                      <div class="card-body p-4">
+                        <div class="row align-items-center">
+                          <div class="col-md-8">
+                            <div class="d-flex align-items-start">
+                              <!-- Report Icon Based on Tag -->
+                              <div class="me-3">
+                                @if($report->tag == 'App Bug')
+                                  <div class="icon-wrapper bg-danger">
+                                    <i class="fas fa-bug text-white"></i>
+                                  </div>
+                                @elseif($report->tag == 'Store Issue')
+                                  <div class="icon-wrapper bg-warning">
+                                    <i class="fas fa-store text-white"></i>
+                                  </div>
+                                @elseif($report->tag == 'Payment')
+                                  <div class="icon-wrapper bg-info">
+                                    <i class="fas fa-credit-card text-white"></i>
+                                  </div>
+                                @elseif($report->tag == 'Account')
+                                  <div class="icon-wrapper bg-primary">
+                                    <i class="fas fa-user-circle text-white"></i>
+                                  </div>
+                                @elseif($report->tag == 'QR Scan')
+                                  <div class="icon-wrapper bg-success">
+                                    <i class="fas fa-qrcode text-white"></i>
+                                  </div>
+                                @else
+                                  <div class="icon-wrapper bg-secondary">
+                                    <i class="fas fa-question-circle text-white"></i>
+                                  </div>
+                                @endif
+                              </div>
+
+                              <!-- Report Details -->
+                              <div class="flex-grow-1">
+                                <div class="d-flex align-items-center mb-2">
+                                  <h5 class="mb-0 fw-bold text-dark me-3">{{ $report->title }}</h5>
+
+                                  <!-- Priority Badge -->
+                                  @if($report->priority == 'Critical')
+                                    <span class="badge bg-danger">
+                                      <i class="fas fa-exclamation-triangle me-1"></i>Critical
+                                    </span>
+                                  @elseif($report->priority == 'High')
+                                    <span class="badge bg-warning">
+                                      <i class="fas fa-exclamation-circle me-1"></i>High
+                                    </span>
+                                  @elseif($report->priority == 'Medium')
+                                    <span class="badge bg-primary">
+                                      <i class="fas fa-circle me-1"></i>Medium
+                                    </span>
+                                  @else
+                                    <span class="badge bg-success">
+                                      <i class="fas fa-circle me-1"></i>Low
+                                    </span>
+                                  @endif
+                                </div>
+
+                                <!-- Tag and Date -->
+                                <div class="mb-2">
+                                  <span class="badge bg-light text-dark me-2">
+                                    <i class="fas fa-tag me-1"></i>{{ $report->tag }}
+                                  </span>
+                                  <small class="text-muted">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    {{ $report->created_at->format('M d, Y \a\t g:i A') }}
+                                  </small>
+                                </div>
+
+                                <!-- Description Preview -->
+                                <p class="text-muted mb-0 description-preview">
+                                  {{ Str::limit($report->description, 120) }}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <!-- Status and Actions -->
+                          <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                            <!-- Status Badge -->
+                            @if($report->status == 'Resolve')
+                              <div class="status-badge bg-success">
+                                <i class="fas fa-check-circle me-2"></i>
+                                <span>Resolved</span>
+                              </div>
+                            @elseif($report->status == 'Warning')
+                              <div class="status-badge bg-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <span>Under Review</span>
+                              </div>
+                            @elseif($report->status == 'Investigate')
+                              <div class="status-badge bg-info">
+                                <i class="fas fa-search me-2"></i>
+                                <span>Investigating</span>
+                              </div>
+                            @elseif($report->status == 'Suspend')
+                              <div class="status-badge bg-danger">
+                                <i class="fas fa-pause-circle me-2"></i>
+                                <span>Suspended</span>
+                              </div>
+                            @else
+                              <div class="status-badge bg-secondary">
+                                <i class="fas fa-clock me-2"></i>
+                                <span>Pending</span>
+                              </div>
+                            @endif
+
+                            <!-- Report ID -->
+                            <div class="mt-2">
+                              <small class="text-muted">
+                                Report #{{ str_pad($report->id, 6, '0', STR_PAD_LEFT) }}
+                              </small>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Evidences -->
+                        @if($report->evidences && $report->evidences->count() > 0)
+                          <div class="row mt-3">
+                            <div class="col-12">
+                              <hr class="my-3">
+                              <div class="d-flex align-items-center">
+                                <small class="text-muted me-3">
+                                  <i class="fas fa-paperclip me-1"></i>Attachments:
+                                </small>
+                                <div class="d-flex gap-2">
+                                  @foreach($report->evidences as $evidence)
+                                    <a href="{{ $evidence->file_url }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                      <i class="fas fa-image me-1"></i>View
+                                    </a>
+                                  @endforeach
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        @endif
+                      </div>
+                    </div>
+                  </div>
+                @endforeach
               </div>
-              <div class="card-body">
-                <!-- Display Success Message -->
-                @if(session('success'))
-                  <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="fas fa-check-circle me-2"></i>
-                    {{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                  </div>
-                @endif
 
-                <!-- Display Validation Errors -->
-                @if($errors->any())
-                  <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    <strong>Please fix the following errors:</strong>
-                    <ul class="mb-0 mt-2">
-                      @foreach($errors->all() as $error)
-                        <li>
-                          @if(str_contains($error, 'image') && str_contains($error, 'may not be greater than'))
-                            <strong>Image too large:</strong> Please choose an image smaller than 5MB
-                          @elseif(str_contains($error, 'image') && str_contains($error, 'must be an image'))
-                            <strong>Invalid file type:</strong> Please upload a valid image file (JPG, PNG, GIF)
-                          @else
-                            {{ $error }}
-                          @endif
-                        </li>
-                      @endforeach
-                    </ul>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                  </div>
-                @endif
-
-                <form method="POST" action="{{ route('report.store') }}" enctype="multipart/form-data">
-                  @csrf
-
-                  <!-- Report Type Selection -->
-                  <div class="row mb-4">
-                    <div class="col-12">
-                      <label class="form-label fw-semibold text-dark">
-                        <i class="fas fa-list me-2"></i>What type of issue are you reporting?
-                      </label>
-                      <div class="row g-3">
-                        <div class="col-6 col-md-4">
-                          <input type="radio" class="btn-check" name="tag" id="app-bug" value="App Bug" required {{ old('tag') == 'App Bug' ? 'checked' : '' }}>
-                          <label class="btn btn-outline-primary w-100 py-3 report-type-btn" for="app-bug">
-                            <div class="fs-2 mb-2">
-                              <i class="fas fa-bug"></i>
-                            </div>
-                            <div class="fw-semibold small">App Bug</div>
-                          </label>
-                        </div>
-                        <div class="col-6 col-md-4">
-                          <input type="radio" class="btn-check" name="tag" id="store-issue" value="Store Issue" required {{ old('tag') == 'Store Issue' ? 'checked' : '' }}>
-                          <label class="btn btn-outline-primary w-100 py-3 report-type-btn" for="store-issue">
-                            <div class="fs-2 mb-2">
-                              <i class="fas fa-store"></i>
-                            </div>
-                            <div class="fw-semibold small">Store Issue</div>
-                          </label>
-                        </div>
-                        <div class="col-6 col-md-4">
-                          <input type="radio" class="btn-check" name="tag" id="payment-problem" value="Payment" required {{ old('tag') == 'Payment' ? 'checked' : '' }}>
-                          <label class="btn btn-outline-primary w-100 py-3 report-type-btn" for="payment-problem">
-                            <div class="fs-2 mb-2">
-                              <i class="fas fa-credit-card"></i>
-                            </div>
-                            <div class="fw-semibold small">Payment</div>
-                          </label>
-                        </div>
-                        <div class="col-6 col-md-4">
-                          <input type="radio" class="btn-check" name="tag" id="account-problem" value="Account" required {{ old('tag') == 'Account' ? 'checked' : '' }}>
-                          <label class="btn btn-outline-primary w-100 py-3 report-type-btn" for="account-problem">
-                            <div class="fs-2 mb-2">
-                              <i class="fas fa-user-circle"></i>
-                            </div>
-                            <div class="fw-semibold small">Account</div>
-                          </label>
-                        </div>
-                        <div class="col-6 col-md-4">
-                          <input type="radio" class="btn-check" name="tag" id="scanning-issue" value="QR Scan" required {{ old('tag') == 'QR Scan' ? 'checked' : '' }}>
-                          <label class="btn btn-outline-primary w-100 py-3 report-type-btn" for="scanning-issue">
-                            <div class="fs-2 mb-2">
-                              <i class="fas fa-qrcode"></i>
-                            </div>
-                            <div class="fw-semibold small">QR Scan</div>
-                          </label>
-                        </div>
-                        <div class="col-6 col-md-4">
-                          <input type="radio" class="btn-check" name="tag" id="other" value="Other" required {{ old('tag') == 'Other' ? 'checked' : '' }}>
-                          <label class="btn btn-outline-primary w-100 py-3 report-type-btn" for="other">
-                            <div class="fs-2 mb-2">
-                              <i class="fas fa-question-circle"></i>
-                            </div>
-                            <div class="fw-semibold small">Other</div>
-                          </label>
-                        </div>
-                      </div>
+              <!-- Pagination -->
+              @if($reports->hasPages())
+                <div class="row mt-5">
+                  <div class="col-12">
+                    <div class="d-flex justify-content-center">
+                      {{ $reports->links() }}
                     </div>
                   </div>
+                </div>
+              @endif
 
-                  <!-- Priority Level -->
-                  <div class="row mb-4">
-                    <div class="col-12">
-                      <label class="form-label fw-semibold text-dark">
-                        <i class="fas fa-exclamation-circle me-2"></i>How urgent is this issue?
-                      </label>
-                      <div class="row g-2">
-                        <div class="col-6 col-md-3">
-                          <input type="radio" class="btn-check" name="priority" id="low" value="Low" required {{ old('priority') == 'Low' ? 'checked' : '' }}>
-                          <label class="btn btn-outline-success w-100 py-2" for="low">
-                            <i class="fas fa-circle me-1"></i>Low
-                          </label>
-                        </div>
-                        <div class="col-6 col-md-3">
-                          <input type="radio" class="btn-check" name="priority" id="medium" value="Medium" required {{ old('priority') == 'Medium' ? 'checked' : '' }}>
-                          <label class="btn btn-outline-primary w-100 py-2" for="medium">
-                            <i class="fas fa-circle me-1"></i>Medium
-                          </label>
-                        </div>
-                        <div class="col-6 col-md-3">
-                          <input type="radio" class="btn-check" name="priority" id="high" value="High" required {{ old('priority') == 'High' ? 'checked' : '' }}>
-                          <label class="btn btn-outline-warning w-100 py-2" for="high">
-                            <i class="fas fa-circle me-1"></i>High
-                          </label>
-                        </div>
-                        <div class="col-6 col-md-3">
-                          <input type="radio" class="btn-check" name="priority" id="critical" value="Critical" required {{ old('priority') == 'Critical' ? 'checked' : '' }}>
-                          <label class="btn btn-outline-danger w-100 py-2" for="critical">
-                            <i class="fas fa-circle me-1"></i>Critical
-                          </label>
-                        </div>
+            @else
+              <!-- Empty State -->
+              <div class="row">
+                <div class="col-12">
+                  <div class="card border-0 shadow-sm rounded-3">
+                    <div class="card-body text-center py-5">
+                      <div class="mb-4">
+                        <i class="fas fa-inbox fa-4x text-muted opacity-50"></i>
                       </div>
+                      <h4 class="fw-bold text-dark mb-3">No Reports Yet</h4>
+                      <p class="text-muted mb-4">
+                        You haven't submitted any reports yet. If you encounter any issues or have feedback,
+                        please don't hesitate to submit a report.
+                      </p>
+                      <a href="{{ route('report.create') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-plus me-2"></i>Submit Your First Report
+                      </a>
                     </div>
                   </div>
-
-                  <!-- Report Title -->
-                  <div class="row mb-4">
-                    <div class="col-12">
-                      <label for="title" class="form-label fw-semibold text-dark">
-                        <i class="fas fa-heading me-2"></i>Issue Title
-                      </label>
-                      <input type="text" class="form-control form-control-lg" id="title" name="title" placeholder="Brief summary of the issue..." maxlength="100"
-                        value="{{ old('title') }}" required>
-                      <div class="form-text">
-                        <small class="text-muted">
-                          <span id="titleCounter">0</span>/100 characters
-                        </small>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Detailed Description -->
-                  <div class="row mb-4">
-                    <div class="col-12">
-                      <label for="description" class="form-label fw-semibold text-dark">
-                        <i class="fas fa-align-left me-2"></i>Detailed Description
-                      </label>
-                      <textarea class="form-control" id="description" name="description" rows="6"
-                        placeholder="Please provide detailed information about the issue. Include:&#10;• What were you trying to do?&#10;• What went wrong?&#10;• When did this happen?&#10;• Any error messages you saw?&#10;• Steps to reproduce the issue (if applicable)"
-                        maxlength="1000" required>{{ old('description') }}</textarea>
-                      <div class="form-text">
-                        <small class="text-muted">
-                          <span id="descCounter">0</span>/1000 characters
-                        </small>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Image Upload Section -->
-                  <div class="row mb-4">
-                    <div class="col-12">
-                      <label class="form-label fw-semibold text-dark">
-                        <i class="fas fa-camera me-2"></i>Attach Screenshot or Photo (optional)
-                      </label>
-                      <div class="upload-area border-2 border-dashed rounded-3 p-4 text-center position-relative">
-                        <input class="d-none" type="file" id="image" name="image" accept="image/*">
-                        <div id="uploadContent">
-                          <div class="mb-3">
-                            <i class="fas fa-cloud-upload-alt fa-3x text-primary opacity-75"></i>
-                          </div>
-                          <h6 class="fw-semibold text-dark mb-2">Drop your image here or click to browse</h6>
-                          <p class="text-muted small mb-3">
-                            Screenshots help us understand your issue better
-                          </p>
-                          <button type="button" class="btn btn-outline-primary btn-sm" onclick="document.getElementById('image').click()">
-                            <i class="fas fa-plus me-2"></i>Choose File
-                          </button>
-                          <div class="mt-2">
-                            <small class="text-muted">JPG, PNG, GIF • Max 5MB</small>
-                          </div>
-                          <div class="mt-2">
-                            <div id="uploadProgress" class="progress d-none" style="height: 4px;">
-                              <div class="progress-bar bg-primary" role="progressbar" style="width: 0%"></div>
-                            </div>
-                          </div>
-                        </div>
-                        <div id="imagePreview" class="d-none">
-                          <div class="position-relative d-inline-block">
-                            <img id="previewImg" src="" alt="Preview" class="img-fluid rounded" style="max-height: 200px;">
-                            <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 rounded-circle"
-                              style="transform: translate(50%, -50%); width: 30px; height: 30px; padding: 0;" onclick="removeImage()">
-                              <i class="fas fa-times"></i>
-                            </button>
-                          </div>
-                          <div class="mt-2">
-                            <small id="fileName" class="text-muted fw-medium"></small>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Submit Actions -->
-                  <div class="row">
-                    <div class="col-12">
-                      <div class="d-flex gap-3 justify-content-end">
-                        <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary">
-                          <i class="fas fa-times me-2"></i>Cancel
-                        </a>
-                        <button type="submit" class="btn btn-primary px-4">
-                          <i class="fas fa-paper-plane me-2"></i>Submit Report
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </form>
+                </div>
               </div>
-            </div>
+            @endif
           </div>
         </div>
+
       </div>
     </div>
   </div>
@@ -291,79 +259,67 @@
       background: linear-gradient(135deg, #10ac84, #0e8e71);
     }
 
-    .btn-outline-primary {
-      border-color: #1dd1a1;
-      color: #1dd1a1;
+    .btn-light {
+      background: rgba(255, 255, 255, 0.95);
+      border: none;
+      color: #333;
       transition: all 0.3s ease;
     }
 
-    .btn-outline-primary:hover {
-      background: #1dd1a1;
-      border-color: #1dd1a1;
-      transform: translateY(-1px);
-    }
-
-    .btn-outline-primary:checked {
-      background: #1dd1a1;
-      border-color: #1dd1a1;
-      color: white;
-    }
-
-    .report-type-btn {
-      transition: all 0.3s ease;
-      height: 100px;
-    }
-
-    .report-type-btn:hover {
-      transform: translateY(-3px);
+    .btn-light:hover {
+      background: white;
+      transform: translateY(-2px);
       box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     }
 
-    .btn-check:checked+.report-type-btn {
-      background: #1dd1a1;
-      border-color: #1dd1a1;
-      color: white;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(29, 209, 161, 0.3);
-    }
-
-    /* Form enhancements */
-    .form-control {
-      border-radius: 0.5rem;
-      border: 2px solid #e9ecef;
+    /* Report Cards */
+    .report-card {
       transition: all 0.3s ease;
+      border-left: 4px solid #1dd1a1 !important;
     }
 
-    .form-control:focus {
-      border-color: #1dd1a1;
-      box-shadow: 0 0 0 0.2rem rgba(29, 209, 161, 0.25);
+    .report-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1) !important;
     }
 
-    /* Priority buttons */
-    .btn-outline-success:checked {
-      background: #22c55e;
-      border-color: #22c55e;
+    /* Icon Wrappers */
+    .icon-wrapper {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
     }
 
-    .btn-outline-warning:checked {
-      background: #f59e0b;
-      border-color: #f59e0b;
+    /* Status Badges */
+    .status-badge {
+      padding: 8px 16px;
+      border-radius: 25px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      display: inline-flex;
+      align-items: center;
+      color: white;
     }
 
-    .btn-outline-danger:checked {
-      background: #ef4444;
-      border-color: #ef4444;
+    /* Priority and Tag Badges */
+    .badge {
+      font-size: 0.75rem;
+      padding: 4px 8px;
+    }
+
+    /* Description Preview */
+    .description-preview {
+      line-height: 1.5;
+      font-size: 0.95rem;
     }
 
     /* Card animations */
     .card {
       animation: slideUp 0.6s ease-out;
-      transition: all 0.3s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12) !important;
     }
 
     @keyframes slideUp {
@@ -371,53 +327,10 @@
         opacity: 0;
         transform: translateY(30px);
       }
-
       to {
         opacity: 1;
         transform: translateY(0);
       }
-    }
-
-    /* Character counters */
-    #titleCounter,
-    #descCounter {
-      font-weight: 600;
-      color: #1dd1a1;
-    }
-
-    /* Enhanced Upload Area */
-    .upload-area {
-      border-color: #d1d5db !important;
-      background: #fafafa;
-      transition: all 0.3s ease;
-      cursor: pointer;
-      min-height: 180px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .upload-area:hover {
-      border-color: #1dd1a1 !important;
-      background: rgba(29, 209, 161, 0.02);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    }
-
-    .upload-area.dragover {
-      border-color: #1dd1a1 !important;
-      background: rgba(29, 209, 161, 0.05);
-      transform: scale(1.02);
-    }
-
-    .upload-area.has-file {
-      border-color: #22c55e !important;
-      background: rgba(34, 197, 94, 0.02);
-    }
-
-    #imagePreview img {
-      border: 3px solid #fff;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     }
 
     /* Mobile optimizations */
@@ -427,35 +340,41 @@
         padding-right: 0.75rem;
       }
 
-      .report-type-btn {
-        height: 80px;
-        padding: 0.5rem !important;
-      }
-
-      .report-type-btn .fs-2 {
-        font-size: 1.5rem !important;
-      }
-
       .card-body {
-        padding: 1rem;
+        padding: 1.5rem;
+      }
+
+      .status-badge {
+        font-size: 0.8rem;
+        padding: 6px 12px;
+      }
+
+      .icon-wrapper {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
       }
     }
 
-    /* Loading state */
-    .btn:disabled {
-      opacity: 0.6;
-      transform: none !important;
-    }
-
-    /* Focus indicators for accessibility */
-    .btn:focus,
-    .form-control:focus {
+    /* Enhanced visual feedback */
+    .btn:focus {
       outline: 2px solid #1dd1a1;
       outline-offset: 2px;
     }
 
-    /* Enhanced visual feedback */
-    .form-check-input:checked {
+    /* Pagination styling */
+    .pagination .page-link {
+      color: #1dd1a1;
+      border-color: #e9ecef;
+    }
+
+    .pagination .page-link:hover {
+      color: #10ac84;
+      background-color: rgba(29, 209, 161, 0.1);
+      border-color: #1dd1a1;
+    }
+
+    .pagination .page-item.active .page-link {
       background-color: #1dd1a1;
       border-color: #1dd1a1;
     }
@@ -463,199 +382,6 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Character counters
-      const titleInput = document.getElementById('title');
-      const descInput = document.getElementById('description');
-      const titleCounter = document.getElementById('titleCounter');
-      const descCounter = document.getElementById('descCounter');
-
-      function updateCounter(input, counter) {
-        const count = input.value.length;
-        const max = parseInt(input.getAttribute('maxlength'));
-        counter.textContent = count;
-
-        // Color coding
-        if (count > max * 0.9) {
-          counter.style.color = '#ef4444';
-        } else if (count > max * 0.7) {
-          counter.style.color = '#f59e0b';
-        } else {
-          counter.style.color = '#1dd1a1';
-        }
-      }
-
-      titleInput.addEventListener('input', () => updateCounter(titleInput, titleCounter));
-      descInput.addEventListener('input', () => updateCounter(descInput, descCounter));
-
-      // Enhanced Image Upload Functionality
-      const uploadArea = document.querySelector('.upload-area');
-      const fileInput = document.getElementById('image');
-      const uploadContent = document.getElementById('uploadContent');
-      const imagePreview = document.getElementById('imagePreview');
-      const previewImg = document.getElementById('previewImg');
-      const fileName = document.getElementById('fileName');
-
-      // Click to upload
-      uploadArea.addEventListener('click', () => {
-        if (!uploadArea.classList.contains('has-file')) {
-          fileInput.click();
-        }
-      });
-
-      // Drag and drop functionality
-      uploadArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        uploadArea.classList.add('dragover');
-      });
-
-      uploadArea.addEventListener('dragleave', (e) => {
-        e.preventDefault();
-        uploadArea.classList.remove('dragover');
-      });
-
-      uploadArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        uploadArea.classList.remove('dragover');
-
-        const files = e.dataTransfer.files;
-        if (files.length > 0) {
-          handleFileSelection(files[0]);
-        }
-      });
-
-      // File input change
-      fileInput.addEventListener('change', (e) => {
-        if (e.target.files.length > 0) {
-          handleFileSelection(e.target.files[0]);
-        }
-      });
-
-      // Handle file selection
-      function handleFileSelection(file) {
-        // Validate file type
-        if (!file.type.startsWith('image/')) {
-          showAlert('Please select an image file (JPG, PNG, GIF)', 'warning');
-          fileInput.value = ''; // Clear the input
-          return;
-        }
-
-        // Validate file size (5MB = 5,242,880 bytes)
-        const maxSize = 5 * 1024 * 1024;
-        if (file.size > maxSize) {
-          const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
-          showAlert(`Image is too large (${fileSizeMB}MB). Please choose an image smaller than 5MB.`, 'danger');
-          fileInput.value = ''; // Clear the input
-          return;
-        }
-
-        // Create file reader
-        const reader = new FileReader();
-        
-        // Show upload progress
-        const uploadProgress = document.getElementById('uploadProgress');
-        const progressBar = uploadProgress.querySelector('.progress-bar');
-        uploadProgress.classList.remove('d-none');
-        
-        // Simulate progress for user feedback
-        let progress = 0;
-        const progressInterval = setInterval(() => {
-          progress += Math.random() * 30;
-          if (progress > 90) progress = 90;
-          progressBar.style.width = progress + '%';
-        }, 100);
-        
-        reader.onload = (e) => {
-          // Complete progress
-          clearInterval(progressInterval);
-          progressBar.style.width = '100%';
-          
-          setTimeout(() => {
-            previewImg.src = e.target.result;
-            fileName.textContent = file.name;
-
-            // Show preview, hide upload content
-            uploadContent.classList.add('d-none');
-            imagePreview.classList.remove('d-none');
-            uploadArea.classList.add('has-file');
-            uploadProgress.classList.add('d-none');
-            progressBar.style.width = '0%';
-
-            // Add success feedback
-            uploadArea.style.borderColor = '#22c55e';
-            showAlert(`Image "${file.name}" uploaded successfully!`, 'success');
-          }, 500);
-        };
-        
-        reader.onerror = () => {
-          clearInterval(progressInterval);
-          uploadProgress.classList.add('d-none');
-          progressBar.style.width = '0%';
-          showAlert('Failed to process the image. Please try again.', 'danger');
-          fileInput.value = '';
-        };
-        
-        reader.readAsDataURL(file);
-      }
-
-      // Remove image function (global scope)
-      window.removeImage = function() {
-        fileInput.value = '';
-        previewImg.src = '';
-        fileName.textContent = '';
-
-        // Reset upload progress
-        const uploadProgress = document.getElementById('uploadProgress');
-        const progressBar = uploadProgress.querySelector('.progress-bar');
-        uploadProgress.classList.add('d-none');
-        progressBar.style.width = '0%';
-
-        // Show upload content, hide preview
-        uploadContent.classList.remove('d-none');
-        imagePreview.classList.add('d-none');
-        uploadArea.classList.remove('has-file');
-        uploadArea.style.borderColor = '';
-        
-        showAlert('Image removed successfully', 'info');
-      };
-
-      // Enhanced alert function
-      function showAlert(message, type = 'info') {
-        const alertDiv = document.createElement('div');
-        alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-        alertDiv.style.cssText = 'top: 90px; right: 20px; z-index: 9999; max-width: 400px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);';
-        
-        let icon = 'info-circle';
-        if (type === 'warning') icon = 'exclamation-triangle';
-        else if (type === 'danger') icon = 'times-circle';
-        else if (type === 'success') icon = 'check-circle';
-        
-        alertDiv.innerHTML = `
-            <i class="fas fa-${icon} me-2"></i>
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-        document.body.appendChild(alertDiv);
-
-        // Auto remove after 6 seconds for longer messages
-        setTimeout(() => {
-          if (alertDiv.parentNode) {
-            alertDiv.remove();
-          }
-        }, 6000);
-      }
-
-      // Basic form interaction - Remove the preventDefault to allow actual submission
-      const form = document.querySelector('form');
-      const submitBtn = form.querySelector('button[type="submit"]');
-
-      form.addEventListener('submit', function(e) {
-        // Add loading state
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
-        
-        // Don't prevent default - let the form submit normally
-      });
-
       // Animate cards on scroll
       const observerOptions = {
         threshold: 0.1,
@@ -671,37 +397,23 @@
         });
       }, observerOptions);
 
-      // Observe all cards
-      document.querySelectorAll('.card').forEach((card, index) => {
+      // Observe all report cards
+      document.querySelectorAll('.report-card').forEach((card, index) => {
         card.style.opacity = '0';
         card.style.transform = 'translateY(30px)';
         card.style.transition = `all 0.6s ease ${index * 0.1}s`;
         observer.observe(card);
       });
 
-      // Touch feedback for mobile
-      if ('ontouchstart' in window) {
-        document.addEventListener('touchstart', function(e) {
-          if (e.target.closest('.report-type-btn, .btn')) {
-            e.target.closest('.report-type-btn, .btn').style.transform = 'scale(0.98)';
+      // Auto-dismiss alerts
+      setTimeout(() => {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+          if (alert.querySelector('.btn-close')) {
+            alert.querySelector('.btn-close').click();
           }
-        }, {
-          passive: true
         });
-
-        document.addEventListener('touchend', function(e) {
-          if (e.target.closest('.report-type-btn, .btn')) {
-            setTimeout(() => {
-              const btn = e.target.closest('.report-type-btn, .btn');
-              if (btn && !btn.classList.contains('btn-check:checked')) {
-                btn.style.transform = '';
-              }
-            }, 100);
-          }
-        }, {
-          passive: true
-        });
-      }
+      }, 5000);
     });
   </script>
 @endsection

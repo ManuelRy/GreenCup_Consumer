@@ -2,11 +2,12 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\RewardRedemptionController;
 use App\Http\Controllers\{AccountController, AuthController, ConsumerController, DashboardController, LoginController, StoreController, ReceiptController, RegisterController};
 
 /*
 |--------------------------------------------------------------------------
-| GreenCup Consumer Web Routes - FIXED VERSION
+| GreenCup Consumer Web Routes - UPDATED WITH REWARDS
 |--------------------------------------------------------------------------
 */
 
@@ -83,8 +84,26 @@ Route::middleware(['auth:consumer'])->group(function () {
     Route::get('/seller/{id}', [StoreController::class, 'show'])->name('seller.show');
     Route::get('/store/{id}', [StoreController::class, 'show'])->name('store.show');
 
-    // Report page
+    /*
+    |--------------------------------------------------------------------------
+    | Report Routes
+    |--------------------------------------------------------------------------
+    */
     Route::resource('reports', ReportController::class)->names('report')->only(['index', 'create', 'store']);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Reward Redemption Routes - NEW
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('rewards')->name('reward.')->group(function () {
+    Route::get('/', [RewardRedemptionController::class, 'index'])->name('index');
+    Route::get('/my', [RewardRedemptionController::class, 'myRewards'])->name('my');
+    Route::get('/{reward}/redeem', [RewardRedemptionController::class, 'redeem'])->name('redeem');
+    Route::post('/{reward}/process', [RewardRedemptionController::class, 'process'])->name('process');
+    Route::get('/history', [RewardRedemptionController::class, 'history'])->name('history');
+    Route::get('/redemption/{redemption}', [RewardRedemptionController::class, 'show'])->name('redemption.show');
+});
 
     /*
     |--------------------------------------------------------------------------
@@ -115,6 +134,13 @@ Route::middleware(['auth:consumer'])->group(function () {
             Route::post('/check', [ReceiptController::class, 'check'])->name('check');
             Route::post('/claim', [ReceiptController::class, 'claim'])->name('claim');
             Route::get('/history', [ReceiptController::class, 'history'])->name('history');
+        });
+
+        // Reward APIs - NEW
+        Route::prefix('rewards')->name('rewards.')->group(function () {
+            Route::get('/search', [RewardRedemptionController::class, 'search'])->name('search');
+            Route::get('/filter', [RewardRedemptionController::class, 'filter'])->name('filter');
+            Route::get('/{reward}/check-availability', [RewardRedemptionController::class, 'checkAvailability'])->name('check-availability');
         });
     });
 

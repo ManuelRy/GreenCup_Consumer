@@ -163,6 +163,14 @@
                     </a>
                   </div>
                   <div class="col-6 col-lg-3">
+                    <a href="{{ route('reward.index') }}" class="btn btn-outline-primary w-100 py-3 text-decoration-none action-btn">
+                      <div class="fs-2 mb-2">
+                        <i class="fas fa-gift"></i>
+                      </div>
+                      <div class="fw-semibold small">Rewards</div>
+                    </a>
+                  </div>
+                  <div class="col-6 col-lg-3">
                     <a href="{{ route('gallery') }}" class="btn btn-outline-primary w-100 py-3 text-decoration-none action-btn">
                       <div class="fs-2 mb-2">
                         <i class="fas fa-shopping-bag"></i>
