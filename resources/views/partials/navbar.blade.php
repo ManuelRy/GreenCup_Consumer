@@ -55,8 +55,8 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}"
-                            href="{{ route('reports.index') }}">
+                        <a class="nav-link {{ request()->routeIs('report.*') ? 'active' : '' }}"
+                            href="{{ route('report.index') }}">
                             <i class="bi bi-exclamation-triangle me-1"></i><span>Report</span>
                         </a>
                     </li>
@@ -436,28 +436,9 @@
             console.log('Bootstrap found, initializing');
             initNav();
         } else {
-            console.log('Bootstrap not found, checking for script');
-            // Fallback: load Bootstrap bundle only if it's missing (won't double-load)
-            const existingScript = document.querySelector('script[src*="bootstrap"]');
-            if (!existingScript) {
-                console.log('Loading Bootstrap');
-                const s = document.createElement('script');
-                s.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js';
-                s.onload = function() {
-                    console.log('Bootstrap loaded successfully');
-                    initNav();
-                };
-                s.onerror = function() {
-                    console.error('Failed to load Bootstrap');
-                    // Fallback navigation without Bootstrap
-                    initNav(); // Still init for fallback handlers
-                };
-                document.body.appendChild(s);
-            } else {
-                // Bootstrap script exists, wait for it to load
-                console.log('Bootstrap script exists, waiting');
-                setTimeout(initNav, 100);
-            }
+            console.log('Bootstrap not found, waiting for it to load');
+            // Wait for Bootstrap to load from master.blade.php
+            setTimeout(initNav, 200);
         }
 
         // Additional safety: ensure offcanvas can be toggled even if Bootstrap fails

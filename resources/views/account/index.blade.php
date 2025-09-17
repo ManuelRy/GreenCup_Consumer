@@ -367,15 +367,17 @@
 
                 <!-- Explore More Shops Placeholder -->
                 <div class="col-md-6 col-lg-4">
-                  <div class="card border-dashed h-100 cursor-pointer" style="border: 2px dashed #dee2e6;">
-                    <div class="card-body p-3 d-flex align-items-center justify-content-center">
-                      <div class="text-center text-muted">
-                        <i class="fas fa-search fa-2x mb-2"></i>
-                        <div class="fw-semibold mb-1">Explore More Shops</div>
-                        <small>Discover partner stores</small>
+                  <a href="{{ route('map') }}" style="text-decoration: none;">
+                    <div class="card border-dashed h-100 cursor-pointer" style="border: 2px dashed #dee2e6;">
+                      <div class="card-body p-3 d-flex align-items-center justify-content-center">
+                        <div class="text-center text-muted">
+                          <i class="fas fa-search fa-2x mb-2"></i>
+                          <div class="fw-semibold mb-1">Explore More Shops</div>
+                          <small>Discover partner stores</small>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </a>
                 </div>
               </div>
 
@@ -877,9 +879,6 @@
       outline-offset: 2px;
     }
   </style>
-
-  <!-- Bootstrap JS (if not already included) -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <!-- Font Awesome (if not already included) -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">

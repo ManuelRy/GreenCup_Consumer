@@ -69,7 +69,7 @@
             // Update chart and data based on selected month
             const chartAmount = document.querySelector('.chart-amount');
             const flowChanges = document.querySelectorAll('.flow-change');
-            
+
             // Sample data for different months (you can customize this)
             const monthData = {
                 'January': { total: '1,450 pts', inChange: '3,200 pts in Dec', outChange: '2,900 pts in Dec' },
@@ -97,8 +97,9 @@
         document.addEventListener('click', function(event) {
             const dropdown = document.getElementById('monthDropdown');
             const button = document.querySelector('.month-button');
-            
-            if (!dropdown.contains(event.target) && !button.contains(event.target)) {
+
+            // Only handle month dropdown, not Bootstrap dropdowns
+            if (dropdown && button && !dropdown.contains(event.target) && !button.contains(event.target)) {
                 dropdown.classList.remove('show');
             }
         });

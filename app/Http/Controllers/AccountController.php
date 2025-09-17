@@ -25,16 +25,16 @@ class AccountController extends Controller
     {
         try {
             $consumer = Auth::user();
-
             $wallets  = $this->cPRepo->listByConsumerId($consumer->id);
             $total = $this->cPRepo->getTotalByConsumerId($consumer->id);
-
             // Get transaction history with receipt system data
             $transactions = $this->getTransactionHistory($consumer->id);
         } catch (\Exception $e) {
+            $consumer = Auth::user();
+            $wallets = collect([]);
+            $total = ['earned' => 0, 'coins' => 0, 'spent' => 0];
             $transactions = collect([]);
         }
-
         return view('account.index', compact(
             'consumer',
             'wallets',

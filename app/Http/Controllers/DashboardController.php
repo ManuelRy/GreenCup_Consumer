@@ -29,20 +29,18 @@ class DashboardController extends Controller
         $monthNumber = Carbon::parse("1 $selectedMonth $year")->month;
 
         try {
-
-            $currentTotal = $this->cPRepo->getTotalByConsumerId($consumer->id);
-
+            $currentTotal = $this->cPRepo->getTotalByConsumerId($consumer->id) ?? 0;
             $availablePoints = $this->pTRepo->current($consumer->id);
-
             // $monthlyData = $this->getMonthlyData($consumer->id, $monthNumber, $year);
             // Get recent activity data (NEW)
             $recentActivity = $this->getRecentActivityForDashboard($consumer->id);
         } catch (\Exception $e) {
-          
+            $currentTotal = 0;
+            $availablePoints = 0;
             $recentActivity = collect([]);
         }
 
-        return view('dashboard', compact('consumer', 'currentTotal', 'availablePoints',  'selectedMonth', 'recentActivity'));
+        return view('dashboard', compact('consumer', 'currentTotal', 'availablePoints', 'selectedMonth', 'recentActivity'));
     }
 
     // private function getMonthlyData($consumerId, $month, $year)

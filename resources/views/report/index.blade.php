@@ -31,7 +31,7 @@
                             </h5>
                         </div>
                         <div class="card-body">
-                            <form id="reportForm" method="POST" action="#">
+                            <form id="reportForm" method="POST" action="#" enctype="multipart/form-data">
                                 @csrf
 
                                 <!-- Report Type Selection -->
@@ -176,20 +176,40 @@
                                     </div>
                                 </div>
 
-                                <!-- Contact Preference -->
+                                <!-- Image Upload Section -->
                                 <div class="row mb-4">
                                     <div class="col-12">
-                                        <div class="card bg-light border-0">
-                                            <div class="card-body py-3">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" id="followUp" name="allow_follow_up" value="1" checked>
-                                                    <label class="form-check-label fw-semibold text-dark" for="followUp">
-                                                        <i class="fas fa-envelope me-2"></i>
-                                                        Allow follow-up communication
-                                                    </label>
-                                                    <div class="form-text mt-1">
-                                                        <small class="text-muted">We may contact you for additional information or to provide updates on your report.</small>
-                                                    </div>
+                                        <label class="form-label fw-semibold text-dark">
+                                            <i class="fas fa-camera me-2"></i>Attach Screenshot or Photo (optional)
+                                        </label>
+                                        <div class="upload-area border-2 border-dashed rounded-3 p-4 text-center position-relative">
+                                            <input class="d-none" type="file" id="image" name="image" accept="image/*">
+                                            <div id="uploadContent">
+                                                <div class="mb-3">
+                                                    <i class="fas fa-cloud-upload-alt fa-3x text-primary opacity-75"></i>
+                                                </div>
+                                                <h6 class="fw-semibold text-dark mb-2">Drop your image here or click to browse</h6>
+                                                <p class="text-muted small mb-3">
+                                                    Screenshots help us understand your issue better
+                                                </p>
+                                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="document.getElementById('image').click()">
+                                                    <i class="fas fa-plus me-2"></i>Choose File
+                                                </button>
+                                                <div class="mt-2">
+                                                    <small class="text-muted">JPG, PNG, GIF • Max 5MB</small>
+                                                </div>
+                                            </div>
+                                            <div id="imagePreview" class="d-none">
+                                                <div class="position-relative d-inline-block">
+                                                    <img id="previewImg" src="" alt="Preview" class="img-fluid rounded" style="max-height: 200px;">
+                                                    <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 rounded-circle"
+                                                            style="transform: translate(50%, -50%); width: 30px; height: 30px; padding: 0;"
+                                                            onclick="removeImage()">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="mt-2">
+                                                    <small id="fileName" class="text-muted fw-medium"></small>
                                                 </div>
                                             </div>
                                         </div>
@@ -200,7 +220,7 @@
                                 <div class="row">
                                     <div class="col-12">
                                         <div class="d-flex gap-3 justify-content-end">
-                                            <a href="#" class="btn btn-outline-secondary">
+                                            <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary">
                                                 <i class="fas fa-times me-2"></i>Cancel
                                             </a>
                                             <button type="submit" class="btn btn-primary px-4">
@@ -210,54 +230,6 @@
                                     </div>
                                 </div>
                             </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Help Section -->
-            <div class="row mt-4">
-                <div class="col-12">
-                    <div class="card border-0 shadow-sm rounded-3">
-                        <div class="card-header bg-white border-0 pb-0">
-                            <h5 class="fw-semibold text-dark mb-0">
-                                <i class="fas fa-info-circle text-info me-2"></i>
-                                Before You Report
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row g-4">
-                                <div class="col-12 col-md-4">
-                                    <div class="text-center">
-                                        <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
-                                             style="width: 60px; height: 60px;">
-                                            <i class="fas fa-search fa-lg text-primary"></i>
-                                        </div>
-                                        <h6 class="fw-semibold text-dark mb-2">Check FAQs</h6>
-                                        <p class="text-muted small mb-0">Common issues might already have solutions in our help center.</p>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-md-4">
-                                    <div class="text-center">
-                                        <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
-                                             style="width: 60px; height: 60px;">
-                                            <i class="fas fa-redo fa-lg text-warning"></i>
-                                        </div>
-                                        <h6 class="fw-semibold text-dark mb-2">Try Again</h6>
-                                        <p class="text-muted small mb-0">Sometimes a simple refresh or retry can resolve temporary issues.</p>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-md-4">
-                                    <div class="text-center">
-                                        <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
-                                             style="width: 60px; height: 60px;">
-                                            <i class="fas fa-clock fa-lg text-success"></i>
-                                        </div>
-                                        <h6 class="fw-semibold text-dark mb-2">Response Time</h6>
-                                        <p class="text-muted small mb-0">We typically respond within 24-48 hours during business days.</p>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -385,6 +357,41 @@
     color: #1dd1a1;
 }
 
+/* Enhanced Upload Area */
+.upload-area {
+    border-color: #d1d5db !important;
+    background: #fafafa;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    min-height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.upload-area:hover {
+    border-color: #1dd1a1 !important;
+    background: rgba(29, 209, 161, 0.02);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.upload-area.dragover {
+    border-color: #1dd1a1 !important;
+    background: rgba(29, 209, 161, 0.05);
+    transform: scale(1.02);
+}
+
+.upload-area.has-file {
+    border-color: #22c55e !important;
+    background: rgba(34, 197, 94, 0.02);
+}
+
+#imagePreview img {
+    border: 3px solid #fff;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
 /* Mobile optimizations */
 @media (max-width: 768px) {
     .container-fluid {
@@ -451,6 +458,118 @@ document.addEventListener('DOMContentLoaded', function() {
 
     titleInput.addEventListener('input', () => updateCounter(titleInput, titleCounter));
     descInput.addEventListener('input', () => updateCounter(descInput, descCounter));
+
+    // Enhanced Image Upload Functionality
+    const uploadArea = document.querySelector('.upload-area');
+    const fileInput = document.getElementById('image');
+    const uploadContent = document.getElementById('uploadContent');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('previewImg');
+    const fileName = document.getElementById('fileName');
+
+    // Click to upload
+    uploadArea.addEventListener('click', () => {
+        if (!uploadArea.classList.contains('has-file')) {
+            fileInput.click();
+        }
+    });
+
+    // Drag and drop functionality
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            handleFileSelection(files[0]);
+        }
+    });
+
+    // File input change
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            handleFileSelection(e.target.files[0]);
+        }
+    });
+
+    // Handle file selection
+    function handleFileSelection(file) {
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            showAlert('Please select an image file (JPG, PNG, GIF)', 'warning');
+            return;
+        }
+
+        // Validate file size (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            showAlert('File size must be less than 5MB', 'warning');
+            return;
+        }
+
+        // Create file reader
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            previewImg.src = e.target.result;
+            fileName.textContent = file.name;
+
+            // Show preview, hide upload content
+            uploadContent.classList.add('d-none');
+            imagePreview.classList.remove('d-none');
+            uploadArea.classList.add('has-file');
+
+            // Add success feedback
+            uploadArea.style.borderColor = '#22c55e';
+            setTimeout(() => {
+                if (uploadArea.classList.contains('has-file')) {
+                    uploadArea.style.borderColor = '#22c55e';
+                }
+            }, 300);
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // Remove image function (global scope)
+    window.removeImage = function() {
+        fileInput.value = '';
+        previewImg.src = '';
+        fileName.textContent = '';
+
+        // Show upload content, hide preview
+        uploadContent.classList.remove('d-none');
+        imagePreview.classList.add('d-none');
+        uploadArea.classList.remove('has-file');
+        uploadArea.style.borderColor = '';
+    };
+
+    // Alert function
+    function showAlert(message, type = 'info') {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        alertDiv.style.cssText = 'top: 90px; right: 20px; z-index: 9999; max-width: 400px;';
+        alertDiv.innerHTML = `
+            <i class="fas fa-${type === 'warning' ? 'exclamation-triangle' : type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(alertDiv);
+
+        // Auto remove after 4 seconds
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 4000);
+    }
 
     // Basic form interaction
     const form = document.getElementById('reportForm');

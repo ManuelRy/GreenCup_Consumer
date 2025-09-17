@@ -11,7 +11,11 @@
             <div class="card border-0 shadow-sm bg-gradient-primary text-white text-center rounded-4">
               <div class="card-body py-5">
                 <div class="display-2 fw-bold mb-2 animate-number">
-                  {{ number_format($currentTotal['coins']) }}
+                  @if(is_array($currentTotal))
+                    {{ number_format($currentTotal['coins'] ?? 0) }}
+                  @else
+                    {{ number_format($currentTotal) }}
+                  @endif
                 </div>
                 <h5 class="fw-light opacity-90 mb-0">Available Points</h5>
               </div>
@@ -333,10 +337,8 @@
 
     /* Card animations */
     .card {
-      animation: slideUp 0.6s ease-out;
-    }
-
-    @keyframes slideUp {
+        animation: slideUp 0.6s ease-out;
+    }    @keyframes slideUp {
       from {
         opacity: 0;
         transform: translateY(30px);
@@ -449,12 +451,9 @@
 
     /* Enhanced shadow for primary card */
     .bg-gradient-primary {
-      box-shadow: 0 10px 40px rgba(29, 209, 161, 0.3) !important;
+        box-shadow: 0 10px 40px rgba(29, 209, 161, 0.3) !important;
     }
   </style>
-
-  <!-- Bootstrap JS (if not already included) -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <!-- Font Awesome (if not already included) -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
