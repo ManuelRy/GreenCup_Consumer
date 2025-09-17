@@ -84,8 +84,7 @@ Route::middleware(['auth:consumer'])->group(function () {
     Route::get('/store/{id}', [StoreController::class, 'show'])->name('store.show');
 
     // Report page
-    Route::resource('reports', ReportController::class)->names('report')->only(['index', 'store']);
-    Route::get('reports/list', [ReportController::class, 'list'])->name('report.list');
+    Route::resource('reports', ReportController::class)->names('report')->only(['index', 'create', 'store']);
 
     /*
     |--------------------------------------------------------------------------

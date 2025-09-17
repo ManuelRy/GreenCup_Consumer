@@ -2,26 +2,31 @@
 
 namespace App\Http\Controllers;
 
+use App\Repository\FileRepository;
 use App\Repository\ReportRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class ReportController extends Controller
 {
     private ReportRepository $rRepo;
+    private FileRepository $fRepo;
 
-    public function __construct(ReportRepository $rRepo)
+    public function __construct(ReportRepository $rRepo, FileRepository $fRepo)
     {
         $this->rRepo = $rRepo;
+        $this->fRepo = $fRepo;
     }
-    
-    public function index()
+
+    public function create()
     {
         return view('report.index');
     }
 
-    public function list()
+    public function index()
     {
         $reports = $this->rRepo->getByReporterId(Auth::id());
         return view('report.list', compact('reports'));
@@ -51,14 +56,21 @@ class ReportController extends Controller
             ]);
 
             if ($request->hasFile('image')) {
-                $path = $request->file('image')->store('report_evidences', 'public');
-                $this->rRepo->createEvidence([
-                    'report_id' => $report->id,
-                    'file_url'  => Storage::url($path),
-                ]);
+                $file = $request->file('image');
+
+                $response = $this->fRepo->upload($file);
+
+                if ($response->successful()) {
+                    $data = $response->json();
+
+                    $this->rRepo->createEvidence([
+                        'report_id' => $report->id,
+                        'file_url'  => $this->fRepo->get($data['path'] ?? null),
+                    ]);
+                }
             }
 
-            return redirect()->route('report.list')->with('success', 'Report created successfully!');
+            return redirect()->route('report.index')->with('success', 'Report created successfully!');
         } catch (\Throwable $th) {
             return back()->withErrors(['error' => 'Something went wrong while submitting your report. Please try again.'])->withInput();
         }

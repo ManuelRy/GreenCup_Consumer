@@ -19,7 +19,7 @@
                     <p class="fw-light opacity-90 mb-0">Track the status of your submitted reports</p>
                   </div>
                   <div class="text-end">
-                    <a href="{{ route('report.index') }}" class="btn btn-light btn-lg">
+                    <a href="{{ route('report.create') }}" class="btn btn-light btn-lg">
                       <i class="fas fa-plus me-2"></i>New Report
                     </a>
                   </div>
@@ -217,7 +217,7 @@
                         You haven't submitted any reports yet. If you encounter any issues or have feedback,
                         please don't hesitate to submit a report.
                       </p>
-                      <a href="{{ route('report.index') }}" class="btn btn-primary btn-lg">
+                      <a href="{{ route('report.create') }}" class="btn btn-primary btn-lg">
                         <i class="fas fa-plus me-2"></i>Submit Your First Report
                       </a>
                     </div>
