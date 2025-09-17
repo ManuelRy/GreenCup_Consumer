@@ -13,6 +13,10 @@ class Item extends Model
     protected $fillable = [
         'name',
         'points_per_unit',
+        'image_url',
+    ];
+    protected $casts = [
+        'points_per_unit' => 'integer',
     ];
 
     public function qrCodes(): HasMany

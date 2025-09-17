@@ -21,13 +21,13 @@ class ReportController extends Controller
         $this->fRepo = $fRepo;
     }
 
-    public function create()
+    public function index()
     {
         $reports = $this->rRepo->getByReporterId(Auth::id());
         return view('report.index', compact('reports'));
     }
 
-    public function index()
+    public function create()
     {
         return view('report.create');
     }
@@ -59,7 +59,7 @@ class ReportController extends Controller
                 $file = $request->file('image');
 
                 $response = $this->fRepo->upload($file);
-
+                // dd($response);
                 if ($response->successful()) {
                     $data = $response->json();
 
