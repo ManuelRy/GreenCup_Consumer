@@ -31,6 +31,37 @@
                 </h5>
               </div>
               <div class="card-body">
+                <!-- Display Success Message -->
+                @if(session('success'))
+                  <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>
+                @endif
+
+                <!-- Display Validation Errors -->
+                @if($errors->any())
+                  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Please fix the following errors:</strong>
+                    <ul class="mb-0 mt-2">
+                      @foreach($errors->all() as $error)
+                        <li>
+                          @if(str_contains($error, 'image') && str_contains($error, 'may not be greater than'))
+                            <strong>Image too large:</strong> Please choose an image smaller than 5MB
+                          @elseif(str_contains($error, 'image') && str_contains($error, 'must be an image'))
+                            <strong>Invalid file type:</strong> Please upload a valid image file (JPG, PNG, GIF)
+                          @else
+                            {{ $error }}
+                          @endif
+                        </li>
+                      @endforeach
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>
+                @endif
+
                 <form method="POST" action="{{ route('report.store') }}" enctype="multipart/form-data">
                   @csrf
 
@@ -42,7 +73,7 @@
                       </label>
                       <div class="row g-3">
                         <div class="col-6 col-md-4">
-                          <input type="radio" class="btn-check" name="tag" id="app-bug" value="app-bug" required>
+                          <input type="radio" class="btn-check" name="tag" id="app-bug" value="App Bug" required {{ old('tag') == 'App Bug' ? 'checked' : '' }}>
                           <label class="btn btn-outline-primary w-100 py-3 report-type-btn" for="app-bug">
                             <div class="fs-2 mb-2">
                               <i class="fas fa-bug"></i>
@@ -51,7 +82,7 @@
                           </label>
                         </div>
                         <div class="col-6 col-md-4">
-                          <input type="radio" class="btn-check" name="tag" id="store-issue" value="store-issue" required>
+                          <input type="radio" class="btn-check" name="tag" id="store-issue" value="Store Issue" required {{ old('tag') == 'Store Issue' ? 'checked' : '' }}>
                           <label class="btn btn-outline-primary w-100 py-3 report-type-btn" for="store-issue">
                             <div class="fs-2 mb-2">
                               <i class="fas fa-store"></i>
@@ -60,7 +91,7 @@
                           </label>
                         </div>
                         <div class="col-6 col-md-4">
-                          <input type="radio" class="btn-check" name="tag" id="payment-problem" value="payment-problem" required>
+                          <input type="radio" class="btn-check" name="tag" id="payment-problem" value="Payment" required {{ old('tag') == 'Payment' ? 'checked' : '' }}>
                           <label class="btn btn-outline-primary w-100 py-3 report-type-btn" for="payment-problem">
                             <div class="fs-2 mb-2">
                               <i class="fas fa-credit-card"></i>
@@ -69,7 +100,7 @@
                           </label>
                         </div>
                         <div class="col-6 col-md-4">
-                          <input type="radio" class="btn-check" name="tag" id="account-problem" value="account-problem" required>
+                          <input type="radio" class="btn-check" name="tag" id="account-problem" value="Account" required {{ old('tag') == 'Account' ? 'checked' : '' }}>
                           <label class="btn btn-outline-primary w-100 py-3 report-type-btn" for="account-problem">
                             <div class="fs-2 mb-2">
                               <i class="fas fa-user-circle"></i>
@@ -78,7 +109,7 @@
                           </label>
                         </div>
                         <div class="col-6 col-md-4">
-                          <input type="radio" class="btn-check" name="tag" id="scanning-issue" value="scanning-issue" required>
+                          <input type="radio" class="btn-check" name="tag" id="scanning-issue" value="QR Scan" required {{ old('tag') == 'QR Scan' ? 'checked' : '' }}>
                           <label class="btn btn-outline-primary w-100 py-3 report-type-btn" for="scanning-issue">
                             <div class="fs-2 mb-2">
                               <i class="fas fa-qrcode"></i>
@@ -87,7 +118,7 @@
                           </label>
                         </div>
                         <div class="col-6 col-md-4">
-                          <input type="radio" class="btn-check" name="tag" id="other" value="other" required>
+                          <input type="radio" class="btn-check" name="tag" id="other" value="Other" required {{ old('tag') == 'Other' ? 'checked' : '' }}>
                           <label class="btn btn-outline-primary w-100 py-3 report-type-btn" for="other">
                             <div class="fs-2 mb-2">
                               <i class="fas fa-question-circle"></i>
@@ -107,25 +138,25 @@
                       </label>
                       <div class="row g-2">
                         <div class="col-6 col-md-3">
-                          <input type="radio" class="btn-check" name="priority" id="low" value="Low" required>
+                          <input type="radio" class="btn-check" name="priority" id="low" value="Low" required {{ old('priority') == 'Low' ? 'checked' : '' }}>
                           <label class="btn btn-outline-success w-100 py-2" for="low">
                             <i class="fas fa-circle me-1"></i>Low
                           </label>
                         </div>
                         <div class="col-6 col-md-3">
-                          <input type="radio" class="btn-check" name="priority" id="normal" value="Normal" required>
-                          <label class="btn btn-outline-primary w-100 py-2" for="normal">
-                            <i class="fas fa-circle me-1"></i>Normal
+                          <input type="radio" class="btn-check" name="priority" id="medium" value="Medium" required {{ old('priority') == 'Medium' ? 'checked' : '' }}>
+                          <label class="btn btn-outline-primary w-100 py-2" for="medium">
+                            <i class="fas fa-circle me-1"></i>Medium
                           </label>
                         </div>
                         <div class="col-6 col-md-3">
-                          <input type="radio" class="btn-check" name="priority" id="high" value="High" required>
+                          <input type="radio" class="btn-check" name="priority" id="high" value="High" required {{ old('priority') == 'High' ? 'checked' : '' }}>
                           <label class="btn btn-outline-warning w-100 py-2" for="high">
                             <i class="fas fa-circle me-1"></i>High
                           </label>
                         </div>
                         <div class="col-6 col-md-3">
-                          <input type="radio" class="btn-check" name="priority" id="critical" value="Critical" required>
+                          <input type="radio" class="btn-check" name="priority" id="critical" value="Critical" required {{ old('priority') == 'Critical' ? 'checked' : '' }}>
                           <label class="btn btn-outline-danger w-100 py-2" for="critical">
                             <i class="fas fa-circle me-1"></i>Critical
                           </label>
@@ -141,7 +172,7 @@
                         <i class="fas fa-heading me-2"></i>Issue Title
                       </label>
                       <input type="text" class="form-control form-control-lg" id="title" name="title" placeholder="Brief summary of the issue..." maxlength="100"
-                        required>
+                        value="{{ old('title') }}" required>
                       <div class="form-text">
                         <small class="text-muted">
                           <span id="titleCounter">0</span>/100 characters
@@ -158,7 +189,7 @@
                       </label>
                       <textarea class="form-control" id="description" name="description" rows="6"
                         placeholder="Please provide detailed information about the issue. Include:&#10;• What were you trying to do?&#10;• What went wrong?&#10;• When did this happen?&#10;• Any error messages you saw?&#10;• Steps to reproduce the issue (if applicable)"
-                        maxlength="1000" required></textarea>
+                        maxlength="1000" required>{{ old('description') }}</textarea>
                       <div class="form-text">
                         <small class="text-muted">
                           <span id="descCounter">0</span>/1000 characters
@@ -188,6 +219,11 @@
                           </button>
                           <div class="mt-2">
                             <small class="text-muted">JPG, PNG, GIF • Max 5MB</small>
+                          </div>
+                          <div class="mt-2">
+                            <div id="uploadProgress" class="progress d-none" style="height: 4px;">
+                              <div class="progress-bar bg-primary" role="progressbar" style="width: 0%"></div>
+                            </div>
                           </div>
                         </div>
                         <div id="imagePreview" class="d-none">
@@ -499,34 +535,65 @@
         // Validate file type
         if (!file.type.startsWith('image/')) {
           showAlert('Please select an image file (JPG, PNG, GIF)', 'warning');
+          fileInput.value = ''; // Clear the input
           return;
         }
 
-        // Validate file size (5MB)
-        if (file.size > 5 * 1024 * 1024) {
-          showAlert('File size must be less than 5MB', 'warning');
+        // Validate file size (5MB = 5,242,880 bytes)
+        const maxSize = 5 * 1024 * 1024;
+        if (file.size > maxSize) {
+          const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+          showAlert(`Image is too large (${fileSizeMB}MB). Please choose an image smaller than 5MB.`, 'danger');
+          fileInput.value = ''; // Clear the input
           return;
         }
 
         // Create file reader
         const reader = new FileReader();
+        
+        // Show upload progress
+        const uploadProgress = document.getElementById('uploadProgress');
+        const progressBar = uploadProgress.querySelector('.progress-bar');
+        uploadProgress.classList.remove('d-none');
+        
+        // Simulate progress for user feedback
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+          progress += Math.random() * 30;
+          if (progress > 90) progress = 90;
+          progressBar.style.width = progress + '%';
+        }, 100);
+        
         reader.onload = (e) => {
-          previewImg.src = e.target.result;
-          fileName.textContent = file.name;
-
-          // Show preview, hide upload content
-          uploadContent.classList.add('d-none');
-          imagePreview.classList.remove('d-none');
-          uploadArea.classList.add('has-file');
-
-          // Add success feedback
-          uploadArea.style.borderColor = '#22c55e';
+          // Complete progress
+          clearInterval(progressInterval);
+          progressBar.style.width = '100%';
+          
           setTimeout(() => {
-            if (uploadArea.classList.contains('has-file')) {
-              uploadArea.style.borderColor = '#22c55e';
-            }
-          }, 300);
+            previewImg.src = e.target.result;
+            fileName.textContent = file.name;
+
+            // Show preview, hide upload content
+            uploadContent.classList.add('d-none');
+            imagePreview.classList.remove('d-none');
+            uploadArea.classList.add('has-file');
+            uploadProgress.classList.add('d-none');
+            progressBar.style.width = '0%';
+
+            // Add success feedback
+            uploadArea.style.borderColor = '#22c55e';
+            showAlert(`Image "${file.name}" uploaded successfully!`, 'success');
+          }, 500);
         };
+        
+        reader.onerror = () => {
+          clearInterval(progressInterval);
+          uploadProgress.classList.add('d-none');
+          progressBar.style.width = '0%';
+          showAlert('Failed to process the image. Please try again.', 'danger');
+          fileInput.value = '';
+        };
+        
         reader.readAsDataURL(file);
       }
 
@@ -536,50 +603,57 @@
         previewImg.src = '';
         fileName.textContent = '';
 
+        // Reset upload progress
+        const uploadProgress = document.getElementById('uploadProgress');
+        const progressBar = uploadProgress.querySelector('.progress-bar');
+        uploadProgress.classList.add('d-none');
+        progressBar.style.width = '0%';
+
         // Show upload content, hide preview
         uploadContent.classList.remove('d-none');
         imagePreview.classList.add('d-none');
         uploadArea.classList.remove('has-file');
         uploadArea.style.borderColor = '';
+        
+        showAlert('Image removed successfully', 'info');
       };
 
-      // Alert function
+      // Enhanced alert function
       function showAlert(message, type = 'info') {
         const alertDiv = document.createElement('div');
         alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-        alertDiv.style.cssText = 'top: 90px; right: 20px; z-index: 9999; max-width: 400px;';
+        alertDiv.style.cssText = 'top: 90px; right: 20px; z-index: 9999; max-width: 400px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);';
+        
+        let icon = 'info-circle';
+        if (type === 'warning') icon = 'exclamation-triangle';
+        else if (type === 'danger') icon = 'times-circle';
+        else if (type === 'success') icon = 'check-circle';
+        
         alertDiv.innerHTML = `
-            <i class="fas fa-${type === 'warning' ? 'exclamation-triangle' : type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>
+            <i class="fas fa-${icon} me-2"></i>
             ${message}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         `;
         document.body.appendChild(alertDiv);
 
-        // Auto remove after 4 seconds
+        // Auto remove after 6 seconds for longer messages
         setTimeout(() => {
           if (alertDiv.parentNode) {
             alertDiv.remove();
           }
-        }, 4000);
+        }, 6000);
       }
 
-      // Basic form interaction
-      const form = document.getElementById('reportForm');
+      // Basic form interaction - Remove the preventDefault to allow actual submission
+      const form = document.querySelector('form');
       const submitBtn = form.querySelector('button[type="submit"]');
 
       form.addEventListener('submit', function(e) {
-        e.preventDefault();
-
         // Add loading state
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
-
-        // Reset after demo
-        setTimeout(() => {
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Submit Report';
-          alert('Form submitted! (This is just a demo)');
-        }, 2000);
+        
+        // Don't prevent default - let the form submit normally
       });
 
       // Animate cards on scroll

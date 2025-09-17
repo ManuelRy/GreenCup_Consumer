@@ -85,6 +85,7 @@ Route::middleware(['auth:consumer'])->group(function () {
 
     // Report page
     Route::resource('reports', ReportController::class)->names('report')->only(['index', 'store']);
+    Route::get('reports/list', [ReportController::class, 'list'])->name('report.list');
 
     /*
     |--------------------------------------------------------------------------

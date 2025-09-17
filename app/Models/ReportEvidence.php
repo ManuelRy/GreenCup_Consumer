@@ -11,4 +11,9 @@ class ReportEvidence extends Model
     'report_id',
     'file_url',
   ];
+
+  public function report()
+  {
+    return $this->belongsTo(Report::class);
+  }
 }

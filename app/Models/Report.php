@@ -28,4 +28,9 @@ class Report extends Model
         'reporter_id',
         'status',
     ];
+
+    public function evidences()
+    {
+        return $this->hasMany(ReportEvidence::class);
+    }
 }

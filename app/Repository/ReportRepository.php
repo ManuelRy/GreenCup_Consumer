@@ -17,4 +17,13 @@ class ReportRepository
   {
     return ReportEvidence::create($data);
   }
+
+  public function getByReporterId($reporterId)
+  {
+    return Report::with('evidences')
+                 ->where('reporter_id', $reporterId)
+                 ->where('reporter', 'consumer')
+                 ->orderBy('created_at', 'desc')
+                 ->paginate(10);
+  }
 }
