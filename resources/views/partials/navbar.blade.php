@@ -37,6 +37,17 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <div class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle {{ request()->routeIs('reward.*') ? 'active' : '' }}" href="#" id="rewardsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-gift me-1"></i><span>Rewards</span>
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="rewardsDropdown">
+                                <li><a class="dropdown-item {{ request()->routeIs('reward.index') ? 'active' : '' }}" href="{{ route('reward.index') }}">All Rewards</a></li>
+                                <li><a class="dropdown-item {{ request()->routeIs('reward.my') ? 'active' : '' }}" href="{{ route('reward.my') }}">My Rewards</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('gallery') || request()->routeIs('products') ? 'active' : '' }}"
                             href="{{ route('gallery') }}" @if (request()->routeIs('gallery') || request()->routeIs('products')) aria-current="page" @endif>
                             <i class="bi bi-grid me-1"></i><span>Products</span>
@@ -141,6 +152,27 @@
                             href="{{ route('dashboard') }}" data-bs-dismiss="offcanvas"
                             onclick="console.log('Dashboard clicked'); return true;">
                             <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-0 {{ request()->routeIs('reward.index') ? 'active' : '' }}"
+                            href="{{ route('reward.index') }}" data-bs-dismiss="offcanvas"
+                            onclick="console.log('Rewards clicked'); return true;">
+                            <i class="bi bi-gift me-2"></i>All Rewards
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-0 {{ request()->routeIs('reward.my') ? 'active' : '' }}"
+                            href="{{ route('reward.my') }}" data-bs-dismiss="offcanvas"
+                            onclick="console.log('My Rewards clicked'); return true;">
+                            <i class="bi bi-star me-2"></i>My Rewards
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-0 {{ request()->routeIs('reward.*') ? 'active' : '' }}"
+                            href="{{ route('reward.index') }}" data-bs-dismiss="offcanvas"
+                            onclick="console.log('Rewards clicked'); return true;">
+                            <i class="bi bi-gift me-2"></i>Rewards
                         </a>
                     </li>
                     <li class="nav-item">

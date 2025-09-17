@@ -15,16 +15,16 @@ class ReportController extends Controller
     {
         $this->rRepo = $rRepo;
     }
-    
+
     public function index()
     {
-        return view('report.index');
+        $reports = $this->rRepo->getByReporterId(Auth::id());
+        return view('report.index', compact('reports'));
     }
 
-    public function list()
+    public function create()
     {
-        $reports = $this->rRepo->getByReporterId(Auth::id());
-        return view('report.list', compact('reports'));
+        return view('report.create');
     }
 
     public function store(Request $request)
@@ -58,7 +58,7 @@ class ReportController extends Controller
                 ]);
             }
 
-            return redirect()->route('report.list')->with('success', 'Report created successfully!');
+            return redirect()->route('report.index')->with('success', 'Report created successfully!');
         } catch (\Throwable $th) {
             return back()->withErrors(['error' => 'Something went wrong while submitting your report. Please try again.'])->withInput();
         }
