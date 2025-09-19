@@ -12,7 +12,7 @@ use App\Http\Controllers\{AccountController, AuthController, ConsumerController,
 */
 
 // Root redirect
-Route::get('/', function() {
+Route::get('/', function () {
     if (auth('consumer')->check()) {
         return redirect()->route('dashboard');
     }
@@ -60,13 +60,12 @@ Route::middleware(['auth:consumer'])->group(function () {
     Route::put('/account/profile', [AccountController::class, 'updateProfile'])->name('account.profile.update');
     Route::put('/account/password', [AccountController::class, 'updatePassword'])->name('account.password.update');
     Route::get('/account/transactions', [AccountController::class, 'transactionHistory'])->name('account.transactions');
-
+    
     // QR Code
     Route::get('/qr-code', [ConsumerController::class, 'showQrCode'])->name('consumer.qr-code');
-
+    
     // Receipt scanning
-    Route::get('/scan-receipt', [ConsumerController::class, 'showScanReceipt'])->name('scan.receipt');
-    Route::get('/scan', [ConsumerController::class, 'showScanReceipt'])->name('scan'); // Alternative
+    Route::get('/scan-receipt', [ReceiptController::class, 'scan'])->name('scan.receipt');
 
     /*
     |--------------------------------------------------------------------------
@@ -97,13 +96,13 @@ Route::middleware(['auth:consumer'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::prefix('rewards')->name('reward.')->group(function () {
-    Route::get('/', [RewardRedemptionController::class, 'index'])->name('index');
-    Route::get('/my', [RewardRedemptionController::class, 'myRewards'])->name('my');
-    Route::get('/{reward}/redeem', [RewardRedemptionController::class, 'redeem'])->name('redeem');
-    Route::post('/{reward}/process', [RewardRedemptionController::class, 'process'])->name('process');
-    Route::get('/history', [RewardRedemptionController::class, 'history'])->name('history');
-    Route::get('/redemption/{redemption}', [RewardRedemptionController::class, 'show'])->name('redemption.show');
-});
+        Route::get('/', [RewardRedemptionController::class, 'index'])->name('index');
+        Route::get('/my', [RewardRedemptionController::class, 'myRewards'])->name('my');
+        Route::get('/{reward}/redeem', [RewardRedemptionController::class, 'redeem'])->name('redeem');
+        Route::post('/{reward}/process', [RewardRedemptionController::class, 'process'])->name('process');
+        Route::get('/history', [RewardRedemptionController::class, 'history'])->name('history');
+        Route::get('/redemption/{redemption}', [RewardRedemptionController::class, 'show'])->name('redemption.show');
+    });
 
     /*
     |--------------------------------------------------------------------------

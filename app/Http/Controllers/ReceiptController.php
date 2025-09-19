@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Repository\ConsumerPointRepository;
+use App\Repository\EarnHistoryRepository;
+use App\Repository\PendingTransactionRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -10,251 +13,160 @@ use Carbon\Carbon;
 
 class ReceiptController extends Controller
 {
+    private PendingTransactionRepository $pTRepo;
+    private ConsumerPointRepository $cPRepo;
+    private EarnHistoryRepository $eHRepo;
+
+    public function __construct(PendingTransactionRepository $pTRepo, ConsumerPointRepository $cPRepo, EarnHistoryRepository $eHRepo)
+    {
+        $this->pTRepo = $pTRepo;
+        $this->cPRepo = $cPRepo;
+        $this->eHRepo = $eHRepo;
+    }
     /**
      * Check if a receipt code is valid and return its details
      */
+    public function scan()
+    {
+        return view('consumers.scan-receipt');
+    }
     public function check(Request $request)
     {
         $request->validate([
             'receipt_code' => 'required|string'
         ]);
-        
-        $consumer = Auth::guard('consumer')->user();
-        
-        if (!$consumer) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Authentication required'
-            ], 401);
-        }
-        
+
         try {
-            $receiptCode = $request->input('receipt_code');
-            
-            // Find the pending transaction
-            $transaction = DB::table('pending_transactions')
-                ->where('receipt_code', $receiptCode)
-                ->first();
-                
-            if (!$transaction) {
+
+            $pending = $this->pTRepo->getByCode($request->receipt_code);
+            if (!$pending) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Invalid receipt code'
                 ]);
             }
-            
+
             // Check if expired
-            if ($transaction->expires_at && Carbon::parse($transaction->expires_at)->isPast()) {
-                // Update status to expired
-                DB::table('pending_transactions')
-                    ->where('id', $transaction->id)
-                    ->update(['status' => 'expired']);
-                    
+            if ($this->pTRepo->isExpire($pending)) {
                 return response()->json([
                     'success' => false,
                     'message' => 'This receipt has expired'
                 ]);
             }
-            
-            // Get seller information
-            $seller = DB::table('sellers')
-                ->where('id', $transaction->seller_id)
-                ->first();
-                
-            if (!$seller) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Store not found'
-                ]);
-            }
-            
-            // Parse items data
-            $items = json_decode($transaction->items, true);
-            
-            // Build response
+
             $receiptData = [
-                'receipt_code' => $transaction->receipt_code,
-                'store_name' => $seller->business_name,
-                'store_address' => $seller->address,
-                'status' => $transaction->status,
-                'total_points' => $transaction->total_points,
-                'total_quantity' => $transaction->total_quantity,
-                'items' => array_map(function($item) {
+                'receipt_code' => $pending->receipt_code,
+                'store_name' => $pending->seller->business_name,
+                'store_address' => $pending->seller->address,
+                'status' => $pending->status,
+                'total_points' => $pending->total_points,
+                'total_quantity' => $pending->total_quantity,
+                'items' => array_map(function ($item) {
                     return [
                         'name' => $item['name'],
                         'quantity' => $item['quantity'],
                         'points_per_unit' => $item['points_per_unit'],
-                        'total_points' => $item['quantity'] * $item['points_per_unit']
+                        'total_points' => $item['total_points']
                     ];
-                }, $items),
-                'created_at' => Carbon::parse($transaction->created_at)->format('M d, Y g:i A'),
-                'expires_at' => $transaction->expires_at ? Carbon::parse($transaction->expires_at)->format('M d, Y g:i A') : null
+                },  $pending->items),
+                'created_at' => $pending->created_at,
+                'expires_at' => $pending->expires_at
             ];
-            
+
             return response()->json([
                 'success' => true,
                 'receipt' => $receiptData
             ]);
-            
         } catch (\Exception $e) {
-            Log::error('Receipt check error: ' . $e->getMessage());
-            
             return response()->json([
                 'success' => false,
                 'message' => 'Error checking receipt'
             ], 500);
         }
     }
-    
+
     /**
      * Claim points from a receipt
      */
     public function claim(Request $request)
     {
-        $request->validate([
-            'receipt_code' => 'required|string'
-        ]);
-        
-        $consumer = Auth::guard('consumer')->user();
-        
-        if (!$consumer) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Authentication required'
-            ], 401);
-        }
-        
         try {
+            $request->validate([
+                'receipt_code' => 'required|string'
+            ]);
+
+            $consumer_id = Auth::id();
             DB::beginTransaction();
-            
-            $receiptCode = $request->input('receipt_code');
-            
-            // Find and lock the transaction
-            $transaction = DB::table('pending_transactions')
-                ->where('receipt_code', $receiptCode)
-                ->lockForUpdate()
-                ->first();
-                
-            if (!$transaction) {
+            $pending = $this->pTRepo->getByCode($request->receipt_code);
+            if (!$pending) {
                 throw new \Exception('Invalid receipt code');
             }
-            
-            // Check if already claimed
-            if ($transaction->status === 'claimed') {
+
+            if ($pending->status === 'claimed') {
                 throw new \Exception('This receipt has already been claimed');
             }
-            
+
             // Check if expired
-            if ($transaction->expires_at && Carbon::parse($transaction->expires_at)->isPast()) {
-                DB::table('pending_transactions')
-                    ->where('id', $transaction->id)
-                    ->update(['status' => 'expired']);
-                    
+            if ($this->pTRepo->isExpire($pending)) {
                 throw new \Exception('This receipt has expired');
             }
-            
-            // Get seller info
-            $seller = DB::table('sellers')
-                ->where('id', $transaction->seller_id)
-                ->first();
-                
-            if (!$seller) {
-                throw new \Exception('Store not found');
-            }
-            
-            // Parse items for transaction description
-            $items = json_decode($transaction->items, true);
-            $itemNames = array_column($items, 'name');
+
+            $itemNames = array_column($pending->items, 'name');
             $description = 'Purchased: ' . implode(', ', array_slice($itemNames, 0, 3));
             if (count($itemNames) > 3) {
                 $description .= ' and ' . (count($itemNames) - 3) . ' more items';
             }
-            
-            // Create point transaction for consumer
-            $pointTransactionId = DB::table('point_transactions')->insertGetId([
-                'consumer_id' => $consumer->id,
-                'seller_id' => $transaction->seller_id,
-                'qr_code_id' => null, // No QR code record for new receipt system
-                'units_scanned' => $transaction->total_quantity,
-                'points' => $transaction->total_points,
-                'type' => 'earn',
-                'description' => $description . ' from ' . $seller->business_name,
-                'scanned_at' => now(),
-                'created_at' => now(),
-                'updated_at' => now()
+
+            // update pending transaction
+            $this->pTRepo->update($pending->id, [
+                'claimed_at' => now(),
+                'status' => 'claimed',
+                'claimed_by_consumer_id' => $consumer_id,
             ]);
-            
-            // Update pending transaction status
-            DB::table('pending_transactions')
-                ->where('id', $transaction->id)
-                ->update([
-                    'status' => 'claimed',
-                    'claimed_at' => now(),
-                    'claimed_by_consumer_id' => $consumer->id,
-                    'updated_at' => now()
-                ]);
-            
-            // Update seller's total points (optional - represents points given out)
-            DB::table('sellers')
-                ->where('id', $transaction->seller_id)
-                ->increment('total_points', $transaction->total_points);
-            
+            // update consumer points
+            $consumer_point =   $this->cPRepo->claim($consumer_id, $pending->seller_id, $pending->total_points);
+            // create new earn history
+            $this->eHRepo->create([
+                'consumer_id' => $consumer_id,
+                'earned' =>  $pending->total_points,
+                'seller_id' => $pending->seller_id
+            ]);
             DB::commit();
-            
-            // Get consumer's new total points
-            $totalEarned = DB::table('point_transactions')
-                ->where('consumer_id', $consumer->id)
-                ->where('type', 'earn')
-                ->sum('points');
-                
-            $totalSpent = DB::table('point_transactions')
-                ->where('consumer_id', $consumer->id)
-                ->where('type', 'spend')
-                ->sum('points');
-                
-            $newBalance = $totalEarned - $totalSpent;
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Points claimed successfully!',
-                'points_earned' => $transaction->total_points,
-                'new_balance' => $newBalance,
-                'transaction_id' => $pointTransactionId,
+                'points_earned' => $pending->total_points,
+                'new_balance' => $consumer_point->earned,
+                // 'transaction_id' => $pointTransactionId,
                 'seller' => [
-                    'name' => $seller->business_name,
-                    'address' => $seller->address
+                    'name' => $pending->seller->business_name,
+                    'address' => $pending->seller->address
                 ]
             ]);
-            
         } catch (\Exception $e) {
             DB::rollBack();
-            
-            Log::error('Receipt claim error: ' . $e->getMessage(), [
-                'consumer_id' => $consumer->id,
-                'receipt_code' => $request->input('receipt_code')
-            ]);
-            
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()
             ]);
         }
     }
-    
+
     /**
      * Get consumer's receipt history
      */
     public function history(Request $request)
     {
         $consumer = Auth::guard('consumer')->user();
-        
+
         if (!$consumer) {
             return response()->json([
                 'success' => false,
                 'message' => 'Authentication required'
             ], 401);
         }
-        
+
         try {
             $receipts = DB::table('pending_transactions as pt')
                 ->join('sellers as s', 's.id', '=', 'pt.seller_id')
@@ -272,23 +184,22 @@ class ReceiptController extends Controller
                 ->orderBy('pt.claimed_at', 'desc')
                 ->limit(20)
                 ->get();
-                
+
             // Parse items for each receipt
-            $receipts = $receipts->map(function($receipt) {
+            $receipts = $receipts->map(function ($receipt) {
                 $receipt->items = json_decode($receipt->items, true);
                 $receipt->claimed_at_formatted = Carbon::parse($receipt->claimed_at)->format('M d, Y g:i A');
                 $receipt->claimed_at_relative = Carbon::parse($receipt->claimed_at)->diffForHumans();
                 return $receipt;
             });
-            
+
             return response()->json([
                 'success' => true,
                 'receipts' => $receipts
             ]);
-            
         } catch (\Exception $e) {
             Log::error('Receipt history error: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Error fetching receipt history'

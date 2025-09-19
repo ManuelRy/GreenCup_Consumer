@@ -1641,6 +1641,7 @@ function checkReceipt(code) {
     })
     .catch(error => {
         closeModal();
+        console.error(error);
         let errorMessage = '';
         if (error.message === 'API_NOT_FOUND') {
             errorMessage = 'Scanning feature not ready. Try later or contact support.';

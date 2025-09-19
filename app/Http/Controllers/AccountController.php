@@ -102,7 +102,7 @@ class AccountController extends Controller
                 'date_of_birth' => 'nullable|date|before:today',
             ]);
             $this->cRepo->update($id, $data);
-            // $consumer->update($data);
+            
             return redirect()->route('account')->with('success', 'Profile updated successfully!');
         } catch (\Throwable $e) {
             abort(500, 'Something went wrong');

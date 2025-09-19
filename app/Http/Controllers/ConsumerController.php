@@ -221,15 +221,6 @@ class ConsumerController extends Controller
         return view('consumers.qr-code', compact('consumer', 'qrCode', 'recentTransactions'));
     }
 
-    /**
-     * Show receipt scanning page
-     */
-    public function showScanReceipt()
-    {
-        $consumer = Auth::guard('consumer')->user();
-        return view('consumers.scan-receipt', compact('consumer'));
-    }
-
     /*
     |--------------------------------------------------------------------------
     | API Methods - UPDATED for Receipt System

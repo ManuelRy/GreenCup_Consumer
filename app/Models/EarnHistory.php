@@ -9,12 +9,13 @@ class EarnHistory extends Model
     protected $fillable = [
         'consumer_id',
         'earned',
-        'coins',
-        'spent',
         'seller_id'
     ];
     public function seller()
     {
         return $this->belongsTo(Seller::class);
+    }
+        public function consumer() {
+        return $this->belongsTo(Consumer::class);
     }
 }
