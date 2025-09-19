@@ -1,6 +1,49 @@
 @extends('master')
 
 @section('content')
+@php
+// Mock shops and rewards data
+$mockShops = [
+  [
+    'seller' => (object)['business_name' => 'Green Cafe'],
+    'wallet' => 350,
+    'rewards' => [
+      (object)[
+        'id' => 1,
+        'name' => 'Free Coffee',
+        'description' => 'Enjoy a free cup of our signature coffee.',
+        'image_url' => 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',
+        'points_required' => 100,
+        'category' => 'food',
+      ],
+      (object)[
+        'id' => 2,
+        'name' => '10% Discount',
+        'description' => 'Get 10% off your next purchase.',
+        'image_url' => 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80',
+        'points_required' => 200,
+        'category' => 'discount',
+      ],
+    ],
+  ],
+  [
+    'seller' => (object)['business_name' => 'Eco Shop'],
+    'wallet' => 80,
+    'rewards' => [
+      (object)[
+        'id' => 3,
+        'name' => 'Reusable Straw',
+        'description' => 'A stylish reusable straw for your drinks.',
+        'image_url' => 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80',
+        'points_required' => 120,
+        'category' => 'merchandise',
+      ],
+    ],
+  ],
+];
+$currentTotal = ['coins' => 350];
+$shops = $mockShops;
+@endphp
   <div class="container-fluid min-vh-100 py-3">
     <div class="row justify-content-center">
       <div class="col-12 col-xl-10">
@@ -139,9 +182,11 @@
                       </div>
                       <div class="mt-auto">
                         @if($shop['wallet'] >= ($reward->points_required ?? ($reward->points_per_unit ?? 0)))
-                          <a href="#" class="btn btn-primary w-100">
+                          <button class="btn btn-primary w-100 redeem-btn" 
+                            data-reward='@json($reward)'
+                            data-shop='@json($shop['seller']->business_name)'>
                             <i class="fas fa-gift me-2"></i>Redeem Now
-                          </a>
+                          </button>
                         @else
                           <button class="btn btn-outline-primary w-100" disabled>
                             <i class="fas fa-coins me-2"></i>Insufficient Points
@@ -187,6 +232,52 @@
     </div>
   </div>
 
+  <!-- Redeem Modal -->
+  <div class="modal fade" id="mockRedeemModal" tabindex="-1" aria-labelledby="mockRedeemModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-gradient-primary text-white">
+          <h5 class="modal-title" id="mockRedeemModalLabel"><i class="fas fa-gift me-2"></i>Redeem Reward</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="mock-reward-details"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-success" id="mockConfirmRedeem">Confirm Redeem</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      let selectedReward = null;
+      let selectedShop = null;
+      document.querySelectorAll('.redeem-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          selectedReward = JSON.parse(this.dataset.reward);
+          selectedShop = this.dataset.shop;
+          document.getElementById('mock-reward-details').innerHTML = `
+            <div class='text-center mb-3'>
+              <img src="${selectedReward.image_url}" class="img-fluid rounded mb-2" style="max-height:120px;">
+              <h5 class="fw-bold mt-2">${selectedReward.name}</h5>
+              <div class="mb-2"><span class="badge bg-primary">${selectedReward.category}</span></div>
+              <div class="mb-2">From <b>${selectedShop}</b></div>
+              <div class="mb-2 text-muted">${selectedReward.description}</div>
+              <div class="mb-2"><span class="badge bg-success">${selectedReward.points_required} pts</span></div>
+            </div>
+          `;
+          new bootstrap.Modal(document.getElementById('mockRedeemModal')).show();
+        });
+      });
+      document.getElementById('mockConfirmRedeem').onclick = function() {
+        alert('Mock: Reward redeemed! (This would be saved to My Rewards)');
+        bootstrap.Modal.getInstance(document.getElementById('mockRedeemModal')).hide();
+      };
+    });
+  </script>
   <style>
     /* Custom CSS consistent with dashboard theme */
     :root {

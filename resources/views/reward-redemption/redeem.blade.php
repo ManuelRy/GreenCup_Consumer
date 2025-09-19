@@ -203,82 +203,39 @@
                 </div>
 
                 <!-- Redemption Form -->
+
                 @if($reward->stock > 0 && (($currentTotal['coins'] ?? 0) >= $reward->points_required))
-                  <form method="POST" action="{{ route('reward.process', $reward->id) }}">
-                    @csrf
-
-                    <div class="redemption-form bg-light rounded-3 p-4">
-                      <h6 class="fw-semibold text-dark mb-3">
-                        <i class="fas fa-clipboard-check text-primary me-2"></i>
-                        Redemption Confirmation
-                      </h6>
-
-                      <!-- Quantity Selection -->
-                      <div class="row mb-3">
-                        <div class="col-md-6">
-                          <label for="quantity" class="form-label fw-semibold text-dark">
-                            <i class="fas fa-sort-numeric-up me-2"></i>Quantity
-                          </label>
-                          <select class="form-select" id="quantity" name="quantity" required>
-                            @for($i = 1; $i <= min(5, $reward->stock, floor(($currentTotal['coins'] ?? 0) / $reward->points_required)); $i++)
-                              <option value="{{ $i }}">{{ $i }}</option>
-                            @endfor
-                          </select>
-                          <div class="form-text">
-                            <small class="text-muted">Maximum quantity based on your points and stock availability</small>
-                          </div>
-                        </div>
-
-                        <div class="col-md-6">
-                          <label class="form-label fw-semibold text-dark">Total Cost</label>
-                          <div class="total-cost-display bg-white border rounded p-3">
-                            <div class="d-flex justify-content-between align-items-center">
-                              <span class="text-muted">Points to spend:</span>
-                              <span class="h5 fw-bold text-primary mb-0" id="totalPoints">
-                                {{ number_format($reward->points_required) }} pts
-                              </span>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center mt-2">
-                              <span class="text-muted">Remaining balance:</span>
-                              <span class="fw-medium" id="remainingPoints">
-                                {{ number_format(($currentTotal['coins'] ?? 0) - $reward->points_required) }} pts
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <!-- Special Instructions -->
-                      <div class="mb-3">
-                        <label for="instructions" class="form-label fw-semibold text-dark">
-                          <i class="fas fa-sticky-note me-2"></i>Special Instructions (Optional)
-                        </label>
-                        <textarea class="form-control" id="instructions" name="instructions" rows="3"
-                          placeholder="Any special requests or notes for the store..."></textarea>
-                      </div>
-
-                      <!-- Terms and Conditions -->
-                      <div class="mb-4">
-                        <div class="form-check">
-                          <input class="form-check-input" type="checkbox" id="agreeTerms" name="agree_terms" required>
-                          <label class="form-check-label fw-medium" for="agreeTerms">
-                            I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">terms and conditions</a>
-                            and understand this redemption is final.
-                          </label>
-                        </div>
-                      </div>
-
-                      <!-- Action Buttons -->
-                      <div class="d-flex gap-3 justify-content-end">
-                        <a href="{{ route('reward.index') }}" class="btn btn-outline-secondary">
-                          <i class="fas fa-times me-2"></i>Cancel
-                        </a>
-                        <button type="submit" class="btn btn-primary px-4" id="redeemButton">
-                          <i class="fas fa-gift me-2"></i>Confirm Redemption
-                        </button>
-                      </div>
+                  <div class="redemption-form bg-light rounded-3 p-4 text-center">
+                    <h6 class="fw-semibold text-dark mb-3">
+                      <i class="fas fa-clipboard-check text-primary me-2"></i>
+                      Redemption Confirmation (Mock)
+                    </h6>
+                    <div class="mb-3">
+                      <span class="h5">Quantity: <b>1</b></span>
                     </div>
-                  </form>
+                    <div class="mb-3">
+                      <span class="h5">Total Cost: <b>{{ number_format($reward->points_required) }} pts</b></span>
+                    </div>
+                    <div class="mb-4">
+                      <span class="text-muted">(In a real app, you could select quantity and add notes.)</span>
+                    </div>
+                    <div class="d-flex gap-3 justify-content-center">
+                      <a href="{{ url('reward-redemption') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>Cancel
+                      </a>
+                      <button type="button" class="btn btn-primary px-4" id="mockConfirmRedeem">
+                        <i class="fas fa-gift me-2"></i>Confirm Redemption
+                      </button>
+                    </div>
+                  </div>
+                  <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                      document.getElementById('mockConfirmRedeem').onclick = function() {
+                        alert('Mock: Reward redeemed! (This would be saved to My Rewards)');
+                        window.location.href = "my";
+                      };
+                    });
+                  </script>
 
                 @elseif($reward->stock <= 0)
                   <!-- Out of Stock Message -->

@@ -1,6 +1,24 @@
 @extends('master')
 
 @section('content')
+@php
+$redemptions = [
+  (object)[
+    'reward_name' => 'Free Coffee',
+    'store_name' => 'Green Cafe',
+    'description' => 'Enjoy a free cup of our signature coffee.',
+    'image_url' => 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',
+    'created_at' => now()->subDays(2),
+  ],
+  (object)[
+    'reward_name' => '10% Discount',
+    'store_name' => 'Green Cafe',
+    'description' => 'Get 10% off your next purchase.',
+    'image_url' => 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80',
+    'created_at' => now()->subDays(5),
+  ],
+];
+@endphp
   <div class="container-fluid min-vh-100 py-3">
     <div class="row justify-content-center">
       <div class="col-12 col-xl-10">

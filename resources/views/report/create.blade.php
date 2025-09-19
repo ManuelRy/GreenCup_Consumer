@@ -62,6 +62,13 @@
                   </div>
                 @endif
 
+                <!-- Live Validation Alert (Hidden by default) -->
+                <div id="liveValidationAlert" class="alert alert-dismissible fade d-none" role="alert">
+                  <i class="fas fa-exclamation-triangle me-2"></i>
+                  <span id="liveValidationMessage"></span>
+                  <button type="button" class="btn-close" onclick="hideLiveAlert()"></button>
+                </div>
+
                 <form method="POST" action="{{ route('report.store') }}" enctype="multipart/form-data">
                   @csrf
 
@@ -171,8 +178,8 @@
                       <label for="title" class="form-label fw-semibold text-dark">
                         <i class="fas fa-heading me-2"></i>Issue Title
                       </label>
-                      <input type="text" class="form-control form-control-lg" id="title" name="title" placeholder="Brief summary of the issue..." maxlength="100"
-                        value="{{ old('title') }}" required>
+                      <input type="text" class="form-control form-control-lg" id="title" name="title"
+                        placeholder="Brief summary of the issue..." maxlength="100" value="{{ old('title') }}" required>
                       <div class="form-text">
                         <small class="text-muted">
                           <span id="titleCounter">0</span>/100 characters
@@ -204,26 +211,20 @@
                       <label class="form-label fw-semibold text-dark">
                         <i class="fas fa-camera me-2"></i>Attach Screenshot or Photo (optional)
                       </label>
-                      <div class="upload-area border-2 border-dashed rounded-3 p-4 text-center position-relative">
+                      <div class="upload-area border-2 border-dashed rounded-3 p-4 text-center position-relative"
+                           onclick="document.getElementById('image').click()">
                         <input class="d-none" type="file" id="image" name="image" accept="image/*">
                         <div id="uploadContent">
                           <div class="mb-3">
                             <i class="fas fa-cloud-upload-alt fa-3x text-primary opacity-75"></i>
                           </div>
                           <h6 class="fw-semibold text-dark mb-2">Drop your image here or click to browse</h6>
-                          <p class="text-muted small mb-3">
-                            Screenshots help us understand your issue better
-                          </p>
-                          <button type="button" class="btn btn-outline-primary btn-sm" onclick="document.getElementById('image').click()">
+                          <p class="text-muted small mb-3">Screenshots help us understand your issue better</p>
+                          <button type="button" class="btn btn-outline-primary btn-sm">
                             <i class="fas fa-plus me-2"></i>Choose File
                           </button>
                           <div class="mt-2">
                             <small class="text-muted">JPG, PNG, GIF • Max 5MB</small>
-                          </div>
-                          <div class="mt-2">
-                            <div id="uploadProgress" class="progress d-none" style="height: 4px;">
-                              <div class="progress-bar bg-primary" role="progressbar" style="width: 0%"></div>
-                            </div>
                           </div>
                         </div>
                         <div id="imagePreview" class="d-none">
@@ -303,7 +304,7 @@
       transform: translateY(-1px);
     }
 
-    .btn-outline-primary:checked {
+    .btn-check:checked + .btn-outline-primary {
       background: #1dd1a1;
       border-color: #1dd1a1;
       color: white;
@@ -319,7 +320,7 @@
       box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     }
 
-    .btn-check:checked+.report-type-btn {
+    .btn-check:checked + .report-type-btn {
       background: #1dd1a1;
       border-color: #1dd1a1;
       color: white;
@@ -355,36 +356,6 @@
       border-color: #ef4444;
     }
 
-    /* Card animations */
-    .card {
-      animation: slideUp 0.6s ease-out;
-      transition: all 0.3s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12) !important;
-    }
-
-    @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* Character counters */
-    #titleCounter,
-    #descCounter {
-      font-weight: 600;
-      color: #1dd1a1;
-    }
-
     /* Enhanced Upload Area */
     .upload-area {
       border-color: #d1d5db !important;
@@ -404,20 +375,16 @@
       box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     }
 
-    .upload-area.dragover {
-      border-color: #1dd1a1 !important;
-      background: rgba(29, 209, 161, 0.05);
-      transform: scale(1.02);
-    }
-
     .upload-area.has-file {
       border-color: #22c55e !important;
       background: rgba(34, 197, 94, 0.02);
     }
 
-    #imagePreview img {
-      border: 3px solid #fff;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    /* Character counters */
+    #titleCounter,
+    #descCounter {
+      font-weight: 600;
+      color: #1dd1a1;
     }
 
     /* Mobile optimizations */
@@ -440,25 +407,6 @@
         padding: 1rem;
       }
     }
-
-    /* Loading state */
-    .btn:disabled {
-      opacity: 0.6;
-      transform: none !important;
-    }
-
-    /* Focus indicators for accessibility */
-    .btn:focus,
-    .form-control:focus {
-      outline: 2px solid #1dd1a1;
-      outline-offset: 2px;
-    }
-
-    /* Enhanced visual feedback */
-    .form-check-input:checked {
-      background-color: #1dd1a1;
-      border-color: #1dd1a1;
-    }
   </style>
 
   <script>
@@ -474,7 +422,6 @@
         const max = parseInt(input.getAttribute('maxlength'));
         counter.textContent = count;
 
-        // Color coding
         if (count > max * 0.9) {
           counter.style.color = '#ef4444';
         } else if (count > max * 0.7) {
@@ -487,213 +434,118 @@
       titleInput.addEventListener('input', () => updateCounter(titleInput, titleCounter));
       descInput.addEventListener('input', () => updateCounter(descInput, descCounter));
 
-      // Enhanced Image Upload Functionality
-      const uploadArea = document.querySelector('.upload-area');
+      // Initialize counters
+      updateCounter(titleInput, titleCounter);
+      updateCounter(descInput, descCounter);
+
+      // Simplified Image Upload
       const fileInput = document.getElementById('image');
       const uploadContent = document.getElementById('uploadContent');
       const imagePreview = document.getElementById('imagePreview');
       const previewImg = document.getElementById('previewImg');
       const fileName = document.getElementById('fileName');
+      const uploadArea = document.querySelector('.upload-area');
 
-      // Click to upload
-      uploadArea.addEventListener('click', () => {
-        if (!uploadArea.classList.contains('has-file')) {
-          fileInput.click();
-        }
-      });
+      fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
 
-      // Drag and drop functionality
-      uploadArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        uploadArea.classList.add('dragover');
-      });
-
-      uploadArea.addEventListener('dragleave', (e) => {
-        e.preventDefault();
-        uploadArea.classList.remove('dragover');
-      });
-
-      uploadArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        uploadArea.classList.remove('dragover');
-
-        const files = e.dataTransfer.files;
-        if (files.length > 0) {
-          handleFileSelection(files[0]);
-        }
-      });
-
-      // File input change
-      fileInput.addEventListener('change', (e) => {
-        if (e.target.files.length > 0) {
-          handleFileSelection(e.target.files[0]);
-        }
-      });
-
-      // Handle file selection
-      function handleFileSelection(file) {
-        // Validate file type
-        if (!file.type.startsWith('image/')) {
-          showAlert('Please select an image file (JPG, PNG, GIF)', 'warning');
-          fileInput.value = ''; // Clear the input
+        // Immediate validation
+        if (!validateFile(file)) {
+          fileInput.value = '';
           return;
         }
 
-        // Validate file size (5MB = 5,242,880 bytes)
-        const maxSize = 5 * 1024 * 1024;
+        // Show preview
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          previewImg.src = e.target.result;
+          fileName.textContent = file.name;
+          uploadContent.classList.add('d-none');
+          imagePreview.classList.remove('d-none');
+          uploadArea.classList.add('has-file');
+          showLiveAlert('Image uploaded successfully!', 'success');
+        };
+        reader.readAsDataURL(file);
+      });
+
+      // File validation
+      function validateFile(file) {
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+        const maxSize = 5 * 1024 * 1024; // 5MB
+
+        if (!allowedTypes.includes(file.type)) {
+          showLiveAlert('Please select a valid image file (JPG, PNG, GIF)', 'danger');
+          return false;
+        }
+
         if (file.size > maxSize) {
           const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
-          showAlert(`Image is too large (${fileSizeMB}MB). Please choose an image smaller than 5MB.`, 'danger');
-          fileInput.value = ''; // Clear the input
-          return;
+          showLiveAlert(`Image is too large (${fileSizeMB}MB). Please choose an image smaller than 5MB.`, 'danger');
+          return false;
         }
 
-        // Create file reader
-        const reader = new FileReader();
-
-        // Show upload progress
-        const uploadProgress = document.getElementById('uploadProgress');
-        const progressBar = uploadProgress.querySelector('.progress-bar');
-        uploadProgress.classList.remove('d-none');
-
-        // Simulate progress for user feedback
-        let progress = 0;
-        const progressInterval = setInterval(() => {
-          progress += Math.random() * 30;
-          if (progress > 90) progress = 90;
-          progressBar.style.width = progress + '%';
-        }, 100);
-
-        reader.onload = (e) => {
-          // Complete progress
-          clearInterval(progressInterval);
-          progressBar.style.width = '100%';
-
-          setTimeout(() => {
-            previewImg.src = e.target.result;
-            fileName.textContent = file.name;
-
-            // Show preview, hide upload content
-            uploadContent.classList.add('d-none');
-            imagePreview.classList.remove('d-none');
-            uploadArea.classList.add('has-file');
-            uploadProgress.classList.add('d-none');
-            progressBar.style.width = '0%';
-
-            // Add success feedback
-            uploadArea.style.borderColor = '#22c55e';
-            showAlert(`Image "${file.name}" uploaded successfully!`, 'success');
-          }, 500);
-        };
-
-        reader.onerror = () => {
-          clearInterval(progressInterval);
-          uploadProgress.classList.add('d-none');
-          progressBar.style.width = '0%';
-          showAlert('Failed to process the image. Please try again.', 'danger');
-          fileInput.value = '';
-        };
-
-        reader.readAsDataURL(file);
+        return true;
       }
 
-      // Remove image function (global scope)
+      // Show live validation alerts
+      function showLiveAlert(message, type) {
+        const alert = document.getElementById('liveValidationAlert');
+        const messageEl = document.getElementById('liveValidationMessage');
+
+        messageEl.textContent = message;
+        alert.className = `alert alert-${type} alert-dismissible fade show`;
+
+        // Auto hide after 5 seconds
+        setTimeout(() => {
+          hideLiveAlert();
+        }, 5000);
+      }
+
+      // Remove image function
       window.removeImage = function() {
         fileInput.value = '';
-        previewImg.src = '';
-        fileName.textContent = '';
-
-        // Show upload content, hide preview
         uploadContent.classList.remove('d-none');
         imagePreview.classList.add('d-none');
         uploadArea.classList.remove('has-file');
-        uploadArea.style.borderColor = '';
+        showLiveAlert('Image removed', 'info');
       };
 
-      // Enhanced alert function
-      function showAlert(message, type = 'info') {
-        const alertDiv = document.createElement('div');
-        alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-        alertDiv.style.cssText = 'top: 90px; right: 20px; z-index: 9999; max-width: 400px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);';
-
-        let icon = 'info-circle';
-        if (type === 'warning') icon = 'exclamation-triangle';
-        else if (type === 'danger') icon = 'times-circle';
-        else if (type === 'success') icon = 'check-circle';
-
-        alertDiv.innerHTML = `
-            <i class="fas fa-${icon} me-2"></i>
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-        document.body.appendChild(alertDiv);
-
-        // Auto remove after 6 seconds for longer messages
-        setTimeout(() => {
-          if (alertDiv.parentNode) {
-            alertDiv.remove();
-          }
-        }, 6000);
-      }
-
-      // Basic form interaction - Remove the preventDefault to allow actual submission
-      const form = document.querySelector('form');
-      const submitBtn = form.querySelector('button[type="submit"]');
-
-      form.addEventListener('submit', function(e) {
-        // Add loading state
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
-
-        // Don't prevent default - let the form submit normally
-      });
-
-      // Animate cards on scroll
-      const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
+      // Hide live alert function
+      window.hideLiveAlert = function() {
+        const alert = document.getElementById('liveValidationAlert');
+        alert.classList.remove('show');
+        alert.classList.add('d-none');
       };
 
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.style.opacity = '1';
-            entry.target.style.transform = 'translateY(0)';
-          }
-        });
-      }, observerOptions);
-
-      // Observe all cards
-      document.querySelectorAll('.card').forEach((card, index) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(30px)';
-        card.style.transition = `all 0.6s ease ${index * 0.1}s`;
-        observer.observe(card);
+      // Drag and drop
+      uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        uploadArea.style.borderColor = '#1dd1a1';
       });
 
-      // Touch feedback for mobile
-      if ('ontouchstart' in window) {
-        document.addEventListener('touchstart', function(e) {
-          if (e.target.closest('.report-type-btn, .btn')) {
-            e.target.closest('.report-type-btn, .btn').style.transform = 'scale(0.98)';
-          }
-        }, {
-          passive: true
-        });
+      uploadArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        uploadArea.style.borderColor = '#d1d5db';
+      });
 
-        document.addEventListener('touchend', function(e) {
-          if (e.target.closest('.report-type-btn, .btn')) {
-            setTimeout(() => {
-              const btn = e.target.closest('.report-type-btn, .btn');
-              if (btn && !btn.classList.contains('btn-check:checked')) {
-                btn.style.transform = '';
-              }
-            }, 100);
-          }
-        }, {
-          passive: true
-        });
-      }
+      uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        uploadArea.style.borderColor = '#d1d5db';
+
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+          fileInput.files = files;
+          fileInput.dispatchEvent(new Event('change'));
+        }
+      });
+
+      // Prevent upload area click when removing image
+      uploadArea.addEventListener('click', function(e) {
+        if (e.target.closest('.btn-danger')) {
+          e.stopPropagation();
+        }
+      });
     });
   </script>
 @endsection
