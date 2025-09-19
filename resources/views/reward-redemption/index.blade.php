@@ -1,49 +1,51 @@
 @extends('master')
 
 @section('content')
-@php
-// Mock shops and rewards data
-$mockShops = [
-  [
-    'seller' => (object)['business_name' => 'Green Cafe'],
-    'wallet' => 350,
-    'rewards' => [
-      (object)[
-        'id' => 1,
-        'name' => 'Free Coffee',
-        'description' => 'Enjoy a free cup of our signature coffee.',
-        'image_url' => 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',
-        'points_required' => 100,
-        'category' => 'food',
-      ],
-      (object)[
-        'id' => 2,
-        'name' => '10% Discount',
-        'description' => 'Get 10% off your next purchase.',
-        'image_url' => 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80',
-        'points_required' => 200,
-        'category' => 'discount',
-      ],
-    ],
-  ],
-  [
-    'seller' => (object)['business_name' => 'Eco Shop'],
-    'wallet' => 80,
-    'rewards' => [
-      (object)[
-        'id' => 3,
-        'name' => 'Reusable Straw',
-        'description' => 'A stylish reusable straw for your drinks.',
-        'image_url' => 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80',
-        'points_required' => 120,
-        'category' => 'merchandise',
-      ],
-    ],
-  ],
-];
-$currentTotal = ['coins' => 350];
-$shops = $mockShops;
-@endphp
+  @php
+    use App\Repository\ConsumerPointRepository;
+    $cPRepo = new ConsumerPointRepository();
+    // Mock shops and rewards data
+    // $mockShops = [
+    //     [
+    //         'seller' => (object) ['business_name' => 'Green Cafe'],
+    //         'wallet' => 350,
+    //         'rewards' => [
+    //             (object) [
+    //                 'id' => 1,
+    //                 'name' => 'Free Coffee',
+    //                 'description' => 'Enjoy a free cup of our signature coffee.',
+    //                 'image_url' => 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',
+    //                 'points_required' => 100,
+    //                 'category' => 'food',
+    //             ],
+    //             (object) [
+    //                 'id' => 2,
+    //                 'name' => '10% Discount',
+    //                 'description' => 'Get 10% off your next purchase.',
+    //                 'image_url' => 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80',
+    //                 'points_required' => 200,
+    //                 'category' => 'discount',
+    //             ],
+    //         ],
+    //     ],
+    //     [
+    //         'seller' => (object) ['business_name' => 'Eco Shop'],
+    //         'wallet' => 80,
+    //         'rewards' => [
+    //             (object) [
+    //                 'id' => 3,
+    //                 'name' => 'Reusable Straw',
+    //                 'description' => 'A stylish reusable straw for your drinks.',
+    //                 'image_url' => 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80',
+    //                 'points_required' => 120,
+    //                 'category' => 'merchandise',
+    //             ],
+    //         ],
+    //     ],
+    // ];
+    // $currentTotal = ['coins' => 350];
+    // $shops = $mockShops;
+  @endphp
   <div class="container-fluid min-vh-100 py-3">
     <div class="row justify-content-center">
       <div class="col-12 col-xl-10">
@@ -61,14 +63,14 @@ $shops = $mockShops;
                     <h2 class="fw-bold mb-2">Reward Gallery</h2>
                     <p class="fw-light opacity-90 mb-0">Discover and redeem amazing rewards with your points</p>
                   </div>
-                  <div class="text-end">
+                  {{-- <div class="text-end">
                     <div class="mb-2">
                       <small class="text-white opacity-75">Available Points</small>
                     </div>
                     <div class="display-6 fw-bold">
                       {{ number_format($currentTotal['coins'] ?? 0) }}
                     </div>
-                  </div>
+                  </div> --}}
                 </div>
               </div>
             </div>
@@ -136,26 +138,25 @@ $shops = $mockShops;
         </div>
 
         <!-- Rewards Grid: Grouped by Shop -->
-        @forelse($shops as $shop)
+        @forelse($sellers as $seller)
+          @php
+            $coins = $cPRepo->getByConsumerAndSeller(Auth::id(), $seller->id)->coins;
+          @endphp
           <div class="mb-5">
             <div class="d-flex align-items-center mb-2">
-              <h4 class="fw-bold mb-0"><i class="fas fa-store me-2"></i>{{ $shop['seller']->business_name }}</h4>
-              <span class="badge bg-success ms-3">Wallet: {{ number_format($shop['wallet']) }} pts</span>
+              <h4 class="fw-bold mb-0"><i class="fas fa-store me-2"></i>{{ $seller->business_name }}</h4>
+              <span class="badge bg-success ms-3">Wallet: {{ number_format($coins) }} pts</span>
             </div>
             <div class="row" id="rewardsContainer">
-              @forelse($shop['rewards'] as $reward)
-                <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-4 reward-card"
-                     data-category="{{ $reward->category ?? '' }}"
-                     data-points="{{ $reward->points_required ?? ($reward->points_per_unit ?? 0) }}"
-                     data-name="{{ strtolower($reward->name) }}">
+              @forelse($seller->rewards as $reward)
+                <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-4 reward-card" data-category="{{ '' }}" data-points="{{ $reward->points_per_unit }}"
+                  data-name="{{ strtolower($reward->name) }}">
                   <div class="card border-0 shadow-sm rounded-3 h-100 reward-item">
                     <div class="position-relative">
-                      <img src="{{ $reward->image_url ?? asset('images/default-reward.jpg') }}"
-                           class="card-img-top rounded-top-3"
-                           style="height: 200px; object-fit: cover;"
-                           alt="{{ $reward->name }}">
+                      <img src="{{ $reward->image_url ?? asset('images/default-reward.jpg') }}" class="card-img-top rounded-top-3" style="height: 200px; object-fit: cover;"
+                        alt="{{ $reward->name }}">
                       <span class="badge bg-primary position-absolute top-0 start-0 m-2">
-                        {{ $shop['seller']->business_name }}
+                        {{ $seller->business_name }}
                       </span>
                     </div>
                     <div class="card-body d-flex flex-column">
@@ -166,11 +167,11 @@ $shops = $mockShops;
                       <div class="d-flex justify-content-between align-items-center mb-3">
                         <div class="points-required">
                           <span class="h5 fw-bold text-primary mb-0">
-                            {{ number_format($reward->points_required ?? ($reward->points_per_unit ?? 0)) }}
+                            {{ number_format($reward->points_per_unit) }}
                           </span>
                           <small class="text-muted"> points</small>
                         </div>
-                        @if($shop['wallet'] >= ($reward->points_required ?? ($reward->points_per_unit ?? 0)))
+                        @if ($coins >= $reward->points_per_unit)
                           <span class="badge bg-success">
                             <i class="fas fa-check me-1"></i>Can Afford
                           </span>
@@ -181,10 +182,9 @@ $shops = $mockShops;
                         @endif
                       </div>
                       <div class="mt-auto">
-                        @if($shop['wallet'] >= ($reward->points_required ?? ($reward->points_per_unit ?? 0)))
-                          <button class="btn btn-primary w-100 redeem-btn" 
-                            data-reward='@json($reward)'
-                            data-shop='@json($shop['seller']->business_name)'>
+                        @if ($coins >= $reward->points_per_unit)
+                          <button class="btn btn-primary w-100 redeem-btn" data-reward='@json($reward)' data-seller_id='@json($seller->id)'
+                            data-shop='@json($seller->business_name)'>
                             <i class="fas fa-gift me-2"></i>Redeem Now
                           </button>
                         @else
@@ -211,25 +211,24 @@ $shops = $mockShops;
           <div class="col-12">
             <div class="card border-0 shadow-sm rounded-3">
               <div class="card-body text-center py-5">
-                  <div class="mb-4">
-                    <i class="fas fa-gift fa-4x text-muted opacity-50"></i>
-                  </div>
-                  <h4 class="fw-bold text-dark mb-3">No Rewards Available</h4>
-                  <p class="text-muted mb-4">
-                    Check back later for exciting rewards from your favorite stores!
-                  </p>
-                  <a href="{{ route('gallery') }}" class="btn btn-primary">
-                    <i class="fas fa-store me-2"></i>Browse Stores
-                  </a>
+                <div class="mb-4">
+                  <i class="fas fa-gift fa-4x text-muted opacity-50"></i>
                 </div>
+                <h4 class="fw-bold text-dark mb-3">No Rewards Available</h4>
+                <p class="text-muted mb-4">
+                  Check back later for exciting rewards from your favorite stores!
+                </p>
+                <a href="{{ route('gallery') }}" class="btn btn-primary">
+                  <i class="fas fa-store me-2"></i>Browse Stores
+                </a>
               </div>
             </div>
-          @endforelse
-        </div>
-
-
+          </div>
+        @endforelse
       </div>
+
     </div>
+  </div>
   </div>
 
   <!-- Redeem Modal -->
@@ -254,27 +253,72 @@ $shops = $mockShops;
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       let selectedReward = null;
+      let selectedSellerId = null;
       let selectedShop = null;
       document.querySelectorAll('.redeem-btn').forEach(btn => {
         btn.addEventListener('click', function() {
           selectedReward = JSON.parse(this.dataset.reward);
           selectedShop = this.dataset.shop;
+          selectedSellerId = this.dataset.seller_id;
           document.getElementById('mock-reward-details').innerHTML = `
             <div class='text-center mb-3'>
               <img src="${selectedReward.image_url}" class="img-fluid rounded mb-2" style="max-height:120px;">
               <h5 class="fw-bold mt-2">${selectedReward.name}</h5>
-              <div class="mb-2"><span class="badge bg-primary">${selectedReward.category}</span></div>
               <div class="mb-2">From <b>${selectedShop}</b></div>
-              <div class="mb-2 text-muted">${selectedReward.description}</div>
-              <div class="mb-2"><span class="badge bg-success">${selectedReward.points_required} pts</span></div>
+              <div class="mb-2"><span class="badge bg-success">${selectedReward.points_per_unit} pts</span></div>
             </div>
           `;
           new bootstrap.Modal(document.getElementById('mockRedeemModal')).show();
         });
       });
       document.getElementById('mockConfirmRedeem').onclick = function() {
-        alert('Mock: Reward redeemed! (This would be saved to My Rewards)');
-        bootstrap.Modal.getInstance(document.getElementById('mockRedeemModal')).hide();
+        if (!selectedReward || !selectedSellerId) {
+          alert('No reward selected.');
+          return;
+        }
+        const btn = this;
+        btn.disabled = true;
+
+        fetch(`/rewards/${selectedReward.id}/redeem`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({})
+          })
+          .then(response => {
+            if (!response.ok) {
+              if (response.status === 404) throw new Error('Not found');
+              if (response.status === 422) throw new Error('Invalid Request');
+              throw new Error(`HTTP_${response.status}`);
+            }
+            return response.json();
+          })
+          .then(data => {
+            if (data.success) {
+              alert('Reward redeemed successfully!');
+              console.log('Redemption:', data);
+              bootstrap.Modal.getInstance(
+                document.getElementById('mockRedeemModal')
+              ).hide();
+            } else {
+              let msg = data.message || 'Unknown error while redeeming reward.';
+              alert(msg);
+            }
+          })
+          .catch(error => {
+            console.error(error);
+            let msg = 'Something went wrong. Try again later.';
+            if (error.message === 'NOT_FOUND') msg = 'Reward not found.';
+            else if (error.message === 'INVALID_REQUEST') msg = 'Invalid redemption request.';
+            else if (error.message.startsWith('HTTP_')) msg = 'Server error. Try again.';
+            alert(msg);
+          })
+          .finally(() => {
+            btn.disabled = false;
+            bootstrap.Modal.getInstance(document.getElementById('mockRedeemModal')).hide();
+          });
       };
     });
   </script>
@@ -343,6 +387,7 @@ $shops = $mockShops;
         opacity: 0;
         transform: translateY(30px);
       }
+
       to {
         opacity: 1;
         transform: translateY(0);
@@ -350,13 +395,15 @@ $shops = $mockShops;
     }
 
     /* Form enhancements */
-    .form-control, .form-select {
+    .form-control,
+    .form-select {
       border-radius: 0.5rem;
       border: 2px solid #e9ecef;
       transition: all 0.3s ease;
     }
 
-    .form-control:focus, .form-select:focus {
+    .form-control:focus,
+    .form-select:focus {
       border-color: #1dd1a1;
       box-shadow: 0 0 0 0.2rem rgba(29, 209, 161, 0.25);
     }
@@ -414,14 +461,37 @@ $shops = $mockShops;
     }
 
     /* Staggered animation for reward cards */
-    .reward-card:nth-child(1) { animation-delay: 0.1s; }
-    .reward-card:nth-child(2) { animation-delay: 0.2s; }
-    .reward-card:nth-child(3) { animation-delay: 0.3s; }
-    .reward-card:nth-child(4) { animation-delay: 0.4s; }
-    .reward-card:nth-child(5) { animation-delay: 0.5s; }
-    .reward-card:nth-child(6) { animation-delay: 0.6s; }
-    .reward-card:nth-child(7) { animation-delay: 0.7s; }
-    .reward-card:nth-child(8) { animation-delay: 0.8s; }
+    .reward-card:nth-child(1) {
+      animation-delay: 0.1s;
+    }
+
+    .reward-card:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .reward-card:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+
+    .reward-card:nth-child(4) {
+      animation-delay: 0.4s;
+    }
+
+    .reward-card:nth-child(5) {
+      animation-delay: 0.5s;
+    }
+
+    .reward-card:nth-child(6) {
+      animation-delay: 0.6s;
+    }
+
+    .reward-card:nth-child(7) {
+      animation-delay: 0.7s;
+    }
+
+    .reward-card:nth-child(8) {
+      animation-delay: 0.8s;
+    }
 
     /* Loading states */
     .btn:disabled {

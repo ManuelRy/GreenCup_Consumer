@@ -98,7 +98,7 @@ Route::middleware(['auth:consumer'])->group(function () {
     Route::prefix('rewards')->name('reward.')->group(function () {
         Route::get('/', [RewardRedemptionController::class, 'index'])->name('index');
         Route::get('/my', [RewardRedemptionController::class, 'myRewards'])->name('my');
-        Route::get('/{reward}/redeem', [RewardRedemptionController::class, 'redeem'])->name('redeem');
+        Route::post('/{reward}/redeem', [RewardRedemptionController::class, 'redeem'])->name('redeem');
         Route::post('/{reward}/process', [RewardRedemptionController::class, 'process'])->name('process');
         Route::get('/history', [RewardRedemptionController::class, 'history'])->name('history');
         Route::get('/redemption/{redemption}', [RewardRedemptionController::class, 'show'])->name('redemption.show');

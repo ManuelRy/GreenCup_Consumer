@@ -3,8 +3,8 @@
 namespace App\Repository;
 
 use App\Models\ConsumerPoint;
-use App\Models\EarnHistory;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 class ConsumerPointRepository
 {
@@ -25,6 +25,18 @@ class ConsumerPointRepository
       'spent'  => (int) $totals->spent,
     ];
   }
+  public function getByConsumerAndSeller($consumer_id, $seller_id): ?Model
+  {
+    return ConsumerPoint::firstOrCreate(
+      [
+        'consumer_id' => $consumer_id,
+        'seller_id' => $seller_id,
+      ],
+      [
+        'coins' => 0,
+      ]
+    );
+  }
 
   public function get($id)
   {
@@ -37,12 +49,18 @@ class ConsumerPointRepository
   }
   public function claim($consumer_id, $seller_id, $points)
   {
-    $cp = ConsumerPoint::firstOrNew([
-      'consumer_id' => $consumer_id,
-      'seller_id' => $seller_id
-    ]);
+    $cp = $this->getByConsumerAndSeller($consumer_id, $seller_id);
     $cp->earned += $points;
     $cp->coins += $points;
+    $cp->save();
+    return $cp;
+  }
+
+  public function redeem($consumer_id, $seller_id, $points)
+  {
+    $cp = $this->getByConsumerAndSeller($consumer_id, $seller_id);
+    $cp->spent += $points;
+    $cp->coins -= $points;
     $cp->save();
     return $cp;
   }

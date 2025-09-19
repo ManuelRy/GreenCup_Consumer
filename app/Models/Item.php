@@ -13,12 +13,17 @@ class Item extends Model
     protected $fillable = [
         'name',
         'points_per_unit',
+        'seller_id',
         'image_url',
     ];
     protected $casts = [
         'points_per_unit' => 'integer',
     ];
 
+    public function seller()
+    {
+        return $this->belongsTo(Seller::class);
+    }
     public function qrCodes(): HasMany
     {
         return $this->hasMany(QrCode::class);

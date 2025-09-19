@@ -5,10 +5,24 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Seller;
 use App\Models\ConsumerPoint;
+use App\Repository\ConsumerPointRepository;
+use App\Repository\RewardRepository;
+use App\Repository\SellerRepository;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class RewardRedemptionController extends Controller
 {
+    private RewardRepository $rRepo;
+    private ConsumerPointRepository $cPRepo;
+    private SellerRepository $sRepo;
+
+    public function __construct(RewardRepository $rRepo, ConsumerPointRepository $cPRepo, SellerRepository $sRepo)
+    {
+        $this->rRepo = $rRepo;
+        $this->cPRepo = $cPRepo;
+        $this->sRepo = $sRepo;
+    }
     public function myRewards()
     {
         // Example: Fetch user's redeemed rewards (replace with real logic)
@@ -21,36 +35,51 @@ class RewardRedemptionController extends Controller
     }
     public function index()
     {
-        // Get all sellers with rewards (assuming rewards are items for now)
-        $sellers = Seller::with(['qrCodes.item'])->get();
-
-        // Get the authenticated consumer
-        $consumer = Auth::guard('consumer')->user();
-
-        // Get all wallet balances for this consumer (per shop)
-        $wallets = ConsumerPoint::where('consumer_id', $consumer->id)->get()->keyBy('seller_id');
-
-        // Prepare data: group rewards (items) by shop
-        $shops = [];
-        foreach ($sellers as $seller) {
-            // Get all items for this seller via QR codes (if any)
-            $items = $seller->qrCodes->pluck('item')->filter();
-            if ($items->isEmpty()) continue;
-
-            $shops[] = [
-                'seller' => $seller,
-                'wallet' => $wallets[$seller->id]->coins ?? 0,
-                'rewards' => $items->unique('id')->values(),
-            ];
-        }
-
-        return view('reward-redemption.index', compact('shops'));
+        $sellers = $this->sRepo->list();
+        return view('reward-redemption.index', compact('sellers'));
     }
 
-    public function redeem($reward)
+    public function redeem($id)
     {
-        // TODO: Implement logic to show redeem page for a reward
-        return view('reward-redemption.redeem');
+        try {
+            DB::beginTransaction();
+            // get the reward 
+            $reward = $this->rRepo->get($id);
+            if (!$reward) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Not found'
+                ], 404);
+            }
+            $consumer_id = Auth::id();
+            $seller_id = $reward->seller_id;
+            $reward_points = $reward->points_per_unit;
+            // check if the reward point is enough to redeem 
+            $cp = $this->cPRepo->getByConsumerAndSeller($consumer_id, $seller_id);
+            if ($cp->coins < $reward_points) {
+                if (!$reward) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Cannot redeem'
+                    ], 404);
+                }
+            }
+            // deduct the coins from consumer 
+            $this->cPRepo->redeem($consumer_id, $seller_id, $reward_points);
+            // add the deducted coins to seller
+            $this->sRepo->addPoints($seller_id, $reward_points);
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'receipt' => "Redeem successfully"
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Error checking reward'
+            ], 500);
+        }
     }
 
     public function process(Request $request, $reward)

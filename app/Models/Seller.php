@@ -31,6 +31,9 @@ class Seller extends Model
         'longitude' => 'decimal:7',
     ];
 
+    public function rewards() {
+        return $this->hasMany(Item::class);
+    }
     /**
      * Scope: only active stores with valid coords.
      */
