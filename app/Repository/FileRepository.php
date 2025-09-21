@@ -21,14 +21,14 @@ class FileRepository
     return $this->base() . '/get/' . $path;
   }
 
-  public function upload($file)
+  public function upload($folder, $file)
   {
     return Http::attach(
       'file',
       fopen($file->getRealPath(), 'r'),
       $file->getClientOriginalName()
     )->post($this->base() . '/upload', [
-      'folder' => 'report_evidences'
+      'folder' =>$folder
     ]);
   }
 }

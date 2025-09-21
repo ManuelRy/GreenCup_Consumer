@@ -22,11 +22,7 @@ class StoreController extends Controller
     public function gallery()
     {
         try {
-            $consumer = Auth::guard('consumer')->user();
-            if (!$consumer) {
-                return redirect()->route('login')->with('error', 'Please login to view the gallery');
-            }
-
+            $consumer = Auth::user();
             $postsData = $this->getFeedPosts(1, 20);
 
             return view('gallery.index', [
@@ -34,7 +30,6 @@ class StoreController extends Controller
                 'consumer' => $consumer,
                 'hasMore' => $postsData['hasMore']
             ]);
-
         } catch (\Exception $e) {
             Log::error('Gallery index error: ' . $e->getMessage());
             return redirect()->route('dashboard')->with('error', 'Unable to load gallery. Please try again.');
@@ -59,7 +54,6 @@ class StoreController extends Controller
                 'hasMore' => $postsData['hasMore'],
                 'message' => $postsData['posts']->count() > 0 ? 'Posts loaded successfully' : 'No posts found for this seller'
             ]);
-
         } catch (\Exception $e) {
             Log::error('Error loading feed: ' . $e->getMessage());
             return response()->json([
@@ -94,7 +88,6 @@ class StoreController extends Controller
             Log::info('Map method called - Stores found: ' . $stores->count());
 
             return view('map.index', compact('stores', 'consumer', 'mapboxToken'));
-
         } catch (\Exception $e) {
             Log::error('[StoreController@map] Error: ' . $e->getMessage());
 
@@ -103,7 +96,7 @@ class StoreController extends Controller
             $mapboxToken = env('MAPBOX_ACCESS_TOKEN', 'pk.eyJ1IjoibmVha3NlbmJlc3RmcmkiLCJhIjoiY205cXhkb3c3MTF3MzJ2b2doamJiM2NmaSJ9.zTnzZvYetGaqX0CODz4qoQ');
 
             return view('map.index', compact('stores', 'consumer', 'mapboxToken'))
-                   ->with('error', 'Some stores may not be available at the moment.');
+                ->with('error', 'Some stores may not be available at the moment.');
         }
     }
 
@@ -128,7 +121,6 @@ class StoreController extends Controller
                 'count' => $stores->count(),
                 'message' => $stores->count() > 0 ? 'Stores loaded successfully' : 'No stores found in database'
             ]);
-
         } catch (\Exception $e) {
             Log::error('Get stores API error: ' . $e->getMessage());
 
@@ -155,7 +147,6 @@ class StoreController extends Controller
 
             $storeDetails = $this->enrichStoreData($store);
             return response()->json(['success' => true, 'data' => $storeDetails]);
-
         } catch (\Exception $e) {
             Log::error('Get store details error: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'Unable to fetch store details'], 500);
@@ -181,8 +172,10 @@ class StoreController extends Controller
             }
 
             $distance = $this->calculateHaversineDistance(
-                $request->user_lat, $request->user_lng,
-                $store->latitude, $store->longitude
+                $request->user_lat,
+                $request->user_lng,
+                $store->latitude,
+                $store->longitude
             );
 
             return response()->json([
@@ -192,7 +185,6 @@ class StoreController extends Controller
                     'distance_miles' => round($distance * 0.621371, 2)
                 ]
             ]);
-
         } catch (\Exception $e) {
             Log::error('Calculate distance error: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'Unable to calculate distance'], 500);
@@ -220,8 +212,16 @@ class StoreController extends Controller
                 ->where('id', $id)
                 ->where('is_active', true)
                 ->first([
-                    'id', 'business_name', 'description', 'address', 'phone',
-                    'working_hours', 'photo_url', 'photo_caption', 'total_points', 'created_at'
+                    'id',
+                    'business_name',
+                    'description',
+                    'address',
+                    'phone',
+                    'working_hours',
+                    'photo_url',
+                    'photo_caption',
+                    'total_points',
+                    'created_at'
                 ]);
 
             if (!$seller) {
@@ -233,7 +233,6 @@ class StoreController extends Controller
             $seller = $this->addRankingData($seller);
 
             return view('store', compact('seller', 'consumer'));
-
         } catch (\Exception $e) {
             Log::error('Error loading seller profile: ' . $e->getMessage());
             abort(404, 'Store not found');
@@ -254,7 +253,6 @@ class StoreController extends Controller
                 ->get(['points', 'description', 'created_at']);
 
             return response()->json(['success' => true, 'transactions' => $transactions]);
-
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Unable to load transactions']);
         }
@@ -291,7 +289,6 @@ class StoreController extends Controller
                 'data' => $stores,
                 'count' => $stores->count()
             ]);
-
         } catch (\Exception $e) {
             Log::error('Search stores error: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'Search failed', 'data' => []], 500);
@@ -312,22 +309,21 @@ class StoreController extends Controller
 
             $sellers = DB::table('sellers')
                 ->where('is_active', true)
-                ->where(function($queryBuilder) use ($query) {
+                ->where(function ($queryBuilder) use ($query) {
                     $queryBuilder->where('business_name', 'like', "%{$query}%")
-                               ->orWhere('description', 'like', "%{$query}%")
-                               ->orWhere('address', 'like', "%{$query}%");
+                        ->orWhere('description', 'like', "%{$query}%")
+                        ->orWhere('address', 'like', "%{$query}%");
                 })
                 ->select(['id', 'business_name', 'description', 'address', 'photo_url', 'total_points'])
                 ->orderByDesc('total_points')
                 ->limit(20)
                 ->get();
 
-            $sellers = $sellers->map(function($seller) {
+            $sellers = $sellers->map(function ($seller) {
                 return $this->addRankingData($seller);
             });
 
             return response()->json(['success' => true, 'sellers' => $sellers]);
-
         } catch (\Exception $e) {
             Log::error('Search error: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'Search failed']);
@@ -364,7 +360,6 @@ class StoreController extends Controller
             }
 
             return response()->json(['success' => true, 'stats' => $stats]);
-
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Unable to get stats']);
         }
@@ -420,7 +415,7 @@ class StoreController extends Controller
                 ->keyBy('seller_id');
 
             // Process each store with real data
-            return $stores->map(function($store) use ($transactionData) {
+            return $stores->map(function ($store) use ($transactionData) {
                 // Get real transaction data for this store
                 $storeTransactionData = $transactionData->get($store->id);
 
@@ -474,7 +469,6 @@ class StoreController extends Controller
                     'created_at' => $store->created_at
                 ];
             });
-
         } catch (\Exception $e) {
             Log::error('Error fetching stores for map: ' . $e->getMessage());
             return collect([]);
@@ -499,8 +493,18 @@ class StoreController extends Controller
                 ->join('sellers as s', 's.id', '=', 'sp.seller_id')
                 ->where('s.is_active', true)
                 ->select([
-                    'sp.id', 'sp.photo_url', 'sp.caption', 'sp.category', 'sp.is_featured', 'sp.created_at',
-                    's.id as seller_id', 's.business_name', 's.address', 's.phone', 's.total_points', 's.description'
+                    'sp.id',
+                    'sp.photo_url',
+                    'sp.caption',
+                    'sp.category',
+                    'sp.is_featured',
+                    'sp.created_at',
+                    's.id as seller_id',
+                    's.business_name',
+                    's.address',
+                    's.phone',
+                    's.total_points',
+                    's.description'
                 ]);
 
             // Filter by specific seller if provided
@@ -553,7 +557,6 @@ class StoreController extends Controller
             $hasMore = ($offset + $perPage) < $total;
 
             return ['posts' => $processedPosts, 'hasMore' => $hasMore];
-
         } catch (\Exception $e) {
             Log::error('Error getting feed posts: ' . $e->getMessage());
             return ['posts' => collect(), 'hasMore' => false];
@@ -568,38 +571,44 @@ class StoreController extends Controller
         try {
             $query = DB::table('sellers')
                 ->select([
-                    'id', 'business_name as name', 'description', 'working_hours as hours',
-                    'email', 'address', 'latitude', 'longitude', 'photo_url as image',
-                    'phone', 'total_points', 'is_active'
+                    'id',
+                    'business_name as name',
+                    'description',
+                    'working_hours as hours',
+                    'email',
+                    'address',
+                    'latitude',
+                    'longitude',
+                    'photo_url as image',
+                    'phone',
+                    'total_points',
+                    'is_active'
                 ])
                 ->where('is_active', true);
 
             // Only filter by coordinates if they exist
-            $query->where(function($q) {
-                $q->where(function($subQ) {
+            $query->where(function ($q) {
+                $q->where(function ($subQ) {
                     $subQ->whereNotNull('latitude')
-                         ->whereNotNull('longitude')
-                         ->where('latitude', '!=', 0)
-                         ->where('longitude', '!=', 0);
+                        ->whereNotNull('longitude')
+                        ->where('latitude', '!=', 0)
+                        ->where('longitude', '!=', 0);
                 });
             });
 
             if ($search) {
-                $query->where(function($q) use ($search) {
+                $query->where(function ($q) use ($search) {
                     $q->where('business_name', 'LIKE', "%{$search}%")
-                      ->orWhere('address', 'LIKE', "%{$search}%")
-                      ->orWhere('description', 'LIKE', "%{$search}%");
+                        ->orWhere('address', 'LIKE', "%{$search}%")
+                        ->orWhere('description', 'LIKE', "%{$search}%");
                 });
             }
 
             $stores = $query->get();
 
-            Log::info('Stores fetched from database: ' . $stores->count());
-
-            return $stores->map(function($store) {
+            return $stores->map(function ($store) {
                 return $this->enrichStoreData($store);
             });
-
         } catch (\Exception $e) {
             Log::error('Error fetching stores: ' . $e->getMessage());
             return collect([]);
@@ -614,9 +623,18 @@ class StoreController extends Controller
         try {
             return DB::table('sellers')
                 ->select([
-                    'id', 'business_name as name', 'description', 'working_hours as hours',
-                    'email', 'address', 'latitude', 'longitude', 'photo_url as image',
-                    'phone', 'total_points', 'is_active'
+                    'id',
+                    'business_name as name',
+                    'description',
+                    'working_hours as hours',
+                    'email',
+                    'address',
+                    'latitude',
+                    'longitude',
+                    'photo_url as image',
+                    'phone',
+                    'total_points',
+                    'is_active'
                 ])
                 ->where('id', $id)
                 ->where('is_active', true)
@@ -664,7 +682,7 @@ class StoreController extends Controller
         $store->hours_formatted = $this->formatWorkingHours($store->hours);
         $store->is_open = $this->isStoreCurrentlyOpen($store->hours);
 
-                        // Initialize distance
+        // Initialize distance
         $store->distance = null;
 
         // Add photos (last 3 images max) and total count
@@ -750,7 +768,6 @@ class StoreController extends Controller
             }
 
             return $photos->toArray();
-
         } catch (\Exception $e) {
             Log::error('Error loading seller photos for seller ' . $sellerId . ': ' . $e->getMessage());
             return [];
@@ -765,23 +782,32 @@ class StoreController extends Controller
         try {
             $baseQuery = DB::table('sellers')
                 ->select([
-                    'id', 'business_name as name', 'description', 'working_hours as hours',
-                    'email', 'address', 'latitude', 'longitude', 'photo_url as image',
-                    'phone', 'total_points', 'is_active'
+                    'id',
+                    'business_name as name',
+                    'description',
+                    'working_hours as hours',
+                    'email',
+                    'address',
+                    'latitude',
+                    'longitude',
+                    'photo_url as image',
+                    'phone',
+                    'total_points',
+                    'is_active'
                 ])
                 ->where('is_active', true)
-                ->where(function($q) {
-                    $q->where(function($subQ) {
+                ->where(function ($q) {
+                    $q->where(function ($subQ) {
                         $subQ->whereNotNull('latitude')
-                             ->whereNotNull('longitude')
-                             ->where('latitude', '!=', 0)
-                             ->where('longitude', '!=', 0);
+                            ->whereNotNull('longitude')
+                            ->where('latitude', '!=', 0)
+                            ->where('longitude', '!=', 0);
                     });
                 })
-                ->where(function($q) use ($query) {
+                ->where(function ($q) use ($query) {
                     $q->where('business_name', 'LIKE', "%{$query}%")
-                      ->orWhere('address', 'LIKE', "%{$query}%")
-                      ->orWhere('description', 'LIKE', "%{$query}%");
+                        ->orWhere('address', 'LIKE', "%{$query}%")
+                        ->orWhere('description', 'LIKE', "%{$query}%");
                 });
 
             if ($userLat && $userLng) {
@@ -790,7 +816,7 @@ class StoreController extends Controller
 
             $stores = $baseQuery->get();
 
-            return $stores->map(function($store) {
+            return $stores->map(function ($store) {
                 return $this->enrichStoreData($store);
             });
         } catch (\Exception $e) {
@@ -850,8 +876,8 @@ class StoreController extends Controller
         $earthRadius = 6371;
         $dLat = deg2rad($lat2 - $lat1);
         $dLng = deg2rad($lng2 - $lng1);
-        $a = sin($dLat/2) * sin($dLat/2) + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($dLng/2) * sin($dLng/2);
-        $c = 2 * atan2(sqrt($a), sqrt(1-$a));
+        $a = sin($dLat / 2) * sin($dLat / 2) + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($dLng / 2) * sin($dLng / 2);
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
         return $earthRadius * $c;
     }
 

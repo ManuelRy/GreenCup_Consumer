@@ -57,9 +57,7 @@ class ReportController extends Controller
 
             if ($request->hasFile('image')) {
                 $file = $request->file('image');
-
-                $response = $this->fRepo->upload($file);
-                // dd($response);
+                $response = $this->fRepo->upload('report_evidences', $file);
                 if ($response->successful()) {
                     $data = $response->json();
 
