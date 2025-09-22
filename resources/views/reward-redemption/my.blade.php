@@ -77,6 +77,7 @@ $redemptions = [
                   </div>
                   <div class="mt-auto">
                     <span class="badge bg-success w-100 p-2">
+                        {{-- if being requested for redeem, change to "Requesting Redeem" --}}
                       <i class="fas fa-check me-1"></i>Successfully Redeemed
                     </span>
                   </div>

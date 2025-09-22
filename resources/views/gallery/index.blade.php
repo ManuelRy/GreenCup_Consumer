@@ -739,7 +739,7 @@ function showErrorState(message) {
 
 function visitStore() {
     if (app.selectedStore) {
-        window.location.href = `/seller/${app.selectedStore.id}`;
+        window.location.href = `/map?store=${app.selectedStore.id}`;
     }
 }
 

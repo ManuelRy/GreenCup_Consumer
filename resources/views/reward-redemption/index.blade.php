@@ -185,7 +185,7 @@
                         @if ($coins >= $reward->points_per_unit)
                           <button class="btn btn-primary w-100 redeem-btn" data-reward='@json($reward)' data-seller_id='@json($seller->id)'
                             data-shop='@json($seller->business_name)'>
-                            <i class="fas fa-gift me-2"></i>Redeem Now
+                            <i class="fas fa-gift me-2"></i>Request Redeem
                           </button>
                         @else
                           <button class="btn btn-outline-primary w-100" disabled>
@@ -244,7 +244,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-success" id="mockConfirmRedeem">Confirm Redeem</button>
+          <button type="button" class="btn btn-success" id="mockConfirmRedeem">Confirm Request</button>
         </div>
       </div>
     </div>

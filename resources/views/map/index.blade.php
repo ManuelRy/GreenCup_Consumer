@@ -1938,13 +1938,14 @@
 
         function checkForAutoSelection() {
             const urlParams = new URLSearchParams(window.location.search);
-            const storeId = urlParams.get('storeId');
+            // Accept both ?store=ID and ?storeId=ID for compatibility
+            const storeId = urlParams.get('store') || urlParams.get('storeId');
 
             if (storeId) {
                 console.log(`Auto-selecting store with ID: ${storeId}`);
 
                 // Find the store in the stores array
-                const store = app.stores.find(s => s.id.toString() === storeId.toString());
+            const store = app.stores.find(s => s.id == storeId);
 
                 if (store) {
                     console.log(`Found store: ${store.name}`);
