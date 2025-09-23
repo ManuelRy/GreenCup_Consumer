@@ -1,24 +1,6 @@
 @extends('master')
 
 @section('content')
-@php
-$redemptions = [
-  (object)[
-    'reward_name' => 'Free Coffee',
-    'store_name' => 'Green Cafe',
-    'description' => 'Enjoy a free cup of our signature coffee.',
-    'image_url' => 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',
-    'created_at' => now()->subDays(2),
-  ],
-  (object)[
-    'reward_name' => '10% Discount',
-    'store_name' => 'Green Cafe',
-    'description' => 'Get 10% off your next purchase.',
-    'image_url' => 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80',
-    'created_at' => now()->subDays(5),
-  ],
-];
-@endphp
   <div class="container-fluid min-vh-100 py-3">
     <div class="row justify-content-center">
       <div class="col-12 col-xl-10">
@@ -56,16 +38,14 @@ $redemptions = [
             <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-4 reward-card">
               <div class="card border-0 shadow-sm rounded-3 h-100 reward-item">
                 <div class="position-relative">
-                  <img src="{{ $redemption->image_url ?? asset('images/default-reward.jpg') }}"
-                       class="card-img-top rounded-top-3"
-                       style="height: 200px; object-fit: cover;"
-                       alt="{{ $redemption->reward_name ?? 'Reward' }}">
+                  <img src="{{ $redemption->image_url ?? asset('images/default-reward.jpg') }}" class="card-img-top rounded-top-3" style="height: 200px; object-fit: cover;"
+                    alt="{{ $redemption->name ?? 'Reward' }}">
                   <span class="badge bg-success position-absolute top-0 start-0 m-2">
-                    <i class="fas fa-check me-1"></i>Redeemed
+                    <i class="fas fa-check me-1"></i> {{ $redemption->is_redeemed ? 'Redeemed' : 'Pending' }}
                   </span>
                 </div>
                 <div class="card-body d-flex flex-column">
-                  <h5 class="card-title fw-bold text-dark mb-2">{{ $redemption->reward_name ?? 'Reward' }}</h5>
+                  <h5 class="card-title fw-bold text-dark mb-2">{{ $redemption->name ?? 'Reward' }}</h5>
                   <div class="mb-2">
                     <small class="text-muted"><i class="fas fa-store me-1"></i>{{ $redemption->store_name ?? '' }}</small>
                   </div>
@@ -73,11 +53,12 @@ $redemptions = [
                     {{ Str::limit($redemption->description ?? '', 80) }}
                   </p>
                   <div class="mb-3">
-                    <span class="badge bg-primary">Redeemed: {{ $redemption->created_at ? $redemption->created_at->format('M d, Y') : '' }}</span>
+                    <span class="badge bg-primary"> {{ $redemption->is_redeemed ? 'Redeemed' : 'Pending' }}:
+                      {{ $redemption->created_at ? $redemption->created_at->format('M d, Y') : '' }}</span>
                   </div>
                   <div class="mt-auto">
                     <span class="badge bg-success w-100 p-2">
-                        {{-- if being requested for redeem, change to "Requesting Redeem" --}}
+                      {{-- if being requested for redeem, change to "Requesting Redeem" --}}
                       <i class="fas fa-check me-1"></i>Successfully Redeemed
                     </span>
                   </div>
@@ -154,6 +135,7 @@ $redemptions = [
         opacity: 0;
         transform: translateY(30px);
       }
+
       to {
         opacity: 1;
         transform: translateY(0);
@@ -171,14 +153,26 @@ $redemptions = [
         padding-left: 0.75rem;
         padding-right: 0.75rem;
       }
+
       .display-6 {
         font-size: 2rem !important;
       }
     }
 
-    .reward-card:nth-child(1) { animation-delay: 0.1s; }
-    .reward-card:nth-child(2) { animation-delay: 0.2s; }
-    .reward-card:nth-child(3) { animation-delay: 0.3s; }
-    .reward-card:nth-child(4) { animation-delay: 0.4s; }
+    .reward-card:nth-child(1) {
+      animation-delay: 0.1s;
+    }
+
+    .reward-card:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .reward-card:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+
+    .reward-card:nth-child(4) {
+      animation-delay: 0.4s;
+    }
   </style>
 @endsection

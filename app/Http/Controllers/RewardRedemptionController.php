@@ -25,12 +25,7 @@ class RewardRedemptionController extends Controller
     }
     public function myRewards()
     {
-        // Example: Fetch user's redeemed rewards (replace with real logic)
-        $consumer = Auth::guard('consumer')->user();
-        // You should have a model/table for redemptions, here is a placeholder:
-        $redemptions = [];
-        // If you have a Redemption model, use:
-        // $redemptions = Redemption::where('consumer_id', $consumer->id)->latest()->get();
+        $redemptions = $this->rRepo->history(Auth::id());
         return view('reward-redemption.my', compact('redemptions'));
     }
     public function index()
@@ -45,7 +40,7 @@ class RewardRedemptionController extends Controller
             DB::beginTransaction();
             // get the reward 
             $reward = $this->rRepo->get($id);
-            if (!$reward) {
+            if (!$reward || !$reward->isValid()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Not found'
@@ -66,6 +61,10 @@ class RewardRedemptionController extends Controller
             }
             // deduct the coins from consumer 
             $this->cPRepo->redeem($consumer_id, $seller_id, $reward_points);
+            // add the quantity redeemed to the reward model
+            $this->rRepo->redeem($reward->id, 1);
+            // create a new redeem history
+            $this->rRepo->createHistory($consumer_id, $reward->id);
             // add the deducted coins to seller
             $this->sRepo->addPoints($seller_id, $reward_points);
             DB::commit();

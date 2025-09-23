@@ -32,7 +32,7 @@ class Seller extends Model
     ];
 
     public function rewards() {
-        return $this->hasMany(Item::class);
+        return $this->hasMany(Reward::class);
     }
     /**
      * Scope: only active stores with valid coords.
