@@ -98,8 +98,12 @@
             const dropdown = document.getElementById('monthDropdown');
             const button = document.querySelector('.month-button');
 
-            // Only handle month dropdown, not Bootstrap dropdowns
-            if (dropdown && button && !dropdown.contains(event.target) && !button.contains(event.target)) {
+            // Only handle custom month dropdown, not Bootstrap dropdowns
+            if (dropdown && button &&
+                !dropdown.contains(event.target) &&
+                !button.contains(event.target) &&
+                !event.target.closest('.navbar') &&
+                !event.target.closest('[data-bs-toggle="dropdown"]')) {
                 dropdown.classList.remove('show');
             }
         });

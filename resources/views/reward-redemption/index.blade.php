@@ -63,14 +63,11 @@
                     <h2 class="fw-bold mb-2">Reward Gallery</h2>
                     <p class="fw-light opacity-90 mb-0">Discover and redeem amazing rewards with your points</p>
                   </div>
-                  {{-- <div class="text-end">
-                    <div class="mb-2">
-                      <small class="text-white opacity-75">Available Points</small>
-                    </div>
-                    <div class="display-6 fw-bold">
-                      {{ number_format($currentTotal['coins'] ?? 0) }}
-                    </div>
-                  </div> --}}
+                  <div class="text-end">
+                    <a href="{{ route('reward.my') }}" class="btn btn-outline-light btn-lg">
+                      <i class="fas fa-trophy me-2"></i>My Rewards
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
@@ -82,6 +79,14 @@
           <div class="col-12">
             <div class="card border-0 shadow-sm rounded-3">
               <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h5 class="fw-semibold text-dark mb-0">
+                    <i class="fas fa-filter me-2"></i>Filter & Search
+                  </h5>
+                  <a href="{{ route('reward.my') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-trophy me-1"></i>View My Rewards
+                  </a>
+                </div>
                 <div class="row g-3 align-items-end">
                   <!-- Search Input -->
                   <div class="col-12 col-md-6 col-lg-4">

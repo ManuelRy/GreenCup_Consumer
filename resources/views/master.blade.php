@@ -143,6 +143,7 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
             padding: 0.5rem 0;
+            z-index: 1050 !important;
         }
 
         .dropdown-item {
@@ -258,8 +259,9 @@
     @include('partials.navbar')
     @yield('content')
 
-    <script src="{{ asset('dashboard.js') }}"></script>
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <!-- Load Bootstrap first to ensure proper initialization -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="{{ asset('dashboard.js') }}"></script>
 </body>
 </html>
