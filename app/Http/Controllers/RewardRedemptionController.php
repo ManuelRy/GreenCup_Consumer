@@ -38,7 +38,7 @@ class RewardRedemptionController extends Controller
     {
         try {
             DB::beginTransaction();
-            // get the reward 
+            // get the reward
             $reward = $this->rRepo->get($id);
             if (!$reward || !$reward->isValid()) {
                 return response()->json([
@@ -49,7 +49,7 @@ class RewardRedemptionController extends Controller
             $consumer_id = Auth::id();
             $seller_id = $reward->seller_id;
             $reward_points = $reward->points_per_unit;
-            // check if the reward point is enough to redeem 
+            // check if the reward point is enough to redeem
             $cp = $this->cPRepo->getByConsumerAndSeller($consumer_id, $seller_id);
             if ($cp->coins < $reward_points) {
                 if (!$reward) {
@@ -59,14 +59,14 @@ class RewardRedemptionController extends Controller
                     ], 404);
                 }
             }
-            // deduct the coins from consumer 
+            // deduct the coins from consumer
             $this->cPRepo->redeem($consumer_id, $seller_id, $reward_points);
             // add the quantity redeemed to the reward model
             $this->rRepo->redeem($reward->id, 1);
             // create a new redeem history
             $this->rRepo->createHistory($consumer_id, $reward->id);
             // add the deducted coins to seller
-            $this->sRepo->addPoints($seller_id, $reward_points);
+            // $this->sRepo->addPoints($seller_id, $reward_points);
             DB::commit();
             return response()->json([
                 'success' => true,
