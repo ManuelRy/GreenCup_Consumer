@@ -60,10 +60,10 @@ Route::middleware(['auth:consumer'])->group(function () {
     Route::put('/account/profile', [AccountController::class, 'updateProfile'])->name('account.profile.update');
     Route::put('/account/password', [AccountController::class, 'updatePassword'])->name('account.password.update');
     Route::get('/account/transactions', [AccountController::class, 'transactionHistory'])->name('account.transactions');
-    
+
     // QR Code
     Route::get('/qr-code', [ConsumerController::class, 'showQrCode'])->name('consumer.qr-code');
-    
+
     // Receipt scanning
     Route::get('/scan-receipt', [ReceiptController::class, 'scan'])->name('scan.receipt');
 
@@ -114,7 +114,7 @@ Route::middleware(['auth:consumer'])->group(function () {
         // Consumer APIs
         Route::get('/consumer/points', [ConsumerController::class, 'getPoints'])->name('consumer.points');
 
-        // Store APIs
+        // Store APIs   
         Route::get('/stores', [StoreController::class, 'getStores'])->name('stores');
         Route::get('/store/{id}/details', [StoreController::class, 'getStoreDetails'])->name('store.details');
         Route::get('/store/{id}/transactions', [StoreController::class, 'getTransactions'])->name('store.transactions');

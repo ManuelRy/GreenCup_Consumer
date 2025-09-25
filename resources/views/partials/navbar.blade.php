@@ -37,15 +37,9 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <div class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle {{ request()->routeIs('reward.*') ? 'active' : '' }}" href="#" id="rewardsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-gift me-1"></i><span>Rewards</span>
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="rewardsDropdown">
-                                <li><a class="dropdown-item {{ request()->routeIs('reward.index') ? 'active' : '' }}" href="{{ route('reward.index') }}">All Rewards</a></li>
-                                <li><a class="dropdown-item {{ request()->routeIs('reward.my') ? 'active' : '' }}" href="{{ route('reward.my') }}">My Rewards</a></li>
-                            </ul>
-                        </div>
+                        <a class="nav-link {{ request()->routeIs('reward.*') ? 'active' : '' }}" href="{{ route('reward.index') }}" @if (request()->routeIs('reward.*')) aria-current="page" @endif>
+                            <i class="bi bi-gift me-1"></i><span>Rewards</span>
+                        </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('gallery') || request()->routeIs('products') ? 'active' : '' }}"
@@ -152,20 +146,6 @@
                             href="{{ route('dashboard') }}" data-bs-dismiss="offcanvas"
                             onclick="console.log('Dashboard clicked'); return true;">
                             <i class="bi bi-speedometer2 me-2"></i>Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link px-0 {{ request()->routeIs('reward.index') ? 'active' : '' }}"
-                            href="{{ route('reward.index') }}" data-bs-dismiss="offcanvas"
-                            onclick="console.log('Rewards clicked'); return true;">
-                            <i class="bi bi-gift me-2"></i>All Rewards
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link px-0 {{ request()->routeIs('reward.my') ? 'active' : '' }}"
-                            href="{{ route('reward.my') }}" data-bs-dismiss="offcanvas"
-                            onclick="console.log('My Rewards clicked'); return true;">
-                            <i class="bi bi-star me-2"></i>My Rewards
                         </a>
                     </li>
                     <li class="nav-item">
@@ -346,6 +326,52 @@
         border-radius: .5rem;
     }
 
+    /* Ensure navbar links are clickable */
+    .navbar .nav-link {
+        border-radius: .75rem;
+        padding: .5rem .75rem;
+        position: relative;
+        z-index: 1;
+        pointer-events: auto !important;
+        cursor: pointer !important;
+    }
+
+    .navbar .nav-link.active,
+    .navbar .nav-link:focus {
+        background: rgba(25, 135, 84, .1);
+        outline: 0;
+    }
+
+    .navbar .dropdown-toggle::after {
+        margin-left: 0.5rem;
+    }
+
+    .navbar .dropdown-menu {
+        border: none;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        border-radius: 0.5rem;
+        z-index: 1050;
+    }
+
+    .navbar .dropdown-item {
+        pointer-events: auto !important;
+        cursor: pointer !important;
+    }
+
+    .offcanvas .nav-link {
+        padding: .6rem 0;
+        cursor: pointer;
+        position: relative;
+        z-index: 1;
+        display: block;
+        text-decoration: none;
+    }
+
+    .offcanvas .nav-link:hover {
+        background: rgba(25, 135, 84, .1);
+        border-radius: .5rem;
+    }
+
     /* Ensure offcanvas links are clickable */
     .offcanvas .navbar-nav .nav-item {
         position: relative;
@@ -356,146 +382,47 @@
         pointer-events: auto;
         touch-action: manipulation;
     }
-
-    /* Debug styling - remove after testing */
-    .offcanvas .nav-link:active {
-        background: rgba(25, 135, 84, .2) !important;
-    }
 </style>
 
-{{-- Safe helpers: auto-close offcanvas; add fallback if Bootstrap JS isn't loaded --}}
+{{-- Fix specifically for account dropdown --}}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('Navbar script loaded');
+document.addEventListener('DOMContentLoaded', function() {
+    // Wait for Bootstrap to load completely
+    function initializeDropdowns() {
+        console.log('Initializing dropdowns...');
 
-        function initNav() {
-            console.log('Initializing navbar');
+        // Specifically target the account dropdown
+        const accountDropdown = document.querySelector('.user-dropdown .dropdown-toggle');
 
-            // Enhanced auto-close functionality for offcanvas navigation
-            document.querySelectorAll('.offcanvas .nav-link, [data-bs-dismiss="offcanvas"]').forEach(function(
-                el) {
-                el.addEventListener('click', function(e) {
-                    console.log('Navigation link clicked:', el.textContent.trim());
-
-                    const oc = el.closest('.offcanvas');
-                    if (!oc) return;
-
-                    // If it's a navigation link (has href), ensure navigation happens
-                    if (el.hasAttribute('href') && el.getAttribute('href') !== '#') {
-                        const href = el.getAttribute('href');
-                        console.log('Navigating to:', href);
-
-                        // Close the offcanvas first
-                        if (window.bootstrap && bootstrap.Offcanvas) {
-                            const offcanvasInstance = bootstrap.Offcanvas.getOrCreateInstance(
-                                oc);
-                            offcanvasInstance.hide();
-
-                            // Navigate after a short delay to allow offcanvas to close
-                            setTimeout(function() {
-                                console.log('Delayed navigation to:', href);
-                                window.location.href = href;
-                            }, 150);
-                        } else {
-                            // Fallback: navigate immediately if Bootstrap is not available
-                            console.log('Bootstrap not available, direct navigation to:', href);
-                            window.location.href = href;
-                        }
-
-                        // Prevent default to handle navigation manually
-                        e.preventDefault();
-                    } else {
-                        // For non-navigation elements (like close buttons), just close the offcanvas
-                        if (window.bootstrap && bootstrap.Offcanvas) {
-                            bootstrap.Offcanvas.getOrCreateInstance(oc).hide();
-                        }
-                    }
-                });
-            });
-
-            // Simpler fallback: direct click handling
-            document.querySelectorAll('.offcanvas .nav-link[href]:not([href="#"])').forEach(function(link) {
-                link.addEventListener('click', function(e) {
-                    console.log('Direct link handler triggered');
-                    const href = this.getAttribute('href');
-                    if (href) {
-                        e.preventDefault();
-                        e.stopPropagation();
-
-                        // Close mobile menu if visible
-                        const offcanvas = document.querySelector(
-                            '.offcanvas.show, .offcanvas[style*="display: block"]');
-                        if (offcanvas) {
-                            offcanvas.style.display = 'none';
-                            offcanvas.classList.remove('show');
-                            document.body.classList.remove('modal-open');
-
-                            // Remove backdrop if exists
-                            const backdrop = document.querySelector('.offcanvas-backdrop');
-                            if (backdrop) backdrop.remove();
-                        }
-
-                        // Navigate
-                        setTimeout(() => {
-                            window.location.href = href;
-                        }, 100);
-                    }
-                });
-            });
-
-            // Optional: stronger shadow after scroll
-            const nav = document.querySelector('.navbar.fixed-top');
-            if (nav) {
-                document.addEventListener('scroll', function() {
-                    nav.classList.toggle('shadow-sm', window.scrollY < 4);
-                    nav.classList.toggle('shadow', window.scrollY >= 4);
-                });
+        if (window.bootstrap && bootstrap.Dropdown) {
+            // Initialize account dropdown
+            if (accountDropdown && !bootstrap.Dropdown.getInstance(accountDropdown)) {
+                console.log('Initializing account dropdown');
+                new bootstrap.Dropdown(accountDropdown);
             }
 
-            // Handle form submissions in offcanvas (like logout)
-            document.querySelectorAll('.offcanvas form').forEach(function(form) {
-                form.addEventListener('submit', function(e) {
-                    const oc = form.closest('.offcanvas');
-                    if (oc && window.bootstrap && bootstrap.Offcanvas) {
-                        bootstrap.Offcanvas.getOrCreateInstance(oc).hide();
-                    }
-                });
-            });
-        }
-
-        // Check if Bootstrap is loaded
-        if (window.bootstrap && bootstrap.Offcanvas) {
-            console.log('Bootstrap found, initializing');
-            initNav();
+            console.log('Dropdowns initialized successfully');
         } else {
-            console.log('Bootstrap not found, waiting for it to load');
-            // Wait for Bootstrap to load from master.blade.php
-            setTimeout(initNav, 200);
+            console.log('Bootstrap not ready, retrying...');
+            setTimeout(initializeDropdowns, 100);
         }
+    }
 
-        // Additional safety: ensure offcanvas can be toggled even if Bootstrap fails
-        document.querySelectorAll('[data-bs-toggle="offcanvas"]').forEach(function(toggler) {
-            toggler.addEventListener('click', function(e) {
-                console.log('Offcanvas toggler clicked');
-                if (!window.bootstrap || !bootstrap.Offcanvas) {
-                    // Simple fallback: show/hide the offcanvas manually
-                    const target = document.querySelector(toggler.getAttribute(
-                        'data-bs-target'));
-                    if (target) {
-                        console.log('Manual toggle offcanvas');
-                        if (target.style.display === 'block' || target.classList.contains(
-                                'show')) {
-                            target.style.display = 'none';
-                            target.classList.remove('show');
-                            document.body.classList.remove('modal-open');
-                        } else {
-                            target.style.display = 'block';
-                            target.classList.add('show');
-                            document.body.classList.add('modal-open');
-                        }
-                    }
-                }
+    // Try initialization multiple times to ensure it works
+    setTimeout(initializeDropdowns, 50);
+    setTimeout(initializeDropdowns, 200);
+    setTimeout(initializeDropdowns, 500);
+
+    // Handle mobile offcanvas closing
+    document.querySelectorAll('.offcanvas .nav-link[href]').forEach(function(link) {
+        if (link.getAttribute('href') !== '#') {
+            link.addEventListener('click', function() {
+                setTimeout(() => {
+                    const backdrop = document.querySelector('.offcanvas-backdrop');
+                    if (backdrop) backdrop.remove();
+                }, 150);
             });
-        });
+        }
     });
+});
 </script>
