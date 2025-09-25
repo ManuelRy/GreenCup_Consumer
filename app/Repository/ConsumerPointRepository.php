@@ -64,4 +64,13 @@ class ConsumerPointRepository
     $cp->save();
     return $cp;
   }
+
+  public function refund($consumer_id, $seller_id, $points)
+  {
+    $cp = $this->getByConsumerAndSeller($consumer_id, $seller_id);
+    $cp->spent -= $points;
+    $cp->coins += $points;
+    $cp->save();
+    return $cp;
+  }
 }
