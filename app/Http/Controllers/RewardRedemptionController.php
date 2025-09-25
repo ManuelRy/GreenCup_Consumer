@@ -31,6 +31,15 @@ class RewardRedemptionController extends Controller
     public function index()
     {
         $sellers = $this->sRepo->list();
+        // return only the valid reward
+        $sellers = $sellers->map(function ($seller) {
+            $seller->setRelation(
+                'rewards',
+                $seller->rewards->filter->isValid()->values()
+            );
+
+            return $seller;
+        });
         return view('reward-redemption.index', compact('sellers'));
     }
 

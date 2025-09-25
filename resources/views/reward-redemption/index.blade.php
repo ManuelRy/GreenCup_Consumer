@@ -4,47 +4,6 @@
   @php
     use App\Repository\ConsumerPointRepository;
     $cPRepo = new ConsumerPointRepository();
-    // Mock shops and rewards data
-    // $mockShops = [
-    //     [
-    //         'seller' => (object) ['business_name' => 'Green Cafe'],
-    //         'wallet' => 350,
-    //         'rewards' => [
-    //             (object) [
-    //                 'id' => 1,
-    //                 'name' => 'Free Coffee',
-    //                 'description' => 'Enjoy a free cup of our signature coffee.',
-    //                 'image_url' => 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',
-    //                 'points_required' => 100,
-    //                 'category' => 'food',
-    //             ],
-    //             (object) [
-    //                 'id' => 2,
-    //                 'name' => '10% Discount',
-    //                 'description' => 'Get 10% off your next purchase.',
-    //                 'image_url' => 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80',
-    //                 'points_required' => 200,
-    //                 'category' => 'discount',
-    //             ],
-    //         ],
-    //     ],
-    //     [
-    //         'seller' => (object) ['business_name' => 'Eco Shop'],
-    //         'wallet' => 80,
-    //         'rewards' => [
-    //             (object) [
-    //                 'id' => 3,
-    //                 'name' => 'Reusable Straw',
-    //                 'description' => 'A stylish reusable straw for your drinks.',
-    //                 'image_url' => 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80',
-    //                 'points_required' => 120,
-    //                 'category' => 'merchandise',
-    //             ],
-    //         ],
-    //     ],
-    // ];
-    // $currentTotal = ['coins' => 350];
-    // $shops = $mockShops;
   @endphp
   <div class="container-fluid min-vh-100 py-3">
     <div class="row justify-content-center">
@@ -149,7 +108,7 @@
             </div>
             <div class="row" id="rewardsContainer">
               @forelse($seller->rewards as $reward)
-                <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-4 reward-card" data-category="{{ '' }}" data-points="{{ $reward->points_per_unit }}"
+                <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-4 reward-card" data-category="{{ '' }}" data-points="{{ $reward->points_required }}"
                   data-name="{{ strtolower($reward->name) }}">
                   <div class="card border-0 shadow-sm rounded-3 h-100 reward-item">
                     <div class="position-relative">
@@ -160,18 +119,18 @@
                       </span>
                     </div>
                     <div class="card-body d-flex flex-column">
-                      <h5 class="card-title fw-bold text-dark mb-2">{{ $reward->name }}</h5>
+                      <h5 class="card-title fw-bold text-dark mb-2">{{ $reward->name }}: {{ $reward->quantity - $reward->quantity_redeemed }} left</h5>
                       <p class="card-text text-muted small mb-3 flex-grow-1">
                         {{ Str::limit($reward->description ?? '', 80) }}
                       </p>
                       <div class="d-flex justify-content-between align-items-center mb-3">
                         <div class="points-required">
                           <span class="h5 fw-bold text-primary mb-0">
-                            {{ number_format($reward->points_per_unit) }}
+                            {{ number_format($reward->points_required) }}
                           </span>
                           <small class="text-muted"> points</small>
                         </div>
-                        @if ($coins >= $reward->points_per_unit)
+                        @if ($coins >= $reward->points_required)
                           <span class="badge bg-success">
                             <i class="fas fa-check me-1"></i>Can Afford
                           </span>
@@ -182,7 +141,7 @@
                         @endif
                       </div>
                       <div class="mt-auto">
-                        @if ($coins >= $reward->points_per_unit)
+                        @if ($coins >= $reward->points_required)
                           <button class="btn btn-primary w-100 redeem-btn" data-reward='@json($reward)' data-seller_id='@json($seller->id)'
                             data-shop='@json($seller->business_name)'>
                             <i class="fas fa-gift me-2"></i>Request Redeem
@@ -265,7 +224,7 @@
               <img src="${selectedReward.image_url}" class="img-fluid rounded mb-2" style="max-height:120px;">
               <h5 class="fw-bold mt-2">${selectedReward.name}</h5>
               <div class="mb-2">From <b>${selectedShop}</b></div>
-              <div class="mb-2"><span class="badge bg-success">${selectedReward.points_per_unit} pts</span></div>
+              <div class="mb-2"><span class="badge bg-success">${selectedReward.points_required} pts</span></div>
             </div>
           `;
           new bootstrap.Modal(document.getElementById('mockRedeemModal')).show();
