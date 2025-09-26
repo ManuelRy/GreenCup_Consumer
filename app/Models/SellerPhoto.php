@@ -9,6 +9,8 @@ class SellerPhoto extends Model
 {
     use HasFactory;
 
+    protected $table = 'seller_photos';
+    
     protected $fillable = [
         'seller_id',
         'photo_url',
@@ -23,11 +25,17 @@ class SellerPhoto extends Model
         'sort_order' => 'integer',
     ];
 
-    /**
-     * Seller photo belongs to a seller
-     */
     public function seller()
     {
         return $this->belongsTo(Seller::class);
+    }
+
+    public function isFrozen(): bool
+    {
+        return str_starts_with($photo->caption ?? '', '[FROZEN]');
+    }
+
+    public function trimCaption(): string {
+        return preg_replace('/^\[frozen\]\s*/i', '', $this->caption);
     }
 }
