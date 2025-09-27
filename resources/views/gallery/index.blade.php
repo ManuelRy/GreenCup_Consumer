@@ -1,129 +1,150 @@
 @extends('master')
 
 @section('content')
-  <div class="gallery-container">
-    <!-- Mobile Stores Toggle -->
-    <div class="d-lg-none mb-3">
-      <button class="btn btn-success w-100 d-flex align-items-center justify-content-center gap-2" data-bs-toggle="offcanvas" data-bs-target="#storesPanel" aria-controls="storesPanel">
-        <i class="bi bi-shop"></i>
-        <span>Browse Stores</span>
-        <span class="badge bg-light text-success" id="mobileStoresCount">0</span>
-      </button>
+<div class="container-fluid px-3 py-4" style="max-width: 1400px;">
+  <!-- Mobile Toggle -->
+  <div class="d-lg-none mb-3">
+    <button class="btn btn-success w-100 d-flex align-items-center justify-content-center gap-2" data-bs-toggle="offcanvas" data-bs-target="#storesPanel">
+      <i class="bi bi-shop"></i><span>Browse Stores</span><span class="badge bg-light text-success" id="mobileStoresCount">0</span>
+    </button>
+  </div>
+
+  <div class="row g-3">
+    <!-- Stores Panel -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm d-none d-lg-block">
+        <div class="card-header bg-white py-3">
+          <div class="d-flex align-items-center justify-content-between">
+            <h5 class="mb-0 d-flex align-items-center gap-2"><i class="bi bi-shop text-success"></i>Stores Directory</h5>
+            <span class="badge bg-success" id="storesCount">0</span>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          <div class="p-3 border-bottom">
+            <div class="input-group mb-3">
+              <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+              <input type="text" class="form-control" id="storeSearch" placeholder="Search stores...">
+            </div>
+            <select class="form-select" id="storeFilter">
+              <option value="all">All Ranks</option><option value="platinum">Platinum</option><option value="gold">Gold</option><option value="silver">Silver</option><option value="bronze">Bronze</option><option value="standard">Standard</option>
+            </select>
+          </div>
+          <div class="overflow-auto" style="max-height: 70vh;">
+            <div class="p-3 border-2 border-success rounded mx-3 mb-2" onclick="selectAllStores()" data-store-id="all" style="cursor: pointer;">
+              <div class="d-flex align-items-center">
+                <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px;"><i class="bi bi-grid-3x3-gap"></i></div>
+                <div><h6 class="mb-1">All Stores</h6><small class="text-muted d-block">View photos from all stores</small><small class="text-muted">Gallery • Featured</small></div>
+              </div>
+            </div>
+            <hr class="mx-3">
+            <div id="storesList"><div class="text-center p-4"><div class="spinner-border text-success"></div><p class="mt-2 text-muted">Loading stores...</p></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Offcanvas -->
+      <div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="storesPanel">
+        <div class="offcanvas-header">
+          <h5 class="d-flex align-items-center gap-2"><i class="bi bi-shop text-success"></i>Stores Directory</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body p-0">
+          <div class="p-3 border-bottom">
+            <div class="input-group mb-3">
+              <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+              <input type="text" class="form-control" id="mobileStoreSearch" placeholder="Search stores...">
+            </div>
+            <select class="form-select" id="mobileStoreFilter">
+              <option value="all">All Ranks</option><option value="platinum">Platinum</option><option value="gold">Gold</option><option value="silver">Silver</option><option value="bronze">Bronze</option><option value="standard">Standard</option>
+            </select>
+          </div>
+          <div class="overflow-auto" style="height: calc(100vh - 180px);" id="mobileStoresList"></div>
+        </div>
+      </div>
     </div>
 
-    <div class="row g-3">
-      <!-- Stores Panel -->
-      <div class="col-lg-4">
-        <!-- Desktop Panel -->
-        <div class="card border-0 shadow-sm d-none d-lg-block">
-          <div class="card-header bg-white border-bottom-0 py-3">
+    <!-- Posts Panel -->
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm">
+        <!-- All Stores View -->
+        <div id="allStoresView">
+          <div class="card-header bg-white py-3">
             <div class="d-flex align-items-center justify-content-between">
-              <h5 class="mb-0 d-flex align-items-center gap-2">
-                <i class="bi bi-shop text-success"></i>
-                Stores Directory
-              </h5>
-              <span class="badge bg-success" id="storesCount">0</span>
+              <div class="d-flex align-items-center gap-3">
+                <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;"><i class="bi bi-grid-3x3-gap"></i></div>
+                <div><h6 class="mb-0">All Stores Gallery</h6><small class="text-muted">Photos from all participating stores</small></div>
+              </div>
+              <span class="badge bg-success" id="allPostsCount">0 posts</span>
             </div>
           </div>
-          <div class="card-body p-0">
-            <div class="p-3 border-bottom">
-              <div class="mb-3">
-                <div class="input-group">
-                  <span class="input-group-text border-end-0 bg-white">
-                    <i class="bi bi-search text-muted"></i>
-                  </span>
-                  <input type="text" class="form-control border-start-0" id="storeSearch" placeholder="Search stores...">
-                </div>
-              </div>
-              <select class="form-select" id="storeFilter">
-                <option value="all">All Ranks</option>
-                <option value="platinum">Platinum</option>
-                <option value="gold">Gold</option>
-                <option value="silver">Silver</option>
-                <option value="bronze">Bronze</option>
-                <option value="standard">Standard</option>
-              </select>
-            </div>
-            <div class="stores-list" style="max-height: 70vh; overflow-y: auto;" id="storesList">
-              <div class="text-center p-4">
-                <div class="spinner-border text-success" role="status">
-                  <span class="visually-hidden">Loading...</span>
-                </div>
-                <p class="mt-2 text-muted">Loading stores...</p>
-              </div>
+          <div class="card-body">
+            <div id="allPostsGrid"><div class="text-center p-4"><div class="spinner-border text-success"></div><p class="mt-2 text-muted">Loading posts...</p></div></div>
+            <div class="text-center mt-3 d-none" id="allLoadMoreSection">
+              <button class="btn btn-outline-success" id="allLoadMoreBtn">
+                <span class="all-load-text">Load More Posts</span>
+                <span class="all-load-spinner d-none"><span class="spinner-border spinner-border-sm me-1"></span>Loading...</span>
+              </button>
             </div>
           </div>
         </div>
 
-        <!-- Mobile Offcanvas -->
-        <div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="storesPanel">
-          <div class="offcanvas-header border-bottom">
-            <h5 class="offcanvas-title d-flex align-items-center gap-2">
-              <i class="bi bi-shop text-success"></i>
-              Stores Directory
-            </h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
-          </div>
-          <div class="offcanvas-body p-0">
-            <div class="p-3 border-bottom">
-              <div class="mb-3">
-                <div class="input-group">
-                  <span class="input-group-text border-end-0 bg-white">
-                    <i class="bi bi-search text-muted"></i>
-                  </span>
-                  <input type="text" class="form-control border-start-0" id="mobileStoreSearch" placeholder="Search stores...">
-                </div>
-              </div>
-              <select class="form-select" id="mobileStoreFilter">
-                <option value="all">All Ranks</option>
-                <option value="platinum">Platinum</option>
-                <option value="gold">Gold</option>
-                <option value="silver">Silver</option>
-                <option value="bronze">Bronze</option>
-                <option value="standard">Standard</option>
-              </select>
+        <!-- Selected Store Content -->
+        <div id="selectedContent" style="display: none;">
+          <div class="card-header bg-white py-3">
+            <div class="d-flex align-items-center justify-content-between">
+              <div class="d-flex align-items-center gap-3" id="selectedStoreInfo"></div>
+              <span class="badge bg-success" id="postsCount">0 posts</span>
             </div>
-            <div class="mobile-stores-list" style="height: calc(100vh - 180px); overflow-y: auto;" id="mobileStoresList">
-              <!-- Stores will be populated here -->
+          </div>
+          <div class="card-body">
+            <div id="postsGrid"></div>
+            <div class="text-center mt-3 d-none" id="loadMoreSection">
+              <button class="btn btn-outline-success" id="loadMoreBtn">
+                <span class="load-text">Load More Posts</span>
+                <span class="load-spinner d-none"><span class="spinner-border spinner-border-sm me-1"></span>Loading...</span>
+              </button>
             </div>
           </div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
 
-      <!-- Posts Panel -->
-      <div class="col-lg-8">
-        <div class="card border-0 shadow-sm">
-          <!-- Default State -->
-          <div class="default-state text-center p-5" id="defaultState">
-            <div class="mb-4">
-              <i class="bi bi-images display-1 text-muted opacity-50"></i>
-            </div>
-            <h4 class="text-muted">Select a Store</h4>
-            <p class="text-muted mb-0">Choose a store from the directory to view their photo gallery</p>
-          </div>
-
-          <!-- Selected Store Content -->
-          <div class="selected-content" id="selectedContent" style="display: none;">
-            <div class="card-header bg-white border-bottom py-3">
-              <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                <div class="selected-store-info d-flex align-items-center gap-3" id="selectedStoreInfo">
-                  <!-- Dynamic content -->
+<!-- Post Modal -->
+<div class="modal fade" id="postModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header"><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body p-0">
+        <div class="row g-0">
+          <div class="col-lg-8">
+            <div class="ratio ratio-1x1 bg-dark position-relative">
+              <img id="modalImage" class="img-fluid" style="object-fit: contain;">
+              <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark d-flex align-items-center justify-content-center d-none" id="modalCensoredOverlay" style="background: rgba(0,0,0,0.9);">
+                <div class="text-center text-white p-4">
+                  <i class="bi bi-exclamation-triangle-fill text-warning display-4 mb-3"></i>
+                  <h5 class="text-uppercase fw-bold mb-2">Content Under Review</h5>
+                  <p class="small opacity-75">This content is being reviewed by our moderation team</p>
                 </div>
-                <span class="badge bg-success" id="postsCount">0 posts</span>
               </div>
             </div>
-            <div class="card-body p-0">
-              <div class="posts-grid p-3" id="postsGrid">
-                <!-- Posts will be populated here -->
+          </div>
+          <div class="col-lg-4">
+            <div class="p-4 h-100 d-flex flex-column">
+              <div class="mb-3" id="modalStoreProfile"></div>
+              <div class="flex-grow-1">
+                <h6 id="modalPostTitle" class="fw-bold mb-2"></h6>
+                <p id="modalPostCaption" class="text-muted small mb-3"></p>
+                <div>
+                  <small class="text-muted d-flex align-items-center gap-1 mb-2"><i class="bi bi-geo-alt"></i><span id="modalStoreLocation"></span></small>
+                  <small class="text-muted d-flex align-items-center gap-1 mb-2"><i class="bi bi-star-fill"></i><span id="modalStoreRank"></span></small>
+                  <small class="text-muted d-flex align-items-center gap-1"><i class="bi bi-clock"></i><span id="modalPostDate"></span></small>
+                </div>
               </div>
-              <div class="text-center p-3 d-none" id="loadMoreSection">
-                <button class="btn btn-outline-success" id="loadMoreBtn">
-                  <span class="load-text">Load More Posts</span>
-                  <span class="load-spinner d-none">
-                    <span class="spinner-border spinner-border-sm me-1"></span>
-                    Loading...
-                  </span>
-                </button>
+              <div class="d-grid gap-2">
+                <button class="btn btn-success" onclick="visitStore()"><i class="bi bi-shop me-1"></i>Visit Store</button>
+                <button class="btn btn-outline-secondary" onclick="sharePost()"><i class="bi bi-share me-1"></i>Share</button>
               </div>
             </div>
           </div>
@@ -131,710 +152,392 @@
       </div>
     </div>
   </div>
+</div>
 
-  <!-- Post Modal -->
-  <div class="modal fade" id="postModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-      <div class="modal-content border-0 shadow">
-        <div class="modal-header border-bottom-0">
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body p-0">
-          <div class="row g-0">
-            <div class="col-lg-8">
-              <div class="ratio ratio-1x1 bg-dark">
-                <img id="modalImage" class="img-fluid rounded-start" style="object-fit: contain;">
-              </div>
-            </div>
-            <div class="col-lg-4">
-              <div class="p-4 h-100 d-flex flex-column">
-                <div class="store-profile mb-3" id="modalStoreProfile">
-                  <!-- Dynamic content -->
-                </div>
-                <div class="post-content flex-grow-1">
-                  <h6 id="modalPostTitle" class="fw-bold mb-2"></h6>
-                  <p id="modalPostCaption" class="text-muted small mb-3"></p>
-                  <div class="post-meta">
-                    <small class="text-muted d-flex align-items-center gap-1 mb-2">
-                      <i class="bi bi-geo-alt"></i>
-                      <span id="modalStoreLocation"></span>
-                    </small>
-                    <small class="text-muted d-flex align-items-center gap-1 mb-2">
-                      <i class="bi bi-star-fill"></i>
-                      <span id="modalStoreRank"></span>
-                    </small>
-                    <small class="text-muted d-flex align-items-center gap-1">
-                      <i class="bi bi-clock"></i>
-                      <span id="modalPostDate"></span>
-                    </small>
-                  </div>
-                </div>
-                <div class="modal-actions d-grid gap-2">
-                  <button class="btn btn-success" onclick="visitStore()">
-                    <i class="bi bi-shop me-1"></i>Visit Store
-                  </button>
-                  <button class="btn btn-outline-secondary" onclick="sharePost()">
-                    <i class="bi bi-share me-1"></i>Share
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+<script>
+const app = {stores: [], filteredStores: [], selectedStore: null, posts: [], allPosts: [], currentPage: 1, allCurrentPage: 1, hasMorePosts: false, allHasMorePosts: false, isLoading: false};
 
-  <style>
-    .gallery-container {
-      padding: 1rem;
-      max-width: 1400px;
-      margin: 0 auto;
+document.addEventListener('DOMContentLoaded', initializeApp);
+
+async function initializeApp() {
+  try {
+    await loadStores();
+    initializeEventListeners();
+    const sellerId = new URLSearchParams(window.location.search).get('seller');
+    if (sellerId) {
+      const targetStore = app.stores.find(s => s.id == sellerId);
+      if (targetStore) setTimeout(() => selectStore(parseInt(sellerId)), 500);
+    } else {
+      setTimeout(loadAllStoresPosts, 500);
     }
+  } catch (error) {
+    console.error('Failed to initialize:', error);
+    showErrorState('Failed to load stores');
+  }
+}
 
-    .store-card {
-      border: none;
-      border-radius: 12px;
-      transition: all 0.2s ease;
-      cursor: pointer;
-      margin-bottom: 0.75rem;
-    }
+function initializeEventListeners() {
+  ['storeSearch', 'mobileStoreSearch'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', debounce(applySearchAndFilter, 300));
+  });
+  ['storeFilter', 'mobileStoreFilter'].forEach(id => {
+    document.getElementById(id)?.addEventListener('change', applySearchAndFilter);
+  });
+  document.getElementById('loadMoreBtn')?.addEventListener('click', loadMorePosts);
+  document.getElementById('allLoadMoreBtn')?.addEventListener('click', loadMoreAllPosts);
+  syncInputs();
+}
 
-    .store-card:hover {
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      transform: translateY(-1px);
-    }
+function syncInputs() {
+  const ds = document.getElementById('storeSearch'), ms = document.getElementById('mobileStoreSearch');
+  const df = document.getElementById('storeFilter'), mf = document.getElementById('mobileStoreFilter');
+  if (ds && ms) {
+    ds.addEventListener('input', () => ms.value = ds.value);
+    ms.addEventListener('input', () => ds.value = ms.value);
+  }
+  if (df && mf) {
+    df.addEventListener('change', () => mf.value = df.value);
+    mf.addEventListener('change', () => df.value = mf.value);
+  }
+}
 
-    .store-card.selected {
-      border: 2px solid #198754;
-      box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
-    }
+function applySearchAndFilter() {
+  const query = (document.getElementById('storeSearch')?.value || '').toLowerCase().trim();
+  const filter = document.getElementById('storeFilter')?.value || 'all';
+  let filtered = [...app.stores];
+  if (query) filtered = filtered.filter(s => s.name.toLowerCase().includes(query) || (s.address && s.address.toLowerCase().includes(query)));
+  if (filter !== 'all') filtered = filtered.filter(s => s.rank_class === filter);
+  app.filteredStores = filtered;
+  renderStores();
+  updateStoresCount();
+}
 
-    .store-avatar {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      color: white;
-      position: relative;
-    }
-
-    .store-avatar.platinum {
-      background: linear-gradient(135deg, #9B59B6, #8E44AD);
-    }
-
-    .store-avatar.gold {
-      background: linear-gradient(135deg, #FFD700, #FFA500);
-      color: #333;
-    }
-
-    .store-avatar.silver {
-      background: linear-gradient(135deg, #C0C0C0, #A8A8A8);
-      color: #333;
-    }
-
-    .store-avatar.bronze {
-      background: linear-gradient(135deg, #CD7F32, #B87333);
-    }
-
-    .store-avatar.standard {
-      background: linear-gradient(135deg, #198754, #20c997);
-    }
-
-    .rank-badge {
-      position: absolute;
-      top: -5px;
-      right: -5px;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      border: 2px solid #fff;
-    }
-
-    .posts-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 1rem;
-      min-height: 400px;
-    }
-
-    .post-card {
-      background: white;
-      border-radius: 12px;
-      overflow: hidden;
-      transition: all 0.2s ease;
-      cursor: pointer;
-      border: 1px solid #e9ecef;
-    }
-
-    .post-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    }
-
-    .post-image {
-      width: 100%;
-      height: 180px;
-      object-fit: cover;
-      background: #f8f9fa;
-    }
-
-    .featured-badge {
-      position: absolute;
-      top: 8px;
-      left: 8px;
-      background: linear-gradient(135deg, #FFD700, #FFA500);
-      color: #333;
-      padding: 2px 6px;
-      border-radius: 6px;
-      font-size: 10px;
-      font-weight: 600;
-    }
-
-    .blurred {
-      filter: blur(8px);
-    }
-
-    @media (max-width: 576px) {
-      .posts-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.75rem;
-      }
-
-      .post-image {
-        height: 140px;
-      }
-
-      .gallery-container {
-        padding: 0.5rem;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .modal-dialog {
-        margin: 0.5rem;
-      }
-
-      .modal-body .row {
-        flex-direction: column;
-      }
-
-      .modal-body .col-lg-8 {
-        order: 1;
-      }
-
-      .modal-body .col-lg-4 {
-        order: 2;
-      }
-    }
-  </style>
-
-  <script>
-    // Application State
-    const app = {
-      stores: [],
-      filteredStores: [],
-      selectedStore: null,
-      posts: [],
-      currentPage: 1,
-      hasMorePosts: false,
-      isLoading: false
-    };
-
-    // Initialize
-    document.addEventListener('DOMContentLoaded', function() {
-      initializeApp();
-    });
-
-    async function initializeApp() {
-      try {
-        await loadStores();
-        initializeEventListeners();
-
-        // Check for URL parameters to auto-select a store
-        const urlParams = new URLSearchParams(window.location.search);
-        const sellerId = urlParams.get('seller');
-
-        if (sellerId) {
-          // Find and select the store from URL parameter
-          const targetStore = app.stores.find(store => store.id == sellerId);
-          if (targetStore) {
-            console.log('Auto-selecting store from URL:', targetStore.name);
-            setTimeout(() => {
-              selectStore(parseInt(sellerId));
-            }, 500); // Small delay to ensure stores are rendered
-          }
-        }
-
-        console.log('Gallery initialized successfully');
-      } catch (error) {
-        console.error('Failed to initialize app:', error);
-        showErrorState('Failed to load stores');
-      }
-    }
-
-    function initializeEventListeners() {
-      // Search functionality
-      ['storeSearch', 'mobileStoreSearch'].forEach(id => {
-        const input = document.getElementById(id);
-        if (input) {
-          input.addEventListener('input', debounce(handleSearch, 300));
-        }
-      });
-
-      // Filter functionality
-      ['storeFilter', 'mobileStoreFilter'].forEach(id => {
-        const select = document.getElementById(id);
-        if (select) {
-          select.addEventListener('change', handleFilter);
-        }
-      });
-
-      // Load more posts
-      const loadMoreBtn = document.getElementById('loadMoreBtn');
-      if (loadMoreBtn) {
-        loadMoreBtn.addEventListener('click', loadMorePosts);
-      }
-
-      // Sync search and filter between desktop and mobile
-      syncInputs();
-    }
-
-    function applySearchAndFilter() {
-      const query = (document.getElementById('storeSearch')?.value || document.getElementById('mobileStoreSearch')?.value || '').toLowerCase().trim();
-      const filterValue = document.getElementById('storeFilter')?.value || document.getElementById('mobileStoreFilter')?.value || 'all';
-
-      let filtered = [...app.stores];
-
-      if (query) {
-        filtered = filtered.filter(store =>
-          store.name.toLowerCase().includes(query) ||
-          (store.address && store.address.toLowerCase().includes(query))
-        );
-      }
-
-      if (filterValue !== 'all') {
-        filtered = filtered.filter(store => store.rank_class === filterValue);
-      }
-
-      app.filteredStores = filtered;
+async function loadStores() {
+  try {
+    const response = await fetch('/public-api/stores');
+    const data = await response.json();
+    if (data.success) {
+      app.stores = data.data.map(store => ({
+        id: store.id, name: store.name, address: store.address, phone: store.phone,
+        image: store.image, total_points: parseInt(store.total_points) || 0,
+        rank_class: getRankClass(parseInt(store.total_points) || 0),
+        rank_text: getRankText(parseInt(store.total_points) || 0),
+        rank_icon: getRankIcon(parseInt(store.total_points) || 0)
+      }));
+      app.filteredStores = [...app.stores];
       renderStores();
       updateStoresCount();
     }
+  } catch (error) {
+    showErrorState(error.message);
+  }
+}
 
-    function syncInputs() {
-      const desktopSearch = document.getElementById('storeSearch');
-      const mobileSearch = document.getElementById('mobileStoreSearch');
-      const desktopFilter = document.getElementById('storeFilter');
-      const mobileFilter = document.getElementById('mobileStoreFilter');
-
-      if (desktopSearch && mobileSearch) {
-        desktopSearch.addEventListener('input', () => {
-          mobileSearch.value = desktopSearch.value;
-          applySearchAndFilter();
-        });
-        mobileSearch.addEventListener('input', () => {
-          desktopSearch.value = mobileSearch.value;
-          applySearchAndFilter();
-        });
-      }
-
-      if (desktopFilter && mobileFilter) {
-        desktopFilter.addEventListener('change', () => {
-          mobileFilter.value = desktopFilter.value;
-          applySearchAndFilter();
-        });
-        mobileFilter.addEventListener('change', () => {
-          desktopFilter.value = mobileFilter.value;
-          applySearchAndFilter();
-        });
-      }
-    }
-
-    async function loadStores() {
-      try {
-        showStoresLoading(true);
-
-        const response = await fetch('/public-api/stores');
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-        const data = await response.json();
-
-        if (data.success) {
-          app.stores = (data.data || []).map(store => {
-            // Use the total_points directly from the API response
-            const actualPoints = parseInt(store.total_points) || 0;
-
-            const processedStore = {
-              id: store.id,
-              name: store.name,
-              address: store.address,
-              phone: store.phone,
-              image: store.image,
-              total_points: actualPoints,
-              points_reward: actualPoints,
-              transaction_count: store.transaction_count || 0,
-              rank_class: getRankClass(actualPoints),
-              rank_text: getRankText(actualPoints),
-              rank_icon: getRankIcon(actualPoints)
-            };
-
-            return processedStore;
-          });
-
-          // Set initial filtered stores to show all stores by default
-          app.filteredStores = [...app.stores];
-
-          // Render stores and update counts
-          renderStores();
-          updateStoresCount();
-
-        } else {
-          throw new Error(data.message || 'Failed to load stores');
-        }
-      } catch (error) {
-        console.error('Error loading stores:', error);
-        showErrorState(error.message);
-      } finally {
-        showStoresLoading(false);
-      }
-    }
-
-    function showStoresLoading(show) {
-      const loadingHTML = `
-        <div class="text-center p-4">
-            <div class="spinner-border text-success" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-            <p class="mt-2 text-muted">Loading stores...</p>
-        </div>
-    `;
-
-      const emptyHTML = '<div class="p-4"></div>';
-
-      // Don't clear content if stores are already rendered
-      if (!show && app.filteredStores && app.filteredStores.length > 0) {
-        return;
-      }
-
-      document.getElementById('storesList').innerHTML = show ? loadingHTML : emptyHTML;
-      document.getElementById('mobileStoresList').innerHTML = show ? loadingHTML : emptyHTML;
-    }
-
-    function renderStores() {
-      if (app.filteredStores.length === 0) {
-        const emptyHTML = `
-            <div class="text-center p-4 text-muted">
-                <p>No stores found</p>
-            </div>
-        `;
-        document.getElementById('storesList').innerHTML = emptyHTML;
-        document.getElementById('mobileStoresList').innerHTML = emptyHTML;
-        return;
-      }
-
-      const storesHTML = app.filteredStores.map(store => `
-        <div class="store-card p-3" onclick="selectStore(${store.id})" data-store-id="${store.id}">
-            <div class="d-flex align-items-center">
-                <div class="store-avatar ${store.rank_class} me-3">
-                    ${store.name.charAt(0).toUpperCase()}
-                    <div class="rank-badge">
-                        ${store.rank_icon}
-                    </div>
-                </div>
-                <div class="flex-grow-1">
-                    <h6 class="mb-1">${store.name}</h6>
-                    <small class="text-muted d-block">${store.address || 'No address'}</small>
-                    <small class="text-muted">${store.total_points} pts • ${store.rank_text}</small>
-                </div>
-            </div>
-        </div>
-    `).join('');
-
-      document.getElementById('storesList').innerHTML = storesHTML;
-      document.getElementById('mobileStoresList').innerHTML = storesHTML;
-    }
-
-    function selectStore(storeId) {
-      // Update UI selection
-      document.querySelectorAll('.store-card').forEach(card => {
-        card.classList.remove('selected');
-      });
-
-      document.querySelectorAll(`[data-store-id="${storeId}"]`).forEach(card => {
-        card.classList.add('selected');
-      });
-
-      // Find and set selected store
-      app.selectedStore = app.stores.find(store => store.id === storeId);
-      if (!app.selectedStore) return;
-
-      // Update UI
-      document.getElementById('defaultState').style.display = 'none';
-      document.getElementById('selectedContent').style.display = 'block';
-
-      updateSelectedStoreInfo();
-      loadStorePosts(storeId);
-
-      // Close mobile offcanvas
-      const offcanvas = bootstrap.Offcanvas.getInstance(document.getElementById('storesPanel'));
-      if (offcanvas) offcanvas.hide();
-    }
-
-    function updateSelectedStoreInfo() {
-      document.getElementById('selectedStoreInfo').innerHTML = `
-        <div class="store-avatar ${app.selectedStore.rank_class}">
-            ${app.selectedStore.name.charAt(0).toUpperCase()}
-            <div class="rank-badge">
-                ${app.selectedStore.rank_icon}
-            </div>
+function renderStores() {
+  const rankColors = {platinum: 'bg-purple-600', gold: 'bg-warning text-dark', silver: 'bg-secondary text-dark', bronze: 'bg-warning-subtle text-dark', standard: 'bg-success'};
+  const html = app.filteredStores.map(store => `
+    <div class="p-3 mb-2 rounded border" style="cursor: pointer;" onclick="selectStore(${store.id})" data-store-id="${store.id}">
+      <div class="d-flex align-items-center">
+        <div class="${rankColors[store.rank_class]} text-white rounded-circle d-flex align-items-center justify-content-center me-3 position-relative" style="width: 48px; height: 48px;">
+          ${store.name.charAt(0).toUpperCase()}
+          <span class="position-absolute top-0 end-0 translate-middle badge rounded-pill bg-light text-dark" style="font-size: 10px;">${store.rank_icon}</span>
         </div>
         <div>
-            <h6 class="mb-0">${app.selectedStore.name}</h6>
-            <small class="text-muted">${app.selectedStore.rank_text} • ${app.selectedStore.total_points} points</small>
+          <h6 class="mb-1">${store.name}</h6>
+          <small class="text-muted d-block">${store.address || 'No address'}</small>
+          <small class="text-muted">${store.total_points} pts • ${store.rank_text}</small>
         </div>
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('storesList').innerHTML = html;
+  document.getElementById('mobileStoresList').innerHTML = html;
+}
+
+function selectStore(storeId) {
+  document.querySelectorAll('[data-store-id]').forEach(el => el.classList.remove('border-success', 'border-2'));
+  document.querySelectorAll(`[data-store-id="${storeId}"]`).forEach(el => el.classList.add('border-success', 'border-2'));
+  app.selectedStore = app.stores.find(s => s.id === storeId);
+  if (!app.selectedStore) return;
+  document.getElementById('allStoresView').style.display = 'none';
+  document.getElementById('selectedContent').style.display = 'block';
+  updateSelectedStoreInfo();
+  loadStorePosts(storeId);
+  bootstrap.Offcanvas.getInstance(document.getElementById('storesPanel'))?.hide();
+}
+
+function selectAllStores() {
+  document.querySelectorAll('[data-store-id]').forEach(el => el.classList.remove('border-success', 'border-2'));
+  document.querySelectorAll('[data-store-id="all"]').forEach(el => el.classList.add('border-success', 'border-2'));
+  app.selectedStore = null;
+  document.getElementById('selectedContent').style.display = 'none';
+  document.getElementById('allStoresView').style.display = 'block';
+  loadAllStoresPosts();
+  bootstrap.Offcanvas.getInstance(document.getElementById('storesPanel'))?.hide();
+}
+
+function updateSelectedStoreInfo() {
+  const rankColors = {platinum: 'bg-purple-600', gold: 'bg-warning text-dark', silver: 'bg-secondary text-dark', bronze: 'bg-warning-subtle text-dark', standard: 'bg-success'};
+  document.getElementById('selectedStoreInfo').innerHTML = `
+    <div class="${rankColors[app.selectedStore.rank_class]} text-white rounded-circle d-flex align-items-center justify-content-center position-relative" style="width: 48px; height: 48px;">
+      ${app.selectedStore.name.charAt(0).toUpperCase()}
+      <span class="position-absolute top-0 end-0 translate-middle badge rounded-pill bg-light text-dark" style="font-size: 10px;">${app.selectedStore.rank_icon}</span>
+    </div>
+    <div>
+      <h6 class="mb-0">${app.selectedStore.name}</h6>
+      <small class="text-muted">${app.selectedStore.rank_text} • ${app.selectedStore.total_points} points</small>
+    </div>
+  `;
+}
+
+async function loadStorePosts(storeId, page = 1) {
+  try {
+    app.isLoading = true;
+    if (page === 1) {
+      app.posts = [];
+      document.getElementById('postsGrid').innerHTML = '<div class="text-center p-4"><div class="spinner-border text-success"></div></div>';
+    }
+    const response = await fetch(`/public-api/gallery/feed?seller_id=${storeId}&page=${page}`);
+    const data = await response.json();
+    if (data.success) {
+      const posts = data.posts.map(post => ({id: post.id, photo_url: post.photo_url, caption: post.caption || '', time_ago: post.time_ago || 'Recently', is_featured: post.is_featured || false}));
+      if (page === 1) app.posts = posts; else app.posts.push(...posts);
+      app.hasMorePosts = data.hasMore || false;
+      renderPosts();
+      updatePostsCount();
+      document.getElementById('loadMoreSection').classList.toggle('d-none', !app.hasMorePosts);
+    }
+  } catch (error) {
+    if (page === 1) document.getElementById('postsGrid').innerHTML = '<div class="text-center p-4 text-muted"><i class="bi bi-exclamation-triangle display-4 mb-3"></i><p>Failed to load posts</p></div>';
+  } finally {
+    app.isLoading = false;
+  }
+}
+
+function renderPosts() {
+  const html = app.posts.map(post => {
+    const isFrozen = /^\[frozen\]/i.test(post.caption);
+    const cleanCaption = post.caption.replace(/^\[frozen\]\s*/i, "");
+    return `
+      <div class="col-md-4 mb-3">
+        <div class="bg-white border rounded shadow-sm position-relative" style="cursor: pointer;" onclick="openPostModal(${post.id})">
+          ${post.is_featured ? '<div class="position-absolute top-0 start-0 bg-warning text-dark px-2 py-1 small fw-bold" style="font-size: 10px; z-index: 5;">Featured</div>' : ''}
+          <div class="position-relative">
+            <img src="${post.photo_url}" alt="${cleanCaption}" class="w-100 rounded-top" style="height: 200px; object-fit: cover;">
+            ${isFrozen ? '<div class="position-absolute top-0 start-0 w-100 h-100 bg-dark d-flex align-items-center justify-content-center rounded-top" style="background: rgba(0,0,0,0.8);"><div class="text-center text-white"><i class="bi bi-exclamation-triangle-fill text-warning fs-3 mb-2"></i><div class="small fw-bold">CONTENT UNDER REVIEW</div></div></div>' : ''}
+          </div>
+          <div class="p-3">
+            <small class="d-block fw-medium">${cleanCaption || 'Store Post'}</small>
+            <small class="text-muted">${post.time_ago}</small>
+          </div>
+        </div>
+      </div>
     `;
+  }).join('');
+  document.getElementById('postsGrid').innerHTML = `<div class="row">${html}</div>`;
+}
+
+async function loadAllStoresPosts(page = 1) {
+  try {
+    app.isLoading = true;
+    if (page === 1) {
+      app.allPosts = [];
+      document.getElementById('allPostsGrid').innerHTML = '<div class="text-center p-4"><div class="spinner-border text-success"></div><p class="mt-2 text-muted">Loading posts...</p></div>';
     }
-
-    async function loadStorePosts(storeId, page = 1) {
-      try {
-        app.isLoading = true;
-
-        if (page === 1) {
-          app.posts = [];
-          app.currentPage = 1;
-          document.getElementById('postsGrid').innerHTML = '<div class="col-12 text-center p-4"><div class="spinner-border text-success"></div></div>';
-        }
-
-        const response = await fetch(`/public-api/gallery/feed?seller_id=${storeId}&page=${page}`);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-        const data = await response.json();
-
-        if (data.success) {
-          const posts = (data.posts || []).map(post => ({
-            id: post.id,
-            photo_url: post.photo_url,
-            caption: post.caption || '',
-            created_at: post.created_at,
-            time_ago: post.time_ago || 'Recently',
-            is_featured: post.is_featured || false
-          }));
-
-          if (page === 1) {
-            app.posts = posts;
-          } else {
-            app.posts.push(...posts);
-          }
-
-          app.hasMorePosts = data.hasMore || false;
-          renderPosts();
-          updatePostsCount();
-
-          const loadMoreSection = document.getElementById('loadMoreSection');
-          loadMoreSection.classList.toggle('d-none', !app.hasMorePosts);
-        }
-      } catch (error) {
-        console.error('Error loading posts:', error);
-        if (page === 1) {
-          document.getElementById('postsGrid').innerHTML = `
-                <div class="col-12 text-center p-4 text-muted">
-                    <i class="bi bi-exclamation-triangle display-4 mb-3"></i>
-                    <p>Failed to load posts</p>
-                </div>
-            `;
-        }
-      } finally {
-        app.isLoading = false;
-      }
+    const response = await fetch(`/public-api/gallery/feed?page=${page}`);
+    const data = await response.json();
+    if (data.success) {
+      const posts = data.posts.map(post => ({id: post.id, seller_id: post.seller_id, business_name: post.business_name, photo_url: post.photo_url, caption: post.caption || '', time_ago: post.time_ago || 'Recently', is_featured: post.is_featured || false, total_points: post.total_points || 0, rank_class: post.rank_class || 'standard', rank_text: post.rank_text || 'Standard', address: post.address || 'Location not available'}));
+      if (page === 1) app.allPosts = posts; else app.allPosts.push(...posts);
+      app.allHasMorePosts = data.hasMore || false;
+      renderAllPosts();
+      updateAllPostsCount();
+      document.getElementById('allLoadMoreSection').classList.toggle('d-none', !app.allHasMorePosts);
     }
+  } catch (error) {
+    if (page === 1) document.getElementById('allPostsGrid').innerHTML = '<div class="text-center p-4 text-muted"><i class="bi bi-exclamation-triangle display-4 mb-3"></i><p>Failed to load posts</p></div>';
+  } finally {
+    app.isLoading = false;
+  }
+}
 
-    function renderPosts() {
-      const postsHTML = app.posts.map(post => {
-        const isFrozen = /^\[frozen\]/i.test(post.caption); // check if caption starts with [frozen]
-        const cleanCaption = post.caption.replace(/^\[frozen\]\s*/i, "");
-
-        return `
-        <div class="post-card position-relative" onclick="openPostModal(${post.id})">
-            ${post.is_featured ? '<div class="featured-badge">Featured</div>' : ''}
-            <img src="${post.photo_url}" 
-                 alt="${cleanCaption}" 
-                 class="post-image ${isFrozen ? 'blurred' : ''}" 
-                 onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM2Yzc1N2QiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZSBOb3QgRm91bmQ8L3RleHQ+PC9zdmc+'">
-            <div class="p-2">
-                <small class="text-truncate d-block fw-medium">${cleanCaption || 'Store Post'}</small>
-                <small class="text-muted">${post.time_ago}</small>
+function renderAllPosts() {
+  const rankColors = {platinum: 'bg-purple-600', gold: 'bg-warning text-dark', silver: 'bg-secondary text-dark', bronze: 'bg-warning-subtle text-dark', standard: 'bg-success'};
+  const html = app.allPosts.map(post => {
+    const isFrozen = /^\[frozen\]/i.test(post.caption);
+    const cleanCaption = post.caption.replace(/^\[frozen\]\s*/i, "");
+    return `
+      <div class="col-md-4 mb-3">
+        <div class="bg-white border rounded shadow-sm position-relative" style="cursor: pointer;" onclick="openPostModal(${post.id})">
+          ${post.is_featured ? '<div class="position-absolute top-0 start-0 bg-warning text-dark px-2 py-1 small fw-bold" style="font-size: 10px; z-index: 5;">Featured</div>' : ''}
+          <div class="position-relative">
+            <img src="${post.photo_url}" alt="${cleanCaption}" class="w-100 rounded-top" style="height: 200px; object-fit: cover;">
+            ${isFrozen ? '<div class="position-absolute top-0 start-0 w-100 h-100 bg-dark d-flex align-items-center justify-content-center rounded-top" style="background: rgba(0,0,0,0.8);"><div class="text-center text-white"><i class="bi bi-exclamation-triangle-fill text-warning fs-3 mb-2"></i><div class="small fw-bold">CONTENT UNDER REVIEW</div></div></div>' : ''}
+          </div>
+          <div class="p-3">
+            <small class="d-block fw-medium">${cleanCaption || 'Store Post'}</small>
+            <div class="d-flex align-items-center gap-1 mt-1">
+              <div class="${rankColors[post.rank_class]} text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 16px; height: 16px; font-size: 8px;">${post.business_name.charAt(0).toUpperCase()}</div>
+              <small class="text-muted">${post.business_name}</small>
             </div>
+            <small class="text-muted">${post.time_ago}</small>
+          </div>
         </div>
+      </div>
     `;
-      }).join('');
+  }).join('');
+  document.getElementById('allPostsGrid').innerHTML = `<div class="row">${html}</div>`;
+}
 
-      document.getElementById('postsGrid').innerHTML = postsHTML;
+function openPostModal(postId) {
+  const post = app.posts.find(p => p.id === postId) || app.allPosts.find(p => p.id === postId);
+  if (!post) return;
+  const isFrozen = /^\[frozen\]/i.test(post.caption);
+  const cleanCaption = post.caption.replace(/^\[frozen\]\s*/i, "");
+  document.getElementById('modalImage').src = post.photo_url;
+  document.getElementById('modalPostTitle').textContent = cleanCaption || 'Store Post';
+  document.getElementById('modalPostCaption').textContent = cleanCaption || 'No caption';
+  document.getElementById('modalPostDate').textContent = post.time_ago;
+  document.getElementById('modalCensoredOverlay').classList.toggle('d-none', !isFrozen);
+  if (app.selectedStore) {
+    document.getElementById('modalStoreLocation').textContent = app.selectedStore.address || 'Location not available';
+    document.getElementById('modalStoreRank').textContent = `${app.selectedStore.rank_text} • ${app.selectedStore.total_points} points`;
+    const rankColors = {platinum: 'bg-purple-600', gold: 'bg-warning text-dark', silver: 'bg-secondary text-dark', bronze: 'bg-warning-subtle text-dark', standard: 'bg-success'};
+    document.getElementById('modalStoreProfile').innerHTML = `<div class="d-flex align-items-center gap-2"><div class="${rankColors[app.selectedStore.rank_class]} text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">${app.selectedStore.name.charAt(0).toUpperCase()}</div><div><h6 class="mb-0 small">${app.selectedStore.name}</h6><small class="text-muted">${app.selectedStore.rank_text}</small></div></div>`;
+  } else if (post.business_name) {
+    document.getElementById('modalStoreLocation').textContent = post.address;
+    document.getElementById('modalStoreRank').textContent = `${post.rank_text} • ${post.total_points} points`;
+    const rankColors = {platinum: 'bg-purple-600', gold: 'bg-warning text-dark', silver: 'bg-secondary text-dark', bronze: 'bg-warning-subtle text-dark', standard: 'bg-success'};
+    document.getElementById('modalStoreProfile').innerHTML = `<div class="d-flex align-items-center gap-2"><div class="${rankColors[post.rank_class]} text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">${post.business_name.charAt(0).toUpperCase()}</div><div><h6 class="mb-0 small">${post.business_name}</h6><small class="text-muted">${post.rank_text}</small></div></div>`;
+  }
+  new bootstrap.Modal(document.getElementById('postModal')).show();
+}
+
+async function loadMorePosts() {
+  if (app.isLoading || !app.hasMorePosts) return;
+  const btn = document.getElementById('loadMoreBtn');
+  btn.querySelector('.load-text').classList.add('d-none');
+  btn.querySelector('.load-spinner').classList.remove('d-none');
+  btn.disabled = true;
+  try {
+    await loadStorePosts(app.selectedStore.id, ++app.currentPage);
+  } catch {
+    app.currentPage--;
+  } finally {
+    btn.querySelector('.load-text').classList.remove('d-none');
+    btn.querySelector('.load-spinner').classList.add('d-none');
+    btn.disabled = false;
+  }
+}
+
+async function loadMoreAllPosts() {
+  if (app.isLoading || !app.allHasMorePosts) return;
+  const btn = document.getElementById('allLoadMoreBtn');
+  btn.querySelector('.all-load-text').classList.add('d-none');
+  btn.querySelector('.all-load-spinner').classList.remove('d-none');
+  btn.disabled = true;
+  try {
+    await loadAllStoresPosts(++app.allCurrentPage);
+  } catch {
+    app.allCurrentPage--;
+  } finally {
+    btn.querySelector('.all-load-text').classList.remove('d-none');
+    btn.querySelector('.all-load-spinner').classList.add('d-none');
+    btn.disabled = false;
+  }
+}
+
+function updatePostsCount() {
+  document.getElementById('postsCount').textContent = `${app.posts.length} posts`;
+}
+
+function updateAllPostsCount() {
+  document.getElementById('allPostsCount').textContent = `${app.allPosts.length} posts`;
+}
+
+function updateStoresCount() {
+  const count = app.filteredStores.length;
+  document.getElementById('storesCount').textContent = count;
+  document.getElementById('mobileStoresCount').textContent = count;
+}
+
+function showErrorState(message) {
+  const errorHTML = `<div class="text-center p-4 text-muted"><i class="bi bi-exclamation-triangle display-4 mb-3"></i><p>${message}</p><button class="btn btn-outline-success btn-sm" onclick="window.location.reload()"><i class="bi bi-arrow-clockwise me-1"></i>Retry</button></div>`;
+  document.getElementById('storesList').innerHTML = errorHTML;
+  document.getElementById('mobileStoresList').innerHTML = errorHTML;
+}
+
+function visitStore() {
+  if (app.selectedStore) {
+    window.location.href = `/map?store=${app.selectedStore.id}`;
+  } else {
+    const currentPost = app.allPosts.find(p => p.photo_url === document.getElementById('modalImage').src);
+    window.location.href = currentPost?.seller_id ? `/map?store=${currentPost.seller_id}` : '/map';
+  }
+}
+
+function sharePost() {
+  let url, title;
+  if (app.selectedStore) {
+    url = `${window.location.origin}/seller/${app.selectedStore.id}`;
+    title = `Check out ${app.selectedStore.name}!`;
+  } else {
+    const currentPost = app.allPosts.find(p => p.photo_url === document.getElementById('modalImage').src);
+    if (currentPost?.seller_id) {
+      url = `${window.location.origin}/seller/${currentPost.seller_id}`;
+      title = `Check out ${currentPost.business_name}!`;
+    } else {
+      url = `${window.location.origin}/gallery`;
+      title = 'Check out GreenCup Store Gallery!';
     }
+  }
 
-    async function loadMorePosts() {
-      if (app.isLoading || !app.hasMorePosts) return;
+  if (navigator.share) {
+    navigator.share({ title, url });
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(() => showToast('Link copied to clipboard!'));
+  }
+}
 
-      const btn = document.getElementById('loadMoreBtn');
-      const loadText = btn.querySelector('.load-text');
-      const loadSpinner = btn.querySelector('.load-spinner');
+function showToast(message) {
+  const toast = document.createElement('div');
+  toast.className = 'toast position-fixed top-0 end-0 m-3';
+  toast.innerHTML = `<div class="toast-body bg-success text-white rounded">${message}</div>`;
+  document.body.appendChild(toast);
+  new bootstrap.Toast(toast).show();
+  setTimeout(() => toast.remove(), 3000);
+}
 
-      loadText.classList.add('d-none');
-      loadSpinner.classList.remove('d-none');
-      btn.disabled = true;
+function debounce(func, wait) {
+  let timeout;
+  return function(...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+}
 
-      try {
-        app.currentPage++;
-        await loadStorePosts(app.selectedStore.id, app.currentPage);
-      } catch (error) {
-        app.currentPage--;
-      } finally {
-        loadText.classList.remove('d-none');
-        loadSpinner.classList.add('d-none');
-        btn.disabled = false;
-      }
-    }
+function getRankClass(points) {
+  if (points >= 2000) return 'platinum';
+  if (points >= 1000) return 'gold';
+  if (points >= 500) return 'silver';
+  if (points >= 100) return 'bronze';
+  return 'standard';
+}
 
-    function openPostModal(postId) {
-      const post = app.posts.find(p => p.id === postId);
-      if (!post) return;
+function getRankText(points) {
+  if (points >= 2000) return 'Platinum';
+  if (points >= 1000) return 'Gold';
+  if (points >= 500) return 'Silver';
+  if (points >= 100) return 'Bronze';
+  return 'Standard';
+}
 
-      document.getElementById('modalImage').src = post.photo_url;
-      document.getElementById('modalPostTitle').textContent = post.caption.replace(/^\[frozen\]\s*/i, "") || 'Store Post';
-      document.getElementById('modalPostCaption').textContent = post.captionv || 'No caption provided';
-      document.getElementById('modalPostDate').textContent = post.time_ago;
-      document.getElementById('modalStoreLocation').textContent = app.selectedStore.address || 'Location not available';
-      document.getElementById('modalStoreRank').textContent = `${app.selectedStore.rank_text} • ${app.selectedStore.total_points} points`;
-
-      document.getElementById('modalStoreProfile').innerHTML = `
-        <div class="d-flex align-items-center gap-2">
-            <div class="store-avatar ${app.selectedStore.rank_class}" style="width: 36px; height: 36px; font-size: 14px;">
-                ${app.selectedStore.name.charAt(0).toUpperCase()}
-            </div>
-            <div>
-                <h6 class="mb-0 small">${app.selectedStore.name}</h6>
-                <small class="text-muted">${app.selectedStore.rank_text}</small>
-            </div>
-        </div>
-    `;
-
-      new bootstrap.Modal(document.getElementById('postModal')).show();
-    }
-
-    function handleSearch() {
-      applySearchAndFilter();
-    }
-
-    function handleFilter() {
-      applySearchAndFilter();
-    }
-
-    function updateStoresCount() {
-      const count = app.filteredStores.length;
-      document.getElementById('storesCount').textContent = count;
-      document.getElementById('mobileStoresCount').textContent = count;
-    }
-
-    function updatePostsCount() {
-      document.getElementById('postsCount').textContent = `${app.posts.length} posts`;
-    }
-
-    function showErrorState(message) {
-      const errorHTML = `
-        <div class="text-center p-4 text-muted">
-            <i class="bi bi-exclamation-triangle display-4 mb-3"></i>
-            <p>${message}</p>
-            <button class="btn btn-outline-success btn-sm" onclick="window.location.reload()">
-                <i class="bi bi-arrow-clockwise me-1"></i>Retry
-            </button>
-        </div>
-    `;
-
-      document.getElementById('storesList').innerHTML = errorHTML;
-      document.getElementById('mobileStoresList').innerHTML = errorHTML;
-    }
-
-    function visitStore() {
-      if (app.selectedStore) {
-        window.location.href = `/map?store=${app.selectedStore.id}`;
-      }
-    }
-
-    function sharePost() {
-      if (app.selectedStore) {
-        const url = `${window.location.origin}/seller/${app.selectedStore.id}`;
-
-        if (navigator.share) {
-          navigator.share({
-            title: `Check out ${app.selectedStore.name}!`,
-            url: url
-          });
-        } else if (navigator.clipboard) {
-          navigator.clipboard.writeText(url).then(() => {
-            showToast('Link copied to clipboard!');
-          });
-        }
-      }
-    }
-
-    function showToast(message) {
-      const toast = document.createElement('div');
-      toast.className = 'toast position-fixed top-0 end-0 m-3';
-      toast.innerHTML = `
-        <div class="toast-body bg-success text-white rounded">
-            ${message}
-        </div>
-    `;
-      document.body.appendChild(toast);
-
-      const bsToast = new bootstrap.Toast(toast);
-      bsToast.show();
-
-      setTimeout(() => toast.remove(), 3000);
-    }
-
-    // Utility functions
-    function debounce(func, wait) {
-      let timeout;
-      return function executedFunction(...args) {
-        const later = () => {
-          clearTimeout(timeout);
-          func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-      };
-    }
-
-    function getRankClass(points) {
-      if (points >= 2000) return 'platinum';
-      if (points >= 1000) return 'gold';
-      if (points >= 500) return 'silver';
-      if (points >= 100) return 'bronze';
-      return 'standard';
-    }
-
-    function getRankText(points) {
-      if (points >= 2000) return 'Platinum';
-      if (points >= 1000) return 'Gold';
-      if (points >= 500) return 'Silver';
-      if (points >= 100) return 'Bronze';
-      return 'Standard';
-    }
-
-    function getRankIcon(points) {
-      if (points >= 2000) return '👑';
-      if (points >= 1000) return '🥇';
-      if (points >= 500) return '🥈';
-      return '⭐';
-    }
-  </script>
+function getRankIcon(points) {
+  if (points >= 2000) return '👑';
+  if (points >= 1000) return '🥇';
+  if (points >= 500) return '🥈';
+  if (points >= 100) return '🥉';
+  return '⭐';
+}
+</script>
 @endsection

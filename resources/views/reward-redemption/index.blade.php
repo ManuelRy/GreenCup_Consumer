@@ -14,7 +14,7 @@
           <div class="col-12">
             <div class="card border-0 shadow-sm bg-gradient-primary text-white rounded-4">
               <div class="card-body py-4">
-                <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
                   <div>
                     <div class="mb-3">
                       <i class="fas fa-gift fa-3x opacity-90"></i>
@@ -38,7 +38,7 @@
           <div class="col-12">
             <div class="card border-0 shadow-sm rounded-3">
               <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                   <h5 class="fw-semibold text-dark mb-0">
                     <i class="fas fa-filter me-2"></i>Filter & Search
                   </h5>
@@ -50,9 +50,9 @@
                   <!-- Search Input -->
                   <div class="col-12 col-md-6 col-lg-4">
                     <label class="form-label fw-semibold text-dark">
-                      <i class="fas fa-search me-2"></i>Search Rewards
+                      <i class="fas fa-search me-2"></i>Search Rewards & Shops
                     </label>
-                    <input type="text" class="form-control" id="searchInput" placeholder="Find rewards...">
+                    <input type="text" class="form-control" id="searchInput" placeholder="Find rewards or shops...">
                   </div>
 
                   <!-- Category Filter -->
@@ -102,93 +102,9 @@
         </div>
 
         <!-- Rewards Grid: Grouped by Shop -->
-        @forelse($sellers as $seller)
-          @php
-            $coins = $cPRepo->getByConsumerAndSeller(Auth::id(), $seller->id)->coins;
-          @endphp
-          <div class="mb-5">
-            <div class="d-flex align-items-center mb-2">
-              <h4 class="fw-bold mb-0"><i class="fas fa-store me-2"></i>{{ $seller->business_name }}</h4>
-              <span class="badge bg-success ms-3">Wallet: {{ number_format($coins) }} pts</span>
-            </div>
-            <div class="row" id="rewardsContainer">
-              @forelse($seller->rewards as $reward)
-                <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-4 reward-card" data-category="{{ '' }}" data-points="{{ $reward->points_required }}"
-                  data-name="{{ strtolower($reward->name) }}">
-                  <div class="card border-0 shadow-sm rounded-3 h-100 reward-item">
-                    <div class="position-relative">
-                      <img src="{{ $reward->image_url ?? asset('images/default-reward.jpg') }}" class="card-img-top rounded-top-3" style="height: 200px; object-fit: cover;"
-                        alt="{{ $reward->name }}">
-                      <span class="badge bg-primary position-absolute top-0 start-0 m-2">
-                        {{ $seller->business_name }}
-                      </span>
-                    </div>
-                    <div class="card-body d-flex flex-column">
-                      <h5 class="card-title fw-bold text-dark mb-2">{{ $reward->name }}: {{ $reward->quantity - $reward->quantity_redeemed }} left</h5>
-                      <p class="card-text text-muted small mb-3 flex-grow-1">
-                        {{ Str::limit($reward->description ?? '', 80) }}
-                      </p>
-                      <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div class="points-required">
-                          <span class="h5 fw-bold text-primary mb-0">
-                            {{ number_format($reward->points_required) }}
-                          </span>
-                          <small class="text-muted"> points</small>
-                        </div>
-                        @if ($coins >= $reward->points_required)
-                          <span class="badge bg-success">
-                            <i class="fas fa-check me-1"></i>Can Afford
-                          </span>
-                        @else
-                          <span class="badge bg-light text-dark">
-                            <i class="fas fa-lock me-1"></i>Need More
-                          </span>
-                        @endif
-                      </div>
-                      <div class="mt-auto">
-                        @if ($coins >= $reward->points_required)
-                          <button class="btn btn-primary w-100 redeem-btn" data-reward='@json($reward)' data-seller_id='@json($seller->id)'
-                            data-shop='@json($seller->business_name)'>
-                            <i class="fas fa-gift me-2"></i>Request Redeem
-                          </button>
-                        @else
-                          <button class="btn btn-outline-primary w-100" disabled>
-                            <i class="fas fa-coins me-2"></i>Insufficient Points
-                          </button>
-                        @endif
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              @empty
-                <div class="col-12">
-                  <div class="card border-0 shadow-sm rounded-3">
-                    <div class="card-body text-center py-5">
-                      <h6 class="fw-semibold text-dark mb-3">No rewards available for this shop.</h6>
-                    </div>
-                  </div>
-                </div>
-              @endforelse
-            </div>
-          </div>
-        @empty
-          <div class="col-12">
-            <div class="card border-0 shadow-sm rounded-3">
-              <div class="card-body text-center py-5">
-                <div class="mb-4">
-                  <i class="fas fa-gift fa-4x text-muted opacity-50"></i>
-                </div>
-                <h4 class="fw-bold text-dark mb-3">No Rewards Available</h4>
-                <p class="text-muted mb-4">
-                  Check back later for exciting rewards from your favorite stores!
-                </p>
-                <a href="{{ route('gallery') }}" class="btn btn-primary">
-                  <i class="fas fa-store me-2"></i>Browse Stores
-                </a>
-              </div>
-            </div>
-          </div>
-        @endforelse
+        <div id="rewardsContainer">
+          @include('reward-redemption.partials.rewards-grid', ['sellers' => $sellers])
+        </div>
       </div>
 
     </div>
@@ -208,84 +124,33 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-success" id="mockConfirmRedeem">Confirm Request</button>
+          <button type="button" class="btn btn-success" id="mockConfirmRedeem">Confirm Redemption</button>
         </div>
       </div>
     </div>
   </div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      let selectedReward = null;
-      let selectedSellerId = null;
-      let selectedShop = null;
-      document.querySelectorAll('.redeem-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-          selectedReward = JSON.parse(this.dataset.reward);
-          selectedShop = this.dataset.shop;
-          selectedSellerId = this.dataset.seller_id;
-          document.getElementById('mock-reward-details').innerHTML = `
-            <div class='text-center mb-3'>
-              <img src="${selectedReward.image_url}" class="img-fluid rounded mb-2" style="max-height:120px;">
-              <h5 class="fw-bold mt-2">${selectedReward.name}</h5>
-              <div class="mb-2">From <b>${selectedShop}</b></div>
-              <div class="mb-2"><span class="badge bg-success">${selectedReward.points_required} pts</span></div>
-            </div>
-          `;
-          new bootstrap.Modal(document.getElementById('mockRedeemModal')).show();
-        });
-      });
-      document.getElementById('mockConfirmRedeem').onclick = function() {
-        if (!selectedReward || !selectedSellerId) {
-          alert('No reward selected.');
-          return;
-        }
-        const btn = this;
-        btn.disabled = true;
+  <!-- Preview Modal -->
+  <div class="modal fade" id="previewRewardModal" tabindex="-1" aria-labelledby="previewRewardModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-gradient-info text-white">
+          <h5 class="modal-title" id="previewRewardModalLabel"><i class="fas fa-eye me-2"></i>Reward Preview</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="preview-reward-details"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-success" onclick="proceedToRedeem()">
+            <i class="fas fa-gift me-2"></i>Proceed to Redeem
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        fetch(`/rewards/${selectedReward.id}/redeem`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            },
-            body: JSON.stringify({})
-          })
-          .then(response => {
-            if (!response.ok) {
-              if (response.status === 404) throw new Error('Not found');
-              if (response.status === 422) throw new Error('Invalid Request');
-              throw new Error(`HTTP_${response.status}`);
-            }
-            return response.json();
-          })
-          .then(data => {
-            if (data.success) {
-              alert('Reward redeemed successfully!');
-              console.log('Redemption:', data);
-              bootstrap.Modal.getInstance(
-                document.getElementById('mockRedeemModal')
-              ).hide();
-            } else {
-              let msg = data.message || 'Unknown error while redeeming reward.';
-              alert(msg);
-            }
-          })
-          .catch(error => {
-            console.error(error);
-            let msg = 'Something went wrong. Try again later.';
-            if (error.message === 'NOT_FOUND') msg = 'Reward not found.';
-            else if (error.message === 'INVALID_REQUEST') msg = 'Invalid redemption request.';
-            else if (error.message.startsWith('HTTP_')) msg = 'Server error. Try again.';
-            alert(msg);
-          })
-          .finally(() => {
-            btn.disabled = false;
-            bootstrap.Modal.getInstance(document.getElementById('mockRedeemModal')).hide();
-          });
-      };
-    });
-  </script>
   <style>
     /* Custom CSS consistent with dashboard theme */
     :root {
@@ -328,16 +193,25 @@
     /* Reward Cards */
     .reward-item {
       transition: all 0.3s ease;
-      border-left: 4px solid #1dd1a1 !important;
     }
 
     .reward-item:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    /* Default reward card styling */
+    .reward-default-card {
+      height: 200px;
+    }
+
+    /* Reward overlay */
+    .bg-gradient-to-t {
+      background: linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0));
     }
 
     /* Points styling */
-    .points-required .h5 {
+    .text-primary {
       color: #1dd1a1 !important;
     }
 
@@ -351,7 +225,6 @@
         opacity: 0;
         transform: translateY(30px);
       }
-
       to {
         opacity: 1;
         transform: translateY(0);
@@ -393,6 +266,34 @@
       .display-6 {
         font-size: 2rem !important;
       }
+
+      .btn-lg {
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+      }
+
+      .card-title {
+        font-size: 1rem;
+      }
+
+      .h5 {
+        font-size: 1.1rem;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .text-end {
+        text-align: start !important;
+      }
+
+      .col-xl-3 {
+        min-width: 280px;
+      }
     }
 
     /* Enhanced visual feedback */
@@ -401,169 +302,595 @@
       outline-offset: 2px;
     }
 
-    /* Pagination styling */
-    .pagination .page-link {
-      color: #1dd1a1;
-      border-color: #e9ecef;
-    }
-
-    .pagination .page-link:hover {
-      color: #10ac84;
-      background-color: rgba(29, 209, 161, 0.1);
-      border-color: #1dd1a1;
-    }
-
-    .pagination .page-item.active .page-link {
-      background-color: #1dd1a1;
-      border-color: #1dd1a1;
-    }
-
-    /* Filter section enhancements */
-    .form-label {
-      font-size: 0.9rem;
-      margin-bottom: 0.5rem;
-    }
-
     /* Staggered animation for reward cards */
-    .reward-card:nth-child(1) {
-      animation-delay: 0.1s;
-    }
-
-    .reward-card:nth-child(2) {
-      animation-delay: 0.2s;
-    }
-
-    .reward-card:nth-child(3) {
-      animation-delay: 0.3s;
-    }
-
-    .reward-card:nth-child(4) {
-      animation-delay: 0.4s;
-    }
-
-    .reward-card:nth-child(5) {
-      animation-delay: 0.5s;
-    }
-
-    .reward-card:nth-child(6) {
-      animation-delay: 0.6s;
-    }
-
-    .reward-card:nth-child(7) {
-      animation-delay: 0.7s;
-    }
-
-    .reward-card:nth-child(8) {
-      animation-delay: 0.8s;
-    }
+    .reward-card:nth-child(1) { animation-delay: 0.1s; }
+    .reward-card:nth-child(2) { animation-delay: 0.2s; }
+    .reward-card:nth-child(3) { animation-delay: 0.3s; }
+    .reward-card:nth-child(4) { animation-delay: 0.4s; }
+    .reward-card:nth-child(5) { animation-delay: 0.5s; }
+    .reward-card:nth-child(6) { animation-delay: 0.6s; }
+    .reward-card:nth-child(7) { animation-delay: 0.7s; }
+    .reward-card:nth-child(8) { animation-delay: 0.8s; }
 
     /* Loading states */
     .btn:disabled {
       opacity: 0.6;
       transform: none !important;
     }
+
+    /* Improved loading animation */
+    .spinner-border {
+      width: 3rem;
+      height: 3rem;
+    }
+
+    /* Shop section styling */
+    .shop-section {
+      opacity: 1;
+      transition: all 0.3s ease;
+    }
+
+    .shop-section.filtering {
+      opacity: 0.7;
+    }
+
+    /* Enhanced reward card hover effects */
+    .reward-card {
+      transform-origin: center;
+    }
+
+    .reward-card .card {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 2px solid transparent;
+    }
+
+    .reward-card .card:hover {
+      border-color: rgba(29, 209, 161, 0.3);
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .reward-preview-card:hover {
+      border-color: rgba(29, 209, 161, 0.5) !important;
+      transform: translateY(-10px) scale(1.03) !important;
+      box-shadow: 0 25px 50px rgba(29, 209, 161, 0.2) !important;
+    }
+
+    .reward-preview-card:hover::after {
+      content: "👁️ Click to Preview";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(29, 209, 161, 0.9);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      z-index: 10;
+      pointer-events: none;
+      opacity: 0;
+      animation: fadeInPreview 0.3s ease forwards;
+    }
+
+    @keyframes fadeInPreview {
+      to {
+        opacity: 1;
+      }
+    }
+
+    /* Improved filter section */
+    .form-control:focus,
+    .form-select:focus {
+      border-color: #1dd1a1;
+      box-shadow: 0 0 0 0.2rem rgba(29, 209, 161, 0.25);
+      outline: none;
+    }
+
+    /* Better mobile responsiveness */
+    @media (max-width: 768px) {
+      .reward-card .card:hover {
+        transform: translateY(-4px) scale(1.01);
+      }
+
+      .shop-section h4 {
+        font-size: 1.2rem;
+      }
+
+      .badge {
+        font-size: 0.7rem;
+      }
+    }
   </style>
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      let selectedReward = null;
+      let selectedSellerId = null;
+      let selectedShop = null;
+      let filterTimeout = null;
+
+      // Temporary: Log all clicks to debug
+      document.addEventListener('click', function(e) {
+        console.log('Global click on:', e.target.tagName, e.target.className);
+      });
+
+      // Initialize redeem modal functionality with event delegation
+      initializeRedeemButtons();
+
+      // Debug: Check if buttons exist and add fallback direct listeners
+      setTimeout(function() {
+        const buttons = document.querySelectorAll('.redeem-btn');
+        console.log('Found', buttons.length, 'redeem buttons on page load');
+
+        // Add direct listeners as fallback
+        buttons.forEach((btn, index) => {
+          console.log(`Button ${index}:`, btn, 'Data:', btn.dataset);
+
+          // Add direct click listener as backup
+          btn.addEventListener('click', function(e) {
+            console.log('Direct listener triggered for button', index);
+            handleRedeemClick(e);
+          });
+
+          // Add visual feedback to ensure buttons are clickable
+          btn.style.cursor = 'pointer';
+          btn.style.pointerEvents = 'auto';
+        });
+      }, 1000);
+
+      function initializeRedeemButtons() {
+        console.log('Setting up event delegation for redeem buttons');
+
+        // Remove any existing event listeners to avoid duplicates
+        document.removeEventListener('click', handleRedeemClick);
+
+        // Use event delegation to handle dynamically loaded buttons
+        document.addEventListener('click', handleRedeemClick);
+      }
+
+      function handleRedeemClick(e) {
+        console.log('Click detected on:', e.target);
+
+        // Check if the clicked element or its parent is a redeem button
+        let btn = null;
+
+        if (e.target.classList.contains('redeem-btn')) {
+          btn = e.target;
+          console.log('Direct click on redeem button');
+        } else if (e.target.closest('.redeem-btn')) {
+          btn = e.target.closest('.redeem-btn');
+          console.log('Click on child of redeem button');
+        } else {
+          // Not a redeem button click, ignore
+          return;
+        }
+
+        console.log('Redeem button clicked!', btn);
+        console.log('Button classes:', btn.className);
+        console.log('Button dataset:', btn.dataset);
+        console.log('Raw reward data:', btn.dataset.reward);
+        console.log('Raw seller_id data:', btn.dataset.seller_id);
+        console.log('Raw shop data:', btn.dataset.shop);
+
+        // Prevent default action
+        e.preventDefault();
+        e.stopPropagation();
+
+        try {
+          // Check if reward data exists
+          if (!btn.dataset.reward || btn.dataset.reward.trim() === '') {
+            console.error('Reward data is missing or empty');
+            alert('Error: Reward data is missing. Please refresh the page and try again.');
+            return;
+          }
+
+          // Check if seller_id exists
+          if (!btn.dataset.seller_id || btn.dataset.seller_id.trim() === '') {
+            console.error('Seller ID is missing or empty');
+            alert('Error: Seller data is missing. Please refresh the page and try again.');
+            return;
+          }
+
+          selectedReward = JSON.parse(btn.dataset.reward);
+          selectedShop = JSON.parse(btn.dataset.shop);
+          selectedSellerId = JSON.parse(btn.dataset.seller_id);
+
+          console.log('Selected reward:', selectedReward);
+          console.log('Selected shop:', selectedShop);
+          console.log('Selected seller ID:', selectedSellerId);
+
+          // Validate parsed data
+          if (!selectedReward || !selectedReward.id) {
+            console.error('Invalid reward data after parsing');
+            alert('Error: Invalid reward data. Please refresh the page and try again.');
+            return;
+          }
+
+          const imageHtml = selectedReward.image_url
+            ? `<div class="text-center mb-3">
+                 <img src="${selectedReward.image_url}" class="img-fluid rounded" style="max-height: 200px; width: auto; object-fit: cover; border-radius: 12px;">
+               </div>`
+            : `<div class="d-flex align-items-center justify-content-center bg-primary bg-opacity-10 rounded-3 mb-3" style="height:180px;">
+                 <div class="text-center">
+                   <div class="bg-primary bg-opacity-20 rounded-circle p-3 mb-2">
+                     <i class="fas fa-gift fa-3x text-primary"></i>
+                   </div>
+                   <div class="fw-semibold text-primary">Reward</div>
+                 </div>
+               </div>`;
+
+          document.getElementById('mock-reward-details').innerHTML = `
+            <div class='text-center'>
+              ${imageHtml}
+              <h4 class="fw-bold text-primary mb-2">🎁 ${selectedReward.name}</h4>
+              <p class="text-muted mb-3">From <strong>${selectedShop}</strong></p>
+              <div class="bg-success bg-opacity-10 text-success rounded-3 p-3 mb-3">
+                <div class="d-flex align-items-center justify-content-center gap-2">
+                  <i class="fas fa-coins"></i>
+                  <span class="fw-bold fs-5">${selectedReward.points_required.toLocaleString()} Points</span>
+                </div>
+                <div class="small mt-1">Will be deducted from your wallet</div>
+              </div>
+              <div class="text-muted small">
+                <i class="fas fa-info-circle me-1"></i>
+                You'll receive a confirmation once the reward is processed
+              </div>
+            </div>
+          `;
+
+          console.log('Opening modal...');
+          const modalElement = document.getElementById('mockRedeemModal');
+          console.log('Modal element:', modalElement);
+
+          if (modalElement) {
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+            console.log('Modal should be visible now');
+          } else {
+            console.error('Modal element not found!');
+          }
+
+        } catch (error) {
+          console.error('Error processing redeem button click:', error);
+          console.error('Error stack:', error.stack);
+          alert(`Error processing reward: ${error.message}. Please refresh the page and try again.`);
+        }
+      }
+
+      // Preview function for clicking on reward cards
+      window.showRewardPreview = function(cardElement) {
+        try {
+          const reward = JSON.parse(cardElement.dataset.reward);
+          const shop = JSON.parse(cardElement.dataset.shop);
+          const sellerId = JSON.parse(cardElement.dataset.seller_id);
+
+          console.log('Preview reward:', reward);
+
+          const imageHtml = reward.image_url
+            ? `<div class="text-center mb-3">
+                 <img src="${reward.image_url}" class="img-fluid rounded" style="max-height: 250px; width: auto; object-fit: cover; border-radius: 12px;">
+               </div>`
+            : `<div class="d-flex align-items-center justify-content-center bg-primary bg-opacity-10 rounded-3 mb-3" style="height:200px;">
+                 <div class="text-center">
+                   <div class="bg-primary bg-opacity-20 rounded-circle p-4 mb-2">
+                     <i class="fas fa-gift fa-4x text-primary"></i>
+                   </div>
+                   <div class="fw-semibold text-primary fs-5">Reward</div>
+                 </div>
+               </div>`;
+
+          document.getElementById('preview-reward-details').innerHTML = `
+            <div class='text-center'>
+              ${imageHtml}
+              <h4 class="fw-bold text-primary mb-2">🎁 ${reward.name}</h4>
+              <p class="text-muted mb-3">From <strong>${shop}</strong></p>
+              <div class="mb-3">
+                <p class="text-dark">${reward.description || 'Redeem this exclusive reward with your points.'}</p>
+              </div>
+              <div class="bg-info bg-opacity-10 text-info rounded-3 p-3 mb-3">
+                <div class="d-flex align-items-center justify-content-center gap-2">
+                  <i class="fas fa-coins"></i>
+                  <span class="fw-bold fs-5">${reward.points_required.toLocaleString()} Points Required</span>
+                </div>
+                <div class="small mt-1">
+                  <i class="fas fa-box me-1"></i>
+                  ${reward.available_qty || 0} rewards remaining
+                  ${reward.available_qty <= 5 && reward.available_qty > 0 ? '<span class="text-warning ms-2"><i class="fas fa-exclamation-triangle"></i> Limited Stock!</span>' : ''}
+                  ${reward.available_qty <= 0 ? '<span class="text-danger ms-2"><i class="fas fa-times-circle"></i> Out of Stock</span>' : ''}
+                </div>
+              </div>
+            </div>
+          `;
+
+          // Store data for potential redemption
+          selectedReward = reward;
+          selectedShop = shop;
+          selectedSellerId = sellerId;
+
+          const previewModal = new bootstrap.Modal(document.getElementById('previewRewardModal'));
+          previewModal.show();
+
+        } catch (error) {
+          console.error('Error showing preview:', error);
+          alert('Error showing reward preview. Please try again.');
+        }
+      }
+
+      // Function to proceed from preview to redeem
+      window.proceedToRedeem = function() {
+        // Check if reward is still available
+        if (selectedReward.available_qty <= 0) {
+          alert('Sorry, this reward is currently out of stock.');
+          return;
+        }
+
+        // Close preview modal
+        bootstrap.Modal.getInstance(document.getElementById('previewRewardModal')).hide();
+
+        // Wait a moment for the modal to close, then open redeem modal
+        setTimeout(() => {
+          if (selectedReward && selectedShop && selectedSellerId) {
+            // Populate redeem modal with the same data
+            const imageHtml = selectedReward.image_url
+              ? `<div class="text-center mb-3">
+                   <img src="${selectedReward.image_url}" class="img-fluid rounded" style="max-height: 200px; width: auto; object-fit: cover; border-radius: 12px;">
+                 </div>`
+              : `<div class="d-flex align-items-center justify-content-center bg-primary bg-opacity-10 rounded-3 mb-3" style="height:180px;">
+                   <div class="text-center">
+                     <div class="bg-primary bg-opacity-20 rounded-circle p-3 mb-2">
+                       <i class="fas fa-gift fa-3x text-primary"></i>
+                     </div>
+                     <div class="fw-semibold text-primary">Reward</div>
+                   </div>
+                 </div>`;
+
+            document.getElementById('mock-reward-details').innerHTML = `
+              <div class='text-center'>
+                ${imageHtml}
+                <h4 class="fw-bold text-primary mb-2">🎁 ${selectedReward.name}</h4>
+                <p class="text-muted mb-3">From <strong>${selectedShop}</strong></p>
+                <div class="bg-success bg-opacity-10 text-success rounded-3 p-3 mb-3">
+                  <div class="d-flex align-items-center justify-content-center gap-2">
+                    <i class="fas fa-coins"></i>
+                    <span class="fw-bold fs-5">${selectedReward.points_required.toLocaleString()} Points</span>
+                  </div>
+                  <div class="small mt-1">Will be deducted from your wallet</div>
+                </div>
+                <div class="bg-info bg-opacity-10 text-info rounded-3 p-2 mb-3">
+                  <div class="small text-center">
+                    <i class="fas fa-box me-1"></i>
+                    ${selectedReward.available_qty} remaining in stock
+                    ${selectedReward.available_qty <= 5 ? ' <span class="text-warning">• Limited Stock!</span>' : ''}
+                  </div>
+                </div>
+                <div class="text-muted small">
+                  <i class="fas fa-info-circle me-1"></i>
+                  You'll receive a confirmation once the reward is processed
+                </div>
+              </div>
+            `;
+
+            const redeemModal = new bootstrap.Modal(document.getElementById('mockRedeemModal'));
+            redeemModal.show();
+          }
+        }, 300);
+      }
+
+      // Confirm redeem
+      document.getElementById('mockConfirmRedeem').onclick = function() {
+        if (!selectedReward || !selectedSellerId) {
+          alert('No reward selected.');
+          return;
+        }
+        const btn = this;
+        btn.disabled = true;
+
+        fetch(`/rewards/${selectedReward.id}/redeem`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({})
+          })
+          .then(response => {
+            if (!response.ok) {
+              if (response.status === 404) throw new Error('Not found');
+              if (response.status === 422) throw new Error('Invalid Request');
+              throw new Error(`HTTP_${response.status}`);
+            }
+            return response.json();
+          })
+          .then(data => {
+            if (data.success) {
+              alert('Reward redeemed successfully!');
+              console.log('Redemption:', data);
+              bootstrap.Modal.getInstance(
+                document.getElementById('mockRedeemModal')
+              ).hide();
+              // Reload the rewards to reflect updated state
+              applyFilters();
+            } else {
+              let msg = data.message || 'Unknown error while redeeming reward.';
+              alert(msg);
+            }
+          })
+          .catch(error => {
+            console.error(error);
+            let msg = 'Something went wrong. Try again later.';
+            if (error.message === 'NOT_FOUND') msg = 'Reward not found.';
+            else if (error.message === 'INVALID_REQUEST') msg = 'Invalid redemption request.';
+            else if (error.message.startsWith('HTTP_')) msg = 'Server error. Try again.';
+            alert(msg);
+          })
+          .finally(() => {
+            btn.disabled = false;
+            bootstrap.Modal.getInstance(document.getElementById('mockRedeemModal')).hide();
+          });
+      };
+
+      // Filter functionality with AJAX
       const searchInput = document.getElementById('searchInput');
       const categoryFilter = document.getElementById('categoryFilter');
       const pointsFilter = document.getElementById('pointsFilter');
       const sortFilter = document.getElementById('sortFilter');
       const rewardsContainer = document.getElementById('rewardsContainer');
-      const rewardCards = document.querySelectorAll('.reward-card');
 
-      // Filter function
-      function filterRewards() {
-        const searchTerm = searchInput.value.toLowerCase();
-        const selectedCategory = categoryFilter.value;
-        const selectedPointsRange = pointsFilter.value;
+      function showLoading() {
+        rewardsContainer.innerHTML = `
+          <div class="col-12 text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="text-muted mt-3">Loading rewards...</p>
+          </div>
+        `;
+      }
 
-        let visibleCards = [];
+      function applyFilters() {
+        // Clear existing timeout
+        if (filterTimeout) {
+          clearTimeout(filterTimeout);
+        }
 
-        rewardCards.forEach(card => {
-          const name = card.dataset.name;
-          const category = card.dataset.category;
-          const points = parseInt(card.dataset.points);
+        // Set new timeout for debouncing
+        filterTimeout = setTimeout(() => {
+          showLoading();
 
-          let showCard = true;
+          // Get filter values
+          const searchValue = searchInput.value.trim();
+          const categoryValue = categoryFilter.value;
+          const pointsValue = pointsFilter.value;
+          const sortValue = sortFilter.value;
 
-          // Search filter
-          if (searchTerm && !name.includes(searchTerm)) {
-            showCard = false;
-          }
+          // Build parameters for backend (excluding category since it's frontend-only)
+          const params = new URLSearchParams({
+            search: searchValue,
+            points_range: pointsValue,
+            sort: sortValue
+          });
 
-          // Category filter
-          if (selectedCategory && category !== selectedCategory) {
-            showCard = false;
-          }
-
-          // Points range filter
-          if (selectedPointsRange) {
-            const [min, max] = selectedPointsRange.split('-').map(p => p.replace('+', ''));
-            const minPoints = parseInt(min);
-            const maxPoints = max ? parseInt(max) : Infinity;
-
-            if (points < minPoints || points > maxPoints) {
-              showCard = false;
+          // Remove empty parameters
+          for (let [key, value] of [...params.entries()]) {
+            if (!value) {
+              params.delete(key);
             }
           }
 
-          if (showCard) {
+          fetch(`{{ route('reward.index') }}?${params.toString()}`, {
+            method: 'GET',
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest',
+              'Content-Type': 'application/json'
+            }
+          })
+          .then(response => response.json())
+          .then(data => {
+            rewardsContainer.innerHTML = data.html;
+
+            // Apply frontend category filtering after loading data
+            if (categoryValue) {
+              filterByCategory(categoryValue);
+            }
+
+            // Animate new cards (event listeners are handled by event delegation)
+            animateCards();
+          })
+          .catch(error => {
+            console.error('Filter error:', error);
+            rewardsContainer.innerHTML = `
+              <div class="col-12 text-center py-5">
+                <div class="text-danger">
+                  <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                  <h5>Error loading rewards</h5>
+                  <p class="text-muted">Please try again later.</p>
+                </div>
+              </div>
+            `;
+          });
+        }, 300); // 300ms debounce
+      }
+
+      // Frontend category filtering function
+      function filterByCategory(selectedCategory) {
+        if (!selectedCategory) return;
+
+        const rewardCards = document.querySelectorAll('.reward-card');
+        const shopSections = document.querySelectorAll('.shop-section');
+
+        rewardCards.forEach(card => {
+          const rewardName = card.dataset.name.toLowerCase();
+          let matchesCategory = false;
+
+          // Simple category matching based on reward name keywords
+          switch (selectedCategory) {
+            case 'food':
+              matchesCategory = rewardName.includes('coffee') || rewardName.includes('drink') ||
+                               rewardName.includes('meal') || rewardName.includes('food') ||
+                               rewardName.includes('beverage') || rewardName.includes('tea');
+              break;
+            case 'discount':
+              matchesCategory = rewardName.includes('discount') || rewardName.includes('%') ||
+                               rewardName.includes('off') || rewardName.includes('coupon');
+              break;
+            case 'merchandise':
+              matchesCategory = rewardName.includes('shirt') || rewardName.includes('mug') ||
+                               rewardName.includes('bag') || rewardName.includes('merchandise') ||
+                               rewardName.includes('item');
+              break;
+            case 'experience':
+              matchesCategory = rewardName.includes('experience') || rewardName.includes('event') ||
+                               rewardName.includes('class') || rewardName.includes('workshop');
+              break;
+            default:
+              matchesCategory = true;
+          }
+
+          if (matchesCategory) {
             card.style.display = 'block';
-            visibleCards.push(card);
           } else {
             card.style.display = 'none';
           }
         });
 
-        // Sort visible cards
-        sortCards(visibleCards);
-
-        // Show/hide empty state
-        const emptyState = document.querySelector('.col-12 .card .card-body.text-center');
-        if (visibleCards.length === 0 && emptyState) {
-          emptyState.closest('.col-12').style.display = 'block';
-        } else if (emptyState) {
-          emptyState.closest('.col-12').style.display = 'none';
-        }
-      }
-
-      // Sort function
-      function sortCards(cards) {
-        const sortBy = sortFilter.value;
-
-        cards.sort((a, b) => {
-          const aPoints = parseInt(a.dataset.points);
-          const bPoints = parseInt(b.dataset.points);
-
-          switch (sortBy) {
-            case 'points-low':
-              return aPoints - bPoints;
-            case 'points-high':
-              return bPoints - aPoints;
-            case 'newest':
-              // Assuming newest first (could be enhanced with actual date data)
-              return 0;
-            case 'popular':
-              // Could be enhanced with popularity data
-              return 0;
-            default:
-              return 0;
+        // Hide shop sections with no visible rewards
+        shopSections.forEach(section => {
+          const visibleCards = section.querySelectorAll('.reward-card:not([style*="display: none"])');
+          if (visibleCards.length === 0) {
+            section.style.display = 'none';
+          } else {
+            section.style.display = 'block';
           }
-        });
-
-        // Reorder DOM elements
-        cards.forEach(card => {
-          rewardsContainer.appendChild(card);
         });
       }
 
       // Event listeners
-      searchInput.addEventListener('input', filterRewards);
-      categoryFilter.addEventListener('change', filterRewards);
-      pointsFilter.addEventListener('change', filterRewards);
-      sortFilter.addEventListener('change', filterRewards);
+      searchInput.addEventListener('input', applyFilters);
+      categoryFilter.addEventListener('change', applyFilters);
+      pointsFilter.addEventListener('change', applyFilters);
+      sortFilter.addEventListener('change', applyFilters);
+
+      // Animation functions
+      function animateCards() {
+        const rewardCards = document.querySelectorAll('.reward-card');
+        rewardCards.forEach((card, index) => {
+          card.style.opacity = '0';
+          card.style.transform = 'translateY(30px)';
+          card.style.transition = `all 0.6s ease ${index * 0.1}s`;
+
+          setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+          }, index * 100);
+        });
+      }
+
+      // Initial animation
+      setTimeout(() => {
+        animateCards();
+      }, 100);
 
       // Animate cards on scroll
       const observerOptions = {
@@ -580,8 +907,8 @@
         });
       }, observerOptions);
 
-      // Observe all reward cards
-      rewardCards.forEach((card, index) => {
+      // Observe initially loaded cards
+      document.querySelectorAll('.reward-card').forEach((card, index) => {
         card.style.opacity = '0';
         card.style.transform = 'translateY(30px)';
         card.style.transition = `all 0.6s ease ${index * 0.1}s`;

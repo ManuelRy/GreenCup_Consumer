@@ -19,6 +19,11 @@ Route::get('/', function () {
     return redirect()->route('login');
 })->name('home');
 
+// Debug route for testing images
+Route::get('/test-images', function () {
+    return view('test-images');
+})->name('test.images');
+
 /*
 |--------------------------------------------------------------------------
 | Public Routes (Guest Only) - Authentication & Registration

@@ -28,18 +28,96 @@ class RewardRedemptionController extends Controller
         $redemptions = $this->rRepo->history(Auth::id());
         return view('reward-redemption.my', compact('redemptions'));
     }
-    public function index()
+    public function index(Request $request)
     {
-        $sellers = $this->sRepo->list();
-        // return only the valid reward
-        $sellers = $sellers->map(function ($seller) {
-            $seller->setRelation(
-                'rewards',
-                $seller->rewards->filter->isValid()->values()
-            );
+        $search = $request->get('search');
+        $pointsRange = $request->get('points_range');
+        $sortBy = $request->get('sort', 'newest');
 
+        $sellers = $this->sRepo->list();
+
+        // Get all valid rewards with seller information
+        $allRewards = collect();
+
+        foreach ($sellers as $seller) {
+            $validRewards = $seller->rewards->filter->isValid();
+
+            // Apply search filter for both reward name and shop name
+            if ($search) {
+                $validRewards = $validRewards->filter(function ($reward) use ($search, $seller) {
+                    return stripos($reward->name, $search) !== false ||
+                           stripos($seller->business_name, $search) !== false;
+                });
+            }
+
+            // Apply points range filter
+            if ($pointsRange) {
+                $validRewards = $validRewards->filter(function ($reward) use ($pointsRange) {
+                    if ($pointsRange === '0-100') {
+                        return $reward->points_required >= 0 && $reward->points_required <= 100;
+                    } elseif ($pointsRange === '101-500') {
+                        return $reward->points_required >= 101 && $reward->points_required <= 500;
+                    } elseif ($pointsRange === '501-1000') {
+                        return $reward->points_required >= 501 && $reward->points_required <= 1000;
+                    } elseif ($pointsRange === '1001+') {
+                        return $reward->points_required >= 1001;
+                    }
+                    return true;
+                });
+            }
+
+            // Add seller information to each reward
+            foreach ($validRewards as $reward) {
+                $reward->seller_info = $seller;
+                $allRewards->push($reward);
+            }
+        }
+
+        // Apply sorting
+        switch ($sortBy) {
+            case 'points-low':
+                $allRewards = $allRewards->sortBy('points_required');
+                break;
+            case 'points-high':
+                $allRewards = $allRewards->sortByDesc('points_required');
+                break;
+            case 'popular':
+                $allRewards = $allRewards->sortByDesc('quantity_redeemed');
+                break;
+            case 'newest':
+            default:
+                $allRewards = $allRewards->sortByDesc('created_at');
+                break;
+        }
+
+        // Group rewards back by seller but maintain sort order
+        $groupedRewards = $allRewards->groupBy('seller_id');
+        $sellers = $sellers->map(function ($seller) use ($groupedRewards) {
+            if ($groupedRewards->has($seller->id)) {
+                $seller->setRelation('rewards', $groupedRewards[$seller->id]->values());
+            } else {
+                $seller->setRelation('rewards', collect());
+            }
             return $seller;
-        });
+        })->filter(function ($seller) {
+            return $seller->rewards->isNotEmpty();
+        })->values(); // Reset the collection keys
+
+        if ($request->ajax()) {
+            // Debug: Log what we're sending
+            \Log::info('AJAX Response - Sellers count: ' . $sellers->count());
+            foreach ($sellers as $seller) {
+                \Log::info('Seller: ' . $seller->business_name . ' - Rewards: ' . $seller->rewards->count());
+                foreach ($seller->rewards as $reward) {
+                    \Log::info('  - Reward: ' . $reward->id . ' - ' . $reward->name);
+                }
+            }
+
+            return response()->json([
+                'html' => view('reward-redemption.partials.rewards-grid', compact('sellers'))->render()
+            ]);
+        }
+
         return view('reward-redemption.index', compact('sellers'));
     }
 

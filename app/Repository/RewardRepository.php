@@ -17,7 +17,7 @@ class RewardRepository
 
   public function history($consumer_id): Collection
   {
-    return RedeemHistory::with(['reward'])->where('consumer_id', $consumer_id)->get();
+    return RedeemHistory::with(['reward.seller'])->where('consumer_id', $consumer_id)->get();
   }
 
   public function redeem( $reward_id, $qantity): bool

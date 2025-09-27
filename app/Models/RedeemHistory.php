@@ -19,6 +19,6 @@ class RedeemHistory extends Model
 
     public function reward()
     {
-        return $this->belongsTo(Item::class);
+        return $this->belongsTo(Reward::class);
     }
 };

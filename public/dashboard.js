@@ -98,12 +98,15 @@
             const dropdown = document.getElementById('monthDropdown');
             const button = document.querySelector('.month-button');
 
-            // Only handle custom month dropdown, not Bootstrap dropdowns
+            // Only handle custom month dropdown, not Bootstrap dropdowns or offcanvas
             if (dropdown && button &&
                 !dropdown.contains(event.target) &&
                 !button.contains(event.target) &&
                 !event.target.closest('.navbar') &&
-                !event.target.closest('[data-bs-toggle="dropdown"]')) {
+                !event.target.closest('[data-bs-toggle="dropdown"]') &&
+                !event.target.closest('[data-bs-toggle="offcanvas"]') &&
+                !event.target.closest('.offcanvas') &&
+                !event.target.hasAttribute('data-bs-dismiss')) {
                 dropdown.classList.remove('show');
             }
         });

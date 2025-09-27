@@ -24,6 +24,27 @@ class Reward extends Model
     {
         return $this->belongsTo(Seller::class);
     }
+
+    public function getImageUrlAttribute()
+    {
+        if (!$this->image_path) {
+            return null;
+        }
+        
+        // If it's already a full URL, return as is
+        if (str_starts_with($this->image_path, 'http')) {
+            return $this->image_path;
+        }
+        
+        // If it starts with 'images/', treat it as a public asset
+        if (str_starts_with($this->image_path, 'images/')) {
+            return asset($this->image_path);
+        }
+        
+        // Otherwise, assume it's in storage
+        return asset('storage/' . $this->image_path);
+    }
+
     public function isValid(): bool
     {
         $now = Carbon::now();

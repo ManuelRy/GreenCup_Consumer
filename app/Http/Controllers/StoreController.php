@@ -22,7 +22,7 @@ class StoreController extends Controller
     public function gallery()
     {
         try {
-            $consumer = Auth::user();
+            $consumer = Auth::guard('consumer')->user();
             $postsData = $this->getFeedPosts(1, 20);
 
             return view('gallery.index', [
@@ -32,7 +32,11 @@ class StoreController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Gallery index error: ' . $e->getMessage());
-            return redirect()->route('dashboard')->with('error', 'Unable to load gallery. Please try again.');
+            return view('gallery.index', [
+                'posts' => collect([]),
+                'consumer' => null,
+                'hasMore' => false
+            ])->with('error', 'Unable to load gallery. Please try again.');
         }
     }
 

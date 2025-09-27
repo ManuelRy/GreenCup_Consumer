@@ -193,9 +193,10 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('report.*') ? 'active' : '' }}"
-                            href="{{ route('report.index') }}">
-                            <i class="bi bi-exclamation-triangle me-1"></i><span>Report</span>
+                        <a class="nav-link px-0 {{ request()->routeIs('report.*') ? 'active' : '' }}"
+                            href="{{ route('report.index') }}" data-bs-dismiss="offcanvas"
+                            onclick="console.log('Report clicked'); return true;">
+                            <i class="bi bi-exclamation-triangle me-2"></i>Report
                         </a>
                     </li>
                     {{-- <li class="nav-item">
@@ -381,48 +382,138 @@
     .offcanvas .navbar-nav .nav-link {
         pointer-events: auto;
         touch-action: manipulation;
+        display: block;
+        width: 100%;
+        text-decoration: none;
+        color: inherit;
+        cursor: pointer;
+        padding: 0.6rem 0.75rem;
+        border-radius: 0.5rem;
+        transition: background-color 0.15s ease-in-out;
+    }
+
+    .offcanvas .navbar-nav .nav-link:hover,
+    .offcanvas .navbar-nav .nav-link:focus {
+        background: rgba(25, 135, 84, .1);
+        text-decoration: none;
+        color: inherit;
+    }
+
+    /* Fix mobile touch targets */
+    @media (max-width: 991.98px) {
+        .offcanvas .navbar-nav .nav-link {
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+        }
+    }
+
+    /* Ensure navbar toggler works */
+    .navbar-toggler {
+        position: relative;
+        z-index: 1050;
+        cursor: pointer;
+        border: none;
+        background: transparent;
+    }
+
+    .navbar-toggler:focus {
+        box-shadow: none;
+        outline: none;
     }
 </style>
 
-{{-- Fix specifically for account dropdown --}}
+{{-- Fix specifically for account dropdown and mobile navigation --}}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Wait for Bootstrap to load completely
-    function initializeDropdowns() {
-        console.log('Initializing dropdowns...');
+    console.log('DOM loaded, initializing navigation...');
 
-        // Specifically target the account dropdown
-        const accountDropdown = document.querySelector('.user-dropdown .dropdown-toggle');
+    // Initialize Bootstrap components
+    function initializeBootstrap() {
+        if (window.bootstrap) {
+            console.log('Bootstrap is available');
 
-        if (window.bootstrap && bootstrap.Dropdown) {
-            // Initialize account dropdown
-            if (accountDropdown && !bootstrap.Dropdown.getInstance(accountDropdown)) {
-                console.log('Initializing account dropdown');
-                new bootstrap.Dropdown(accountDropdown);
-            }
+            // Initialize all dropdowns
+            const dropdownElements = document.querySelectorAll('[data-bs-toggle="dropdown"]');
+            dropdownElements.forEach(function(element) {
+                if (!bootstrap.Dropdown.getInstance(element)) {
+                    new bootstrap.Dropdown(element);
+                    console.log('Dropdown initialized for:', element);
+                }
+            });
 
-            console.log('Dropdowns initialized successfully');
+            // Initialize all offcanvas
+            const offcanvasElements = document.querySelectorAll('.offcanvas');
+            offcanvasElements.forEach(function(element) {
+                if (!bootstrap.Offcanvas.getInstance(element)) {
+                    new bootstrap.Offcanvas(element);
+                    console.log('Offcanvas initialized for:', element.id);
+                }
+            });
         } else {
             console.log('Bootstrap not ready, retrying...');
-            setTimeout(initializeDropdowns, 100);
+            setTimeout(initializeBootstrap, 100);
         }
     }
 
-    // Try initialization multiple times to ensure it works
-    setTimeout(initializeDropdowns, 50);
-    setTimeout(initializeDropdowns, 200);
-    setTimeout(initializeDropdowns, 500);
+    // Initialize Bootstrap after a short delay
+    setTimeout(initializeBootstrap, 50);
 
-    // Handle mobile offcanvas closing
-    document.querySelectorAll('.offcanvas .nav-link[href]').forEach(function(link) {
-        if (link.getAttribute('href') !== '#') {
-            link.addEventListener('click', function() {
-                setTimeout(() => {
-                    const backdrop = document.querySelector('.offcanvas-backdrop');
-                    if (backdrop) backdrop.remove();
+    // Handle mobile navigation links
+    const mobileNavLinks = document.querySelectorAll('#mobileNav .nav-link[href]:not([href="#"])');
+    mobileNavLinks.forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            console.log('Mobile nav link clicked:', this.textContent.trim());
+
+            // Add a small delay before navigation to ensure offcanvas closes
+            const href = this.getAttribute('href');
+            if (href && href !== '#') {
+                // Close the offcanvas
+                const offcanvasElement = document.getElementById('mobileNav');
+                if (offcanvasElement) {
+                    const offcanvasInstance = bootstrap.Offcanvas.getInstance(offcanvasElement);
+                    if (offcanvasInstance) {
+                        offcanvasInstance.hide();
+                    }
+                }
+
+                // Navigate after a short delay
+                setTimeout(function() {
+                    window.location.href = href;
                 }, 150);
-            });
-        }
+
+                // Prevent default to handle navigation manually
+                e.preventDefault();
+                return false;
+            }
+        });
     });
+
+    // Ensure mobile toggler works
+    const mobileToggler = document.querySelector('[data-bs-target="#mobileNav"]');
+    if (mobileToggler) {
+        mobileToggler.addEventListener('click', function(e) {
+            console.log('Mobile toggler clicked');
+            e.stopPropagation();
+        });
+    }
+
+    // Clean up backdrop issues
+    document.addEventListener('hidden.bs.offcanvas', function () {
+        // Remove any lingering backdrops
+        const backdrops = document.querySelectorAll('.offcanvas-backdrop');
+        backdrops.forEach(backdrop => backdrop.remove());
+
+        // Re-enable body scroll
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+    });
+
+    console.log('Navigation initialization complete');
 });
+
+// Fallback for touch devices
+document.addEventListener('touchstart', function() {}, {passive: true});
 </script>
