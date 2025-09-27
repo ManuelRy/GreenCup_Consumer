@@ -13,16 +13,13 @@ use App\Http\Controllers\{AccountController, AuthController, ConsumerController,
 
 // Root redirect
 Route::get('/', function () {
-    if (auth('consumer')->check()) {
-        return redirect()->route('dashboard');
-    }
-    return redirect()->route('login');
-})->name('home');
+    return redirect()->route('dashboard');
+})->name('dashboard');
 
 // Debug route for testing images
 Route::get('/test-images', function () {
     return view('test-images');
-})->name('test.images');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -119,7 +116,7 @@ Route::middleware(['auth:consumer'])->group(function () {
         // Consumer APIs
         Route::get('/consumer/points', [ConsumerController::class, 'getPoints'])->name('consumer.points');
 
-        // Store APIs   
+        // Store APIs
         Route::get('/stores', [StoreController::class, 'getStores'])->name('stores');
         Route::get('/store/{id}/details', [StoreController::class, 'getStoreDetails'])->name('store.details');
         Route::get('/store/{id}/transactions', [StoreController::class, 'getTransactions'])->name('store.transactions');
