@@ -31,8 +31,14 @@ class Seller extends Model
         'longitude' => 'decimal:7',
     ];
 
-    public function rewards() {
+    public function rewards()
+    {
         return $this->hasMany(Reward::class);
+    }
+
+    public function items()
+    {
+        return $this->hasMany(Item::class);
     }
     /**
      * Scope: only active stores with valid coords.
@@ -40,8 +46,8 @@ class Seller extends Model
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true)
-                     ->whereNotNull('latitude')
-                     ->whereNotNull('longitude');
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude');
     }
 
     /**

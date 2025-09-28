@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Repository\SellerRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -10,6 +11,11 @@ use Carbon\Carbon;
 
 class StoreController extends Controller
 {
+    private SellerRepository $sRepo;
+    
+    public function __construct(SellerRepository $sRepo) {
+        $this->sRepo = $sRepo;
+    }
     /*
     |--------------------------------------------------------------------------
     | Gallery/Feed Methods
@@ -143,7 +149,7 @@ class StoreController extends Controller
     public function getStoreDetails($id)
     {
         try {
-            $store = $this->getStoreById($id);
+            $store = $this->sRepo->get($id);
 
             if (!$store) {
                 return response()->json(['success' => false, 'message' => 'Store not found'], 404);

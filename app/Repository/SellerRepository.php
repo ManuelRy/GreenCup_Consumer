@@ -10,12 +10,12 @@ class SellerRepository
 {
   public function list(): Collection
   {
-    return Seller::with(['rewards'])->get();
+    return Seller::with(['rewards', 'items'])->get();
   }
 
   public function get($id): ?Model
   {
-    return Seller::find($id);
+    return Seller::with(['items'])->where('id', $id)->first();
   }
 
   public function addPoints($id, $points): bool

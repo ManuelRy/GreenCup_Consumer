@@ -10,6 +10,7 @@ use App\Repository\RewardRepository;
 use App\Repository\SellerRepository;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class RewardRedemptionController extends Controller
 {
@@ -105,11 +106,11 @@ class RewardRedemptionController extends Controller
 
         if ($request->ajax()) {
             // Debug: Log what we're sending
-            \Log::info('AJAX Response - Sellers count: ' . $sellers->count());
+           Log::info('AJAX Response - Sellers count: ' . $sellers->count());
             foreach ($sellers as $seller) {
-                \Log::info('Seller: ' . $seller->business_name . ' - Rewards: ' . $seller->rewards->count());
+               Log::info('Seller: ' . $seller->business_name . ' - Rewards: ' . $seller->rewards->count());
                 foreach ($seller->rewards as $reward) {
-                    \Log::info('  - Reward: ' . $reward->id . ' - ' . $reward->name);
+                   Log::info('  - Reward: ' . $reward->id . ' - ' . $reward->name);
                 }
             }
 
