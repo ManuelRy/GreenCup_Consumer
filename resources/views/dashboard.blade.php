@@ -194,6 +194,14 @@
                       <div class="fw-semibold small">Locations</div>
                     </a>
                   </div>
+                  <div class="col-6 col-lg-3">
+                    <a href="{{ route('environmental-impact.index') }}" class="btn btn-outline-primary w-100 py-3 text-decoration-none action-btn">
+                      <div class="fs-2 mb-2">
+                        <i class="fas fa-user-circle"></i>
+                      </div>
+                      <div class="fw-semibold small">Environmental Tracking</div>
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>

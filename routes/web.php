@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RewardRedemptionController;
+use App\Http\Controllers\EnvironmentalImpactController;
 use App\Http\Controllers\{AccountController, AuthController, ConsumerController, DashboardController, LoginController, StoreController, ReceiptController, RegisterController};
 
 /*
@@ -14,7 +15,7 @@ use App\Http\Controllers\{AccountController, AuthController, ConsumerController,
 // Root redirect
 Route::get('/', function () {
     return redirect()->route('dashboard');
-})->name('dashboard');
+});
 
 // Debug route for testing images
 Route::get('/test-images', function () {
@@ -69,6 +70,7 @@ Route::middleware(['auth:consumer'])->group(function () {
     // Receipt scanning
     Route::get('/scan-receipt', [ReceiptController::class, 'scan'])->name('scan.receipt');
 
+    Route::get('environmental-impact', [EnvironmentalImpactController::class, 'index'])->name('environmental-impact.index');
     /*
     |--------------------------------------------------------------------------
     | Store Pages - Gallery, Map, Profiles, Search
