@@ -1024,6 +1024,24 @@
       z-index: 100;
     }
 
+    .marker-content {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .marker-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
     .marker-initial {
       width: 100%;
       height: 100%;
@@ -2377,11 +2395,33 @@
           const rankClass = getRankClass(store.points_reward);
           markerElement.className = `store-marker ${rankClass}`;
 
-          // Create main marker content with store initial
+          // Create main marker content with store image or initial
           const markerContent = document.createElement('div');
-          markerContent.className = 'marker-initial';
-          const storeInitial = (store.name || 'S').charAt(0).toUpperCase();
-          markerContent.textContent = storeInitial;
+          markerContent.className = 'marker-content';
+
+          if (store.photo_url) {
+            // Create image element
+            const markerImage = document.createElement('img');
+            markerImage.src = store.photo_url;
+            markerImage.alt = store.name;
+            markerImage.className = 'marker-image';
+            markerImage.onerror = function() {
+              // Fallback to initial if image fails
+              this.style.display = 'none';
+              const fallback = document.createElement('span');
+              fallback.className = 'marker-initial';
+              fallback.textContent = (store.name || 'S').charAt(0).toUpperCase();
+              markerContent.appendChild(fallback);
+            };
+            markerContent.appendChild(markerImage);
+          } else {
+            // Use initial as fallback
+            const markerInitial = document.createElement('span');
+            markerInitial.className = 'marker-initial';
+            markerInitial.textContent = (store.name || 'S').charAt(0).toUpperCase();
+            markerContent.appendChild(markerInitial);
+          }
+
           markerElement.appendChild(markerContent);
 
           // Add rank crown in top-right corner

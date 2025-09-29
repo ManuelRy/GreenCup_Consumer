@@ -462,41 +462,25 @@ class StoreController extends Controller
 
             Log::info('Raw stores fetched for map: ' . $stores->count());
 
-            // Get real transaction data for all stores in one query
-            $transactionData = DB::table('point_transactions')
-                ->select([
-                    'seller_id',
-                    DB::raw('SUM(CASE WHEN type = "earn" THEN points ELSE -points END) as real_points'),
-                    DB::raw('COUNT(*) as real_transaction_count')
-                ])
-                ->groupBy('seller_id')
-                ->get()
-                ->keyBy('seller_id');
+            // Process each store using the same logic as gallery (use total_points directly)
+            return $stores->map(function ($store) {
+                // Use the same points logic as gallery - direct from sellers table
+                $points = $store->total_points ?? 0;
 
-            // Process each store with real data
-            return $stores->map(function ($store) use ($transactionData) {
-                // Get real transaction data for this store
-                $storeTransactionData = $transactionData->get($store->id);
-
-                if ($storeTransactionData) {
-                    // Use REAL data from transactions
-                    $realPoints = (int) $storeTransactionData->real_points;
-                    $realTransactionCount = (int) $storeTransactionData->real_transaction_count;
-                } else {
-                    // No transactions yet - use zeros (not fake data)
-                    $realPoints = 0;
-                    $realTransactionCount = 0;
-                }
+                // For transaction count, still get from point_transactions if needed
+                $transactionCount = DB::table('point_transactions')
+                    ->where('seller_id', $store->id)
+                    ->count();
 
                 // Generate consistent phone if missing (only for phone)
                 if (empty($store->phone)) {
                     $store->phone = $this->generateConsistentPhone($store->id);
                 }
 
-                // Calculate ranking based on REAL points
-                $rankClass = $this->getRankClass($realPoints);
-                $rankText = $this->getRankText($realPoints);
-                $rankIcon = $this->getRankIcon($realPoints);
+                // Calculate ranking based on points (same as gallery)
+                $rankClass = $this->getRankClass($points);
+                $rankText = $this->getRankText($points);
+                $rankIcon = $this->getRankIcon($points);
 
                 // Ensure seller profile image is properly formatted
                 $profileImage = $store->image;
@@ -522,12 +506,12 @@ class StoreController extends Controller
                     'photo_url' => $profileImage ?: asset('images/store-placeholder.png'), // explicit photo_url field
                     'is_active' => $store->is_active,
 
-                    // REAL DATA from database
-                    'total_points' => $realPoints,
-                    'points_reward' => $realPoints,
-                    'transaction_count' => $realTransactionCount,
+                    // Points data (same as gallery)
+                    'total_points' => $points,
+                    'points_reward' => $points,
+                    'transaction_count' => $transactionCount,
 
-                    // Ranking based on real points
+                    // Ranking based on points
                     'rank_class' => $rankClass,
                     'rank_text' => $rankText,
                     'rank_icon' => $rankIcon,
@@ -725,28 +709,19 @@ class StoreController extends Controller
             $store->phone = $this->generateConsistentPhone($store->id);
         }
 
-        // Get REAL points and transaction count from database
-        $transactionData = DB::table('point_transactions')
+        // Use the same points logic as gallery - direct from store
+        $points = $store->total_points ?? 0;
+        $store->points_reward = $points;
+
+        // Get transaction count only if needed
+        $store->transaction_count = DB::table('point_transactions')
             ->where('seller_id', $store->id)
-            ->selectRaw('
-                SUM(CASE WHEN type = "earn" THEN points ELSE -points END) as real_points,
-                COUNT(*) as real_transaction_count
-            ')
-            ->first();
+            ->count();
 
-        if ($transactionData) {
-            $store->points_reward = (int) $transactionData->real_points;
-            $store->transaction_count = (int) $transactionData->real_transaction_count;
-        } else {
-            // No transactions yet - use zeros (not fake data)
-            $store->points_reward = 0;
-            $store->transaction_count = 0;
-        }
-
-        // Add ranking data based on REAL points
-        $store->rank_class = $this->getRankClass($store->points_reward);
-        $store->rank_text = $this->getRankText($store->points_reward);
-        $store->rank_icon = $this->getRankIcon($store->points_reward);
+        // Add ranking data based on points (same as gallery)
+        $store->rank_class = $this->getRankClass($points);
+        $store->rank_text = $this->getRankText($points);
+        $store->rank_icon = $this->getRankIcon($points);
 
         // Format working hours
         $store->hours_formatted = $this->formatWorkingHours($store->hours);

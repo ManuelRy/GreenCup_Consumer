@@ -1,17 +1,24 @@
 @php
     $consumer = auth('consumer')->user();
-    // Get calculated points total like dashboard and profile pages
-    $pointsValue = 0;
-    if (isset($currentTotal)) {
-        $pointsValue = is_array($currentTotal) ? ($currentTotal['coins'] ?? 0) : $currentTotal;
-    } elseif (isset($total)) {
-        $pointsValue = is_array($total) ? ($total['coins'] ?? 0) : $total;
+
+    if ($consumer) {
+        // Get points using the same method as dashboard/account pages
+        try {
+            $cPRepo = app(\App\Repository\ConsumerPointRepository::class);
+            $totalData = $cPRepo->getTotalByConsumerId($consumer->id);
+            $availablePoints = is_array($totalData) ? ($totalData['coins'] ?? 0) : 0;
+        } catch (\Exception $e) {
+            $availablePoints = 0;
+        }
+
+        $points = number_format($availablePoints);
+        $fullName = $consumer->full_name ?? 'User';
+        $initial = strtoupper(substr($fullName, 0, 1));
     } else {
-        $pointsValue = $consumer->available_points ?? 0;
+        $points = '0';
+        $fullName = 'User';
+        $initial = 'U';
     }
-    $points = number_format($pointsValue);
-    $fullName = $consumer->full_name ?? 'User';
-    $initial = strtoupper(substr($fullName, 0, 1));
 @endphp
 
 @auth('consumer')
