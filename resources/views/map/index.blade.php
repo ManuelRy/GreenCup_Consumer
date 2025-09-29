@@ -117,7 +117,12 @@
       <div class="modal-overlay" onclick="closeStoreModal()"></div>
       <div class="modal-content">
         <div class="modal-header">
-          <h3 id="storeName">Store Details</h3>
+          <div class="modal-header-content">
+            <div class="modal-store-avatar" id="modalStoreAvatar">
+              <span id="modalAvatarFallback">S</span>
+            </div>
+            <h3 id="storeName">Store Details</h3>
+          </div>
           <button onclick="closeStoreModal()" class="modal-close">×</button>
         </div>
 
@@ -199,18 +204,9 @@
           </div>
           <div class="store-items" id="storeItems" style="display: none;">
             <h4>🛍️ Available Items</h4>
-            <table class="items-table">
-              <thead>
-                <tr>
-                  <th>Image</th>
-                  <th>Item</th>
-                  <th>Points</th>
-                </tr>
-              </thead>
-              <tbody id="itemsTableBody">
-                <!-- Items will be populated dynamically -->
-              </tbody>
-            </table>
+            <div class="items-grid" id="itemsContainer">
+              <!-- Items will be populated dynamically -->
+            </div>
           </div>
           <!-- Action Buttons -->
           <div class="action-buttons">
@@ -787,6 +783,22 @@
       text-transform: uppercase;
       border: 3px solid;
       position: relative;
+      overflow: hidden;
+    }
+
+    .store-card-avatar .avatar-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    .store-card-avatar .avatar-fallback {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
     }
 
     .store-card-avatar.platinum {
@@ -1201,6 +1213,37 @@
       justify-content: space-between;
     }
 
+    .modal-header-content {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .modal-store-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .modal-store-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    .modal-store-avatar span {
+      font-weight: 600;
+      font-size: 16px;
+      color: white;
+    }
+
     .modal-header h3 {
       margin: 0;
       font-size: 18px;
@@ -1545,29 +1588,85 @@
       background: #228B22;
     }
 
-    .items-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
+    .items-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
     }
 
-    .items-table th,
-    .items-table td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      text-align: left;
-      vertical-align: middle;
+    .item-card {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 16px;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
-    .items-table th {
-      background-color: #f5f5f5;
+    .item-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+
+    .item-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
     }
 
     .item-image {
-      width: 40px;
-      height: 40px;
+      width: 60px;
+      height: 60px;
       object-fit: cover;
-      border-radius: 6px;
+      border-radius: 10px;
+      background: #f5f5f5;
+      border: 2px solid #e0e0e0;
+    }
+
+    .item-details {
+      flex: 1;
+    }
+
+    .item-name {
+      font-weight: 600;
+      color: #333;
+      margin: 0 0 4px 0;
+      font-size: 16px;
+    }
+
+    .item-points {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .item-points::before {
+      content: "⭐";
+      font-size: 12px;
+    }
+
+    @media (max-width: 768px) {
+      .items-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .item-card {
+        padding: 12px;
+      }
+
+      .item-image {
+        width: 50px;
+        height: 50px;
+      }
     }
 
     /* Error Toast - Less Prominent */
@@ -2384,7 +2483,14 @@
         storeItem.innerHTML = `
                     <div class="store-item-header">
                         <div class="store-rank-indicator">
-                            <div class="store-card-avatar ${rankClass}">${store.name.charAt(0)}</div>
+                            <div class="store-card-avatar ${rankClass}">
+                                ${store.photo_url ?
+                                    `<img src="${store.photo_url}" alt="${store.name}" class="avatar-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                     <span class="avatar-fallback" style="display:none;">${store.name.charAt(0)}</span>`
+                                    :
+                                    `<span class="avatar-fallback">${store.name.charAt(0)}</span>`
+                                }
+                            </div>
                             <div class="rank-crown ${rankClass}">${rankIcon}</div>
                         </div>
                         <div class="store-main-info">
@@ -2847,6 +2953,34 @@
       const rankText = getRankText(points);
 
       document.getElementById('storeName').textContent = store.name;
+
+      // Update modal avatar
+      const modalAvatar = document.getElementById('modalStoreAvatar');
+      const avatarFallback = document.getElementById('modalAvatarFallback');
+
+      // Remove any existing image
+      const existingImg = modalAvatar.querySelector('img');
+      if (existingImg) {
+        existingImg.remove();
+      }
+
+      if (store.photo_url) {
+        const avatarImg = document.createElement('img');
+        avatarImg.src = store.photo_url;
+        avatarImg.alt = store.name;
+        avatarImg.onerror = function() {
+          this.style.display = 'none';
+          avatarFallback.style.display = 'flex';
+          avatarFallback.textContent = store.name.charAt(0).toUpperCase();
+        };
+        avatarImg.onload = function() {
+          avatarFallback.style.display = 'none';
+        };
+        modalAvatar.appendChild(avatarImg);
+      } else {
+        avatarFallback.style.display = 'flex';
+        avatarFallback.textContent = store.name.charAt(0).toUpperCase();
+      }
       document.getElementById('storeAddress').textContent = store.address;
       document.getElementById('storePhone').textContent = store.phone;
       document.getElementById('storeHours').textContent = store.hours || 'Hours not specified';
@@ -2933,33 +3067,46 @@
 
     function populateStoreItems(items) {
       const itemsContainer = document.getElementById('storeItems');
-      const tableBody = document.getElementById('itemsTableBody');
-      tableBody.innerHTML = '';
+      const itemsGrid = document.getElementById('itemsContainer');
+      itemsGrid.innerHTML = '';
 
       if (items && items.length > 0) {
         items.forEach(item => {
-          const row = document.createElement('tr');
+          // Create item card
+          const card = document.createElement('div');
+          card.className = 'item-card';
 
-          // Image cell
-          const imgCell = document.createElement('td');
+          // Create item header with image and details
+          const header = document.createElement('div');
+          header.className = 'item-header';
+
           const img = document.createElement('img');
-          img.src = item.image_url || '/images/placeholder.png'; // fallback
+          img.src = item.image_url || '/images/placeholder.png';
           img.alt = item.name;
           img.className = 'item-image';
-          imgCell.appendChild(img);
-          row.appendChild(imgCell);
+          img.onerror = function() {
+            this.src = '/images/placeholder.png';
+          };
 
-          // Item name
-          const nameCell = document.createElement('td');
-          nameCell.textContent = item.name;
-          row.appendChild(nameCell);
+          const details = document.createElement('div');
+          details.className = 'item-details';
 
-          // Points
-          const pointsCell = document.createElement('td');
-          pointsCell.textContent = `${item.points_per_unit} pts`;
-          row.appendChild(pointsCell);
+          const name = document.createElement('h5');
+          name.className = 'item-name';
+          name.textContent = item.name;
 
-          tableBody.appendChild(row);
+          const points = document.createElement('div');
+          points.className = 'item-points';
+          points.textContent = `${item.points_per_unit} pts`;
+
+          // Assemble the card
+          details.appendChild(name);
+          details.appendChild(points);
+          header.appendChild(img);
+          header.appendChild(details);
+          card.appendChild(header);
+
+          itemsGrid.appendChild(card);
         });
 
         itemsContainer.style.display = 'block';

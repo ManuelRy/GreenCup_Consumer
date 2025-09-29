@@ -1,6 +1,15 @@
 @php
     $consumer = auth('consumer')->user();
-    $points = number_format($consumer->available_points ?? 0);
+    // Get calculated points total like dashboard and profile pages
+    $pointsValue = 0;
+    if (isset($currentTotal)) {
+        $pointsValue = is_array($currentTotal) ? ($currentTotal['coins'] ?? 0) : $currentTotal;
+    } elseif (isset($total)) {
+        $pointsValue = is_array($total) ? ($total['coins'] ?? 0) : $total;
+    } else {
+        $pointsValue = $consumer->available_points ?? 0;
+    }
+    $points = number_format($pointsValue);
     $fullName = $consumer->full_name ?? 'User';
     $initial = strtoupper(substr($fullName, 0, 1));
 @endphp
@@ -22,7 +31,11 @@
                 <!-- Toggler points to #mobileNav (offcanvas) -->
                 <button class="navbar-toggler rounded-3 p-2" type="button" data-bs-toggle="offcanvas"
                     data-bs-target="#mobileNav" aria-controls="mobileNav" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
+                    <span class="hamburger-menu">
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+                    </span>
                 </button>
             </div>
 
@@ -131,7 +144,6 @@
                     <span class="user-avatar">{{ $initial }}</span>
                     <span>{{ $fullName }}</span>
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
             </div>
             <div class="offcanvas-body d-flex flex-column">
                 <div class="mb-3">
@@ -236,7 +248,11 @@
             <div class="d-lg-none">
                 <button class="navbar-toggler rounded-3 p-2" type="button" data-bs-toggle="offcanvas"
                     data-bs-target="#guestNav" aria-controls="guestNav" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
+                    <span class="hamburger-menu">
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+                    </span>
                 </button>
             </div>
 
@@ -255,7 +271,6 @@
         <div class="offcanvas offcanvas-end d-lg-none" tabindex="-1" id="guestNav" aria-labelledby="guestNavLabel">
             <div class="offcanvas-header">
                 <h5 class="offcanvas-title" id="guestNavLabel">Menu</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
             </div>
             <div class="offcanvas-body">
                 <div class="navbar-nav">
@@ -417,11 +432,47 @@
         cursor: pointer;
         border: none;
         background: transparent;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .navbar-toggler:focus {
         box-shadow: none;
         outline: none;
+    }
+
+    /* Hamburger Menu Animation */
+    .hamburger-menu {
+        width: 20px;
+        height: 14px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .hamburger-menu .line {
+        width: 100%;
+        height: 2px;
+        background-color: #333;
+        transition: all 0.3s ease;
+        transform-origin: center;
+    }
+
+    /* When offcanvas is shown (active state) */
+    .navbar-toggler[aria-expanded="true"] .hamburger-menu .line:nth-child(1) {
+        transform: rotate(45deg) translate(5px, 5px);
+    }
+
+    .navbar-toggler[aria-expanded="true"] .hamburger-menu .line:nth-child(2) {
+        opacity: 0;
+    }
+
+    .navbar-toggler[aria-expanded="true"] .hamburger-menu .line:nth-child(3) {
+        transform: rotate(-45deg) translate(5px, -5px);
     }
 </style>
 
@@ -491,14 +542,30 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Ensure mobile toggler works
-    const mobileToggler = document.querySelector('[data-bs-target="#mobileNav"]');
-    if (mobileToggler) {
-        mobileToggler.addEventListener('click', function(e) {
-            console.log('Mobile toggler clicked');
-            e.stopPropagation();
-        });
+    // Handle hamburger menu animation
+    function handleTogglerAnimation(togglerSelector, offcanvasSelector) {
+        const toggler = document.querySelector(togglerSelector);
+        const offcanvas = document.querySelector(offcanvasSelector);
+
+        if (toggler && offcanvas) {
+            // Handle offcanvas show event
+            offcanvas.addEventListener('show.bs.offcanvas', function() {
+                toggler.setAttribute('aria-expanded', 'true');
+            });
+
+            // Handle offcanvas hide event
+            offcanvas.addEventListener('hide.bs.offcanvas', function() {
+                toggler.setAttribute('aria-expanded', 'false');
+            });
+
+            // Ensure initial state is correct
+            toggler.setAttribute('aria-expanded', 'false');
+        }
     }
+
+    // Apply animation handling to both togglers
+    handleTogglerAnimation('[data-bs-target="#mobileNav"]', '#mobileNav');
+    handleTogglerAnimation('[data-bs-target="#guestNav"]', '#guestNav');
 
     // Clean up backdrop issues
     document.addEventListener('hidden.bs.offcanvas', function () {

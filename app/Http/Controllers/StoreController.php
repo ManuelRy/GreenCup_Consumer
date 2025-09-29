@@ -156,10 +156,58 @@ class StoreController extends Controller
             }
 
             $storeDetails = $this->enrichStoreData($store);
+
+            // Add business_name explicitly (ensure it's included)
+            $storeDetails->business_name = $store->business_name;
+            $storeDetails->name = $store->business_name; // Map to name for compatibility
+
+            // Add items with their image_url
+            $storeDetails->items = $this->getStoreItems($id);
+
             return response()->json(['success' => true, 'data' => $storeDetails]);
         } catch (\Exception $e) {
             Log::error('Get store details error: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'Unable to fetch store details'], 500);
+        }
+    }
+
+    /**
+     * Get store items with image_url
+     */
+    private function getStoreItems($storeId)
+    {
+        try {
+            $items = DB::table('items')
+                ->where('seller_id', $storeId)
+                ->select([
+                    'id',
+                    'name',
+                    'points_per_unit',
+                    'image_url'
+                ])
+                ->orderBy('name')
+                ->get();
+
+            return $items->map(function ($item) {
+                // Ensure image_url is properly formatted
+                $imageUrl = $item->image_url;
+                if ($imageUrl && !str_starts_with($imageUrl, 'http') && !str_starts_with($imageUrl, '/')) {
+                    $imageUrl = '/storage/items/' . $imageUrl;
+                }
+                if ($imageUrl && str_starts_with($imageUrl, '/storage/')) {
+                    $imageUrl = asset($imageUrl);
+                }
+
+                return (object)[
+                    'id' => $item->id,
+                    'name' => $item->name,
+                    'points_per_unit' => $item->points_per_unit,
+                    'image_url' => $imageUrl ?: asset('images/placeholder.png'), // fallback to placeholder
+                ];
+            });
+        } catch (\Exception $e) {
+            Log::error('Error fetching items for store ' . $storeId . ': ' . $e->getMessage());
+            return collect([]);
         }
     }
 
@@ -449,9 +497,19 @@ class StoreController extends Controller
                 $rankText = $this->getRankText($realPoints);
                 $rankIcon = $this->getRankIcon($realPoints);
 
+                // Ensure seller profile image is properly formatted
+                $profileImage = $store->image;
+                if ($profileImage && !str_starts_with($profileImage, 'http') && !str_starts_with($profileImage, '/')) {
+                    $profileImage = '/storage/sellers/' . $profileImage;
+                }
+                if ($profileImage && str_starts_with($profileImage, '/storage/')) {
+                    $profileImage = asset($profileImage);
+                }
+
                 return (object)[
                     'id' => $store->id,
                     'name' => $store->name,
+                    'business_name' => $store->name, // Explicit business_name field
                     'description' => $store->description ?: 'Quality eco-friendly products and services',
                     'hours' => $store->hours ?: '9:00 AM - 6:00 PM',
                     'address' => $store->address,
@@ -459,7 +517,8 @@ class StoreController extends Controller
                     'longitude' => floatval($store->longitude),
                     'phone' => $store->phone,
                     'email' => $store->email,
-                    'image' => $store->image,
+                    'image' => $profileImage ?: asset('images/store-placeholder.png'), // fallback image
+                    'photo_url' => $profileImage ?: asset('images/store-placeholder.png'), // explicit photo_url field
                     'is_active' => $store->is_active,
 
                     // REAL DATA from database

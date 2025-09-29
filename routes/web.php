@@ -77,8 +77,7 @@ Route::middleware(['auth:consumer'])->group(function () {
     |--------------------------------------------------------------------------
     */
     // Gallery & Feed
-    Route::get('/gallery', [StoreController::class, 'gal
-    lery'])->name('gallery');
+    Route::get('/gallery', [StoreController::class, 'gallery'])->name('gallery');
     Route::get('/products', [StoreController::class, 'gallery'])->name('products'); // Alternative name
 
     // Map & Store Locator
