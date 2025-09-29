@@ -16,9 +16,9 @@
         </thead>
         <tbody>
             <tr>
-                <td>2024-01-15</td>
-                <td>R123456</td>
-                <td>GreenCup Downtown</td>
+                <td>{{$total_cups}}</td>
+                <td>{{$store_visited}}</td>
+                <td> {{ $total_cups*9 }}g </td>
             </tr>
         </tbody>
     </table>

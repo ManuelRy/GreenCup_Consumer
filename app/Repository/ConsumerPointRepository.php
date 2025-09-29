@@ -73,4 +73,8 @@ class ConsumerPointRepository
     $cp->save();
     return $cp;
   }
+  public function countByConsumerId($id): int
+  {
+    return ConsumerPoint::where('consumer_id', $id)->count();
+  }
 }

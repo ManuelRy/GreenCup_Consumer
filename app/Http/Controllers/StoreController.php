@@ -12,8 +12,9 @@ use Carbon\Carbon;
 class StoreController extends Controller
 {
     private SellerRepository $sRepo;
-    
-    public function __construct(SellerRepository $sRepo) {
+
+    public function __construct(SellerRepository $sRepo)
+    {
         $this->sRepo = $sRepo;
     }
     /*
