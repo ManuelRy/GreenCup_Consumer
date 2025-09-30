@@ -536,6 +536,36 @@
       color: #d1fae5;
     }
 
+    /* Guest Link Button - Responsive */
+    .guest-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-md);
+      padding: var(--spacing-lg) var(--spacing-xxxl);
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: var(--border-radius-lg);
+      color: white;
+      font-weight: 600;
+      font-size: var(--font-lg);
+      text-decoration: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      min-height: 44px;
+    }
+
+    .guest-link:hover {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .guest-link i {
+      font-size: var(--font-xl);
+    }
+
     /* Desktop Back Button - Responsive */
     .desktop-back-section {
       margin-top: var(--spacing-xl);
@@ -1176,6 +1206,14 @@
         </button>
         <div id="submit-help" class="sr-only">Submit the registration form to create your account</div>
       </form>
+
+      <!-- Guest Mode Button -->
+      <div style="margin-top: var(--spacing-xxl); text-align: center;">
+        <a href="{{ route('guest.dashboard') }}" class="guest-link">
+          <i class="fas fa-eye"></i>
+          Continue as Guest
+        </a>
+      </div>
 
       <!-- Login Link -->
       <div class="login-section">

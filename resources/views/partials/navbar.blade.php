@@ -85,6 +85,12 @@
                             <i class="bi bi-exclamation-triangle me-1"></i><span>Report</span>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('environmental-impact.*') ? 'active' : '' }}"
+                            href="{{ route('environmental-impact.index') }}" @if (request()->routeIs('environmental-impact.*')) aria-current="page" @endif>
+                            <i class="bi bi-graph-up me-1"></i><span>Impact</span>
+                        </a>
+                    </li>
                 </ul>
 
                 <!-- Right Navigation -->
@@ -125,6 +131,11 @@
                             <li>
                                 <a class="dropdown-item" href="{{ route('account.transactions') }}">
                                     <i class="bi bi-clock-history me-2"></i>Transactions
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="javascript:void(0)" onclick="restartTour()">
+                                    <i class="bi bi-question-circle me-2"></i>Take Tour Again
                                 </a>
                             </li>
                             <li>
@@ -218,6 +229,13 @@
                             <i class="bi bi-exclamation-triangle me-2"></i>Report
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-0 {{ request()->routeIs('environmental-impact.*') ? 'active' : '' }}"
+                            href="{{ route('environmental-impact.index') }}" data-bs-dismiss="offcanvas"
+                            onclick="console.log('Environmental Impact clicked'); return true;">
+                            <i class="bi bi-graph-up me-2"></i>Environmental Impact
+                        </a>
+                    </li>
                     {{-- <li class="nav-item">
                     <a class="nav-link px-0"
                        href="{{ route('consumer.qr-code') }}"
@@ -247,7 +265,7 @@
     <!-- Guest Navigation -->
     <nav class="navbar navbar-expand-lg bg-white fixed-top shadow-sm border-bottom py-1">
         <div class="container-fluid px-3">
-            <a class="navbar-brand d-flex align-items-center gap-2" href="{{ route('home') }}">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="{{ auth('consumer')->check() ? route('dashboard') : route('guest.dashboard') }}">
                 <i class="bi bi-cup-hot"></i><span class="fw-semibold">Green Cups</span>
             </a>
 
@@ -264,12 +282,46 @@
             </div>
 
             <!-- Desktop links -->
-            <div class="d-none d-lg-flex ms-auto">
-                <div class="navbar-nav">
-                    <a class="nav-link" href="{{ route('login') }}"><i
-                            class="bi bi-box-arrow-in-right me-1"></i>Login</a>
-                    <a class="nav-link" href="{{ route('register') }}"><i
-                            class="bi bi-person-plus me-1"></i>Register</a>
+            <div class="d-none d-lg-flex align-items-center flex-grow-1" id="navbarNav">
+                <!-- Left Navigation -->
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('guest.dashboard') ? 'active' : '' }}"
+                            href="{{ route('guest.dashboard') }}">
+                            <i class="bi bi-speedometer2 me-1"></i><span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('guest.gallery') ? 'active' : '' }}"
+                            href="{{ route('guest.gallery') }}">
+                            <i class="bi bi-grid me-1"></i><span>Products</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('guest.map') ? 'active' : '' }}"
+                            href="{{ route('guest.map') }}">
+                            <i class="bi bi-geo-alt me-1"></i><span>Stores</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('guest.environmental-impact') ? 'active' : '' }}"
+                            href="{{ route('guest.environmental-impact') }}">
+                            <i class="bi bi-graph-up me-1"></i><span>Impact</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Right Navigation -->
+                <div class="navbar-nav d-flex align-items-center">
+                    <a class="nav-link" href="javascript:void(0)" onclick="restartTour()" title="Take a Tour">
+                        <i class="bi bi-question-circle fs-5"></i>
+                    </a>
+                    <a class="nav-link btn btn-outline-success me-2" href="{{ route('login') }}">
+                        <i class="bi bi-box-arrow-in-right me-1"></i>Login
+                    </a>
+                    <a class="nav-link btn btn-success text-white" href="{{ route('register') }}">
+                        <i class="bi bi-person-plus me-1"></i>Sign Up Free
+                    </a>
                 </div>
             </div>
         </div>
@@ -281,11 +333,32 @@
             </div>
             <div class="offcanvas-body">
                 <div class="navbar-nav">
-                    <a class="nav-link" href="{{ route('login') }}" data-bs-dismiss="offcanvas">
+                    <a class="nav-link {{ request()->routeIs('guest.dashboard') ? 'active' : '' }}"
+                        href="{{ route('guest.dashboard') }}" data-bs-dismiss="offcanvas">
+                        <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                    </a>
+                    <a class="nav-link {{ request()->routeIs('guest.gallery') ? 'active' : '' }}"
+                        href="{{ route('guest.gallery') }}" data-bs-dismiss="offcanvas">
+                        <i class="bi bi-grid me-1"></i>Products
+                    </a>
+                    <a class="nav-link {{ request()->routeIs('guest.map') ? 'active' : '' }}"
+                        href="{{ route('guest.map') }}" data-bs-dismiss="offcanvas">
+                        <i class="bi bi-geo-alt me-1"></i>Stores
+                    </a>
+                    <a class="nav-link {{ request()->routeIs('guest.environmental-impact') ? 'active' : '' }}"
+                        href="{{ route('guest.environmental-impact') }}" data-bs-dismiss="offcanvas">
+                        <i class="bi bi-graph-up me-1"></i>Impact
+                    </a>
+                    <hr class="my-3">
+                    <a class="nav-link" href="javascript:void(0)" onclick="restartTour(); document.querySelector('[data-bs-dismiss=offcanvas]').click();">
+                        <i class="bi bi-question-circle me-1"></i>Take a Tour
+                    </a>
+                    <hr class="my-3">
+                    <a class="nav-link btn btn-outline-success w-100 mb-2" href="{{ route('login') }}" data-bs-dismiss="offcanvas">
                         <i class="bi bi-box-arrow-in-right me-1"></i>Login
                     </a>
-                    <a class="nav-link" href="{{ route('register') }}" data-bs-dismiss="offcanvas">
-                        <i class="bi bi-person-plus me-1"></i>Register
+                    <a class="nav-link btn btn-success text-white w-100" href="{{ route('register') }}" data-bs-dismiss="offcanvas">
+                        <i class="bi bi-person-plus me-1"></i>Sign Up Free
                     </a>
                 </div>
             </div>

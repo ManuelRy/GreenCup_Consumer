@@ -34,13 +34,19 @@ class DashboardController extends Controller
             // $monthlyData = $this->getMonthlyData($consumer->id, $monthNumber, $year);
             // Get recent activity data (NEW)
             $recentActivity = $this->getRecentActivityForDashboard($consumer->id);
+
+            // Get environmental impact data for motivational messages
+            $environmentalData = $this->getEnvironmentalImpactData($consumer->id);
+            $motivationalMessage = $this->getMotivationalMessage($environmentalData, $consumer);
         } catch (\Exception $e) {
             $currentTotal = 0;
             $availablePoints = 0;
             $recentActivity = collect([]);
+            $environmentalData = [];
+            $motivationalMessage = $this->getDefaultMotivationalMessage($consumer);
         }
 
-        return view('dashboard', compact('consumer', 'currentTotal', 'availablePoints', 'selectedMonth', 'recentActivity'));
+        return view('dashboard', compact('consumer', 'currentTotal', 'availablePoints', 'selectedMonth', 'recentActivity', 'environmentalData', 'motivationalMessage'));
     }
 
     // private function getMonthlyData($consumerId, $month, $year)
@@ -173,5 +179,96 @@ class DashboardController extends Controller
         if (str_contains($itemName, 'smoothie') || str_contains($itemName, 'juice')) return '🥤';
 
         return '🛒'; // Default shopping icon
+    }
+
+    /**
+     * Get environmental impact data for the consumer
+     */
+    private function getEnvironmentalImpactData($consumerId)
+    {
+        // Get total units scanned
+        $totalUnits = DB::table('point_transactions')
+            ->where('consumer_id', $consumerId)
+            ->where('type', 'earn')
+            ->sum('units_scanned') ?? 0;
+
+        // Calculate environmental impact
+        // Assumptions: 1 reusable cup = ~0.25kg CO2 saved, ~1L water saved, ~0.01kg waste reduced
+        return [
+            'total_units' => $totalUnits,
+            'co2_saved' => round($totalUnits * 0.25, 2), // kg
+            'water_saved' => round($totalUnits * 1, 2), // liters
+            'waste_reduced' => round($totalUnits * 0.01, 2), // kg
+        ];
+    }
+
+    /**
+     * Get motivational message based on environmental impact
+     */
+    private function getMotivationalMessage($environmentalData, $consumer)
+    {
+        $totalUnits = $environmentalData['total_units'] ?? 0;
+
+        if ($totalUnits >= 100) {
+            return "Amazing work, {$consumer->name}! You've made a huge environmental impact! 🌍";
+        } elseif ($totalUnits >= 50) {
+            return "Great job, {$consumer->name}! You're making a real difference! 🌱";
+        } elseif ($totalUnits >= 20) {
+            return "Keep it up, {$consumer->name}! Every eco-action counts! ♻️";
+        } elseif ($totalUnits >= 5) {
+            return "Nice start, {$consumer->name}! You're on the right track! 🌿";
+        } else {
+            return "Welcome, {$consumer->name}! Start your eco-journey today! 💚";
+        }
+    }
+
+    /**
+     * Get default motivational message
+     */
+    private function getDefaultMotivationalMessage($consumer)
+    {
+        return "Welcome back, {$consumer->name}! Keep making a difference! 🌱";
+    }
+
+    /**
+     * Guest mode dashboard (no authentication required)
+     */
+    public function guestIndex(Request $request)
+    {
+        // Create a mock consumer object for guest mode
+        $consumer = (object) [
+            'name' => 'Guest',
+            'id' => null,
+        ];
+
+        // Default values for guest mode
+        $currentTotal = [
+            'coins' => 0,
+            'earned' => 0,
+            'spent' => 0
+        ];
+        $availablePoints = 0;
+        $selectedMonth = $request->get('month', Carbon::now()->format('F'));
+        $recentActivity = collect([]);
+
+        // Guest environmental data with example/demo values
+        $environmentalData = [
+            'total_units' => 0,
+            'co2_saved' => 0,
+            'water_saved' => 0,
+            'waste_reduced' => 0,
+        ];
+
+        $motivationalMessage = "Welcome to GreenCup! Join us to start your eco-journey! 🌱";
+
+        return view('dashboard', compact(
+            'consumer',
+            'currentTotal',
+            'availablePoints',
+            'selectedMonth',
+            'recentActivity',
+            'environmentalData',
+            'motivationalMessage'
+        ));
     }
 }

@@ -5,6 +5,58 @@
     <div class="row justify-content-center">
       <div class="col-12 col-xl-10">
 
+        <!-- Guest Banner -->
+        @if($consumer->id === null)
+          @include('partials.guest-banner')
+        @endif
+
+        <!-- Motivational Message Section -->
+        <div class="row mb-4">
+          <div class="col-12">
+            <div class="card border-0 shadow-sm bg-gradient-success text-white rounded-4">
+              <div class="card-body py-4 text-center">
+                <div class="hero-icon mb-3">🌱</div>
+                <h4 class="fw-bold mb-2">{{ $motivationalMessage }}</h4>
+                <p class="mb-3 opacity-90">
+                  @if(isset($environmentalData['total_units']) && $environmentalData['total_units'] > 0)
+                    You've used your eco-cup {{ number_format($environmentalData['total_units']) }} times, saving {{ number_format($environmentalData['co2_saved'], 2) }}kg CO₂ and {{ number_format($environmentalData['water_saved'], 2) }}L of water!
+                  @else
+                    Start your eco-journey today and make a positive impact on our planet!
+                  @endif
+                </p>
+                @if($consumer->id === null)
+                  <!-- Guest Mode CTA -->
+                  <div class="mt-4">
+                    <a href="{{ route('register') }}" class="btn btn-light btn-lg me-2 mb-2">
+                      <i class="fas fa-user-plus me-2"></i>Sign Up to Track Your Impact
+                    </a>
+                    <a href="{{ route('login') }}" class="btn btn-outline-light btn-lg mb-2">
+                      <i class="fas fa-sign-in-alt me-2"></i>Login
+                    </a>
+                  </div>
+                @else
+                  <div class="progress-badges d-flex justify-content-center gap-3 flex-wrap">
+                    @if(isset($environmentalData['total_units']))
+                      @if($environmentalData['total_units'] >= 1)
+                        <span class="badge bg-white text-success px-3 py-2">🌱 Eco Beginner</span>
+                      @endif
+                      @if($environmentalData['total_units'] >= 10)
+                        <span class="badge bg-white text-success px-3 py-2">🌿 Green Warrior</span>
+                      @endif
+                      @if($environmentalData['total_units'] >= 50)
+                        <span class="badge bg-white text-success px-3 py-2">🌳 Planet Protector</span>
+                      @endif
+                      @if($environmentalData['total_units'] >= 100)
+                        <span class="badge bg-white text-success px-3 py-2">🌍 Earth Champion</span>
+                      @endif
+                    @endif
+                  </div>
+                @endif
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Points Section -->
         <div class="row mb-4">
           <div class="col-12">
@@ -154,40 +206,44 @@
               </div>
               <div class="card-body">
                 <div class="row g-3">
+                  @if($consumer->id !== null)
+                    <div class="col-6 col-lg-3">
+                      <a href="{{ route('account') }}" class="btn btn-outline-primary w-100 py-3 text-decoration-none action-btn">
+                        <div class="fs-2 mb-2">
+                          <i class="fas fa-user-circle"></i>
+                        </div>
+                        <div class="fw-semibold small">Account</div>
+                      </a>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                      <a href="{{ route('reward.index') }}" class="btn btn-outline-primary w-100 py-3 text-decoration-none action-btn">
+                        <div class="fs-2 mb-2">
+                          <i class="fas fa-gift"></i>
+                        </div>
+                        <div class="fw-semibold small">Rewards</div>
+                      </a>
+                    </div>
+                  @endif
                   <div class="col-6 col-lg-3">
-                    <a href="{{ route('account') }}" class="btn btn-outline-primary w-100 py-3 text-decoration-none action-btn">
-                      <div class="fs-2 mb-2">
-                        <i class="fas fa-user-circle"></i>
-                      </div>
-                      <div class="fw-semibold small">Account</div>
-                    </a>
-                  </div>
-                  <div class="col-6 col-lg-3">
-                    <a href="{{ route('reward.index') }}" class="btn btn-outline-primary w-100 py-3 text-decoration-none action-btn">
-                      <div class="fs-2 mb-2">
-                        <i class="fas fa-gift"></i>
-                      </div>
-                      <div class="fw-semibold small">Rewards</div>
-                    </a>
-                  </div>
-                  <div class="col-6 col-lg-3">
-                    <a href="{{ route('gallery') }}" class="btn btn-outline-primary w-100 py-3 text-decoration-none action-btn">
+                    <a href="{{ $consumer->id !== null ? route('gallery') : route('guest.gallery') }}" class="btn btn-outline-primary w-100 py-3 text-decoration-none action-btn">
                       <div class="fs-2 mb-2">
                         <i class="fas fa-shopping-bag"></i>
                       </div>
                       <div class="fw-semibold small">Shop Gallery</div>
                     </a>
                   </div>
+                  @if($consumer->id !== null)
+                    <div class="col-6 col-lg-3">
+                      <a href="{{ route('scan.receipt') }}" class="btn btn-primary w-100 py-3 text-decoration-none action-btn">
+                        <div class="fs-2 mb-2">
+                          <i class="fas fa-qrcode text-white"></i>
+                        </div>
+                        <div class="fw-semibold small text-white">Scan QR</div>
+                      </a>
+                    </div>
+                  @endif
                   <div class="col-6 col-lg-3">
-                    <a href="{{ route('scan.receipt') }}" class="btn btn-primary w-100 py-3 text-decoration-none action-btn">
-                      <div class="fs-2 mb-2">
-                        <i class="fas fa-qrcode text-white"></i>
-                      </div>
-                      <div class="fw-semibold small text-white">Scan QR</div>
-                    </a>
-                  </div>
-                  <div class="col-6 col-lg-3">
-                    <a href="{{ route('map') }}" class="btn btn-outline-primary w-100 py-3 text-decoration-none action-btn">
+                    <a href="{{ $consumer->id !== null ? route('map') : route('guest.map') }}" class="btn btn-outline-primary w-100 py-3 text-decoration-none action-btn">
                       <div class="fs-2 mb-2">
                         <i class="fas fa-map-marker-alt"></i>
                       </div>
@@ -195,13 +251,31 @@
                     </a>
                   </div>
                   <div class="col-6 col-lg-3">
-                    <a href="{{ route('environmental-impact.index') }}" class="btn btn-outline-primary w-100 py-3 text-decoration-none action-btn">
+                    <a href="{{ $consumer->id !== null ? route('environmental-impact.index') : route('guest.environmental-impact') }}" class="btn btn-outline-primary w-100 py-3 text-decoration-none action-btn">
                       <div class="fs-2 mb-2">
-                        <i class="fas fa-user-circle"></i>
+                        <i class="fas fa-leaf"></i>
                       </div>
-                      <div class="fw-semibold small">Environmental Tracking</div>
+                      <div class="fw-semibold small">Environmental Impact</div>
                     </a>
                   </div>
+                  @if($consumer->id === null)
+                    <div class="col-6 col-lg-3">
+                      <a href="{{ route('login') }}" class="btn btn-primary w-100 py-3 text-decoration-none action-btn">
+                        <div class="fs-2 mb-2">
+                          <i class="fas fa-sign-in-alt text-white"></i>
+                        </div>
+                        <div class="fw-semibold small text-white">Login</div>
+                      </a>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                      <a href="{{ route('register') }}" class="btn btn-success w-100 py-3 text-decoration-none action-btn">
+                        <div class="fs-2 mb-2">
+                          <i class="fas fa-user-plus text-white"></i>
+                        </div>
+                        <div class="fw-semibold small text-white">Sign Up</div>
+                      </a>
+                    </div>
+                  @endif
                 </div>
               </div>
             </div>
@@ -282,6 +356,35 @@
       background: linear-gradient(135deg, #1dd1a1, #10ac84) !important;
     }
 
+    .bg-gradient-success {
+      background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%) !important;
+      box-shadow: 0 10px 40px rgba(45, 90, 39, 0.3) !important;
+    }
+
+    .hero-icon {
+      font-size: 3rem;
+      display: inline-block;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-10px); }
+      60% { transform: translateY(-5px); }
+    }
+
+    .progress-badges .badge {
+      font-size: 0.9rem;
+      font-weight: 600;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .progress-badges .badge:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+    }
+
     .btn-primary {
       background: linear-gradient(135deg, #1dd1a1, #10ac84);
       border: none;
@@ -292,6 +395,40 @@
       transform: translateY(-2px);
       box-shadow: 0 8px 25px rgba(29, 209, 161, 0.3);
       background: linear-gradient(135deg, #10ac84, #0e8e71);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      border: none;
+      transition: all 0.3s ease;
+    }
+
+    .btn-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(34, 197, 94, 0.3);
+      background: linear-gradient(135deg, #16a34a, #15803d);
+    }
+
+    .btn-light {
+      transition: all 0.3s ease;
+    }
+
+    .btn-light:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-outline-light {
+      border-color: rgba(255, 255, 255, 0.5);
+      color: white;
+      transition: all 0.3s ease;
+    }
+
+    .btn-outline-light:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: white;
+      color: white;
+      transform: translateY(-2px);
     }
 
     .btn-outline-primary {

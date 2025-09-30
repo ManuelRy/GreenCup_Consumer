@@ -88,10 +88,8 @@ class StoreController extends Controller
     public function map()
     {
         try {
+            // Support both authenticated and guest users
             $consumer = Auth::guard('consumer')->user();
-            if (!$consumer) {
-                return redirect()->route('login')->with('error', 'Please login to view the map');
-            }
 
             $stores = $this->getAllStoresForMap();
             $mapboxToken = env('MAPBOX_ACCESS_TOKEN', 'pk.eyJ1IjoibmVha3NlbmJlc3RmcmkiLCJhIjoiY205cXhkb3c3MTF3MzJ2b2doamJiM2NmaSJ9.zTnzZvYetGaqX0CODz4qoQ');
@@ -625,40 +623,46 @@ class StoreController extends Controller
         try {
             $query = DB::table('sellers')
                 ->select([
-                    'id',
-                    'business_name as name',
-                    'description',
-                    'working_hours as hours',
-                    'email',
-                    'address',
-                    'latitude',
-                    'longitude',
-                    'photo_url as image',
-                    'phone',
-                    'total_points',
-                    'is_active'
+                    'sellers.id',
+                    'sellers.business_name as name',
+                    'sellers.description',
+                    'sellers.working_hours as hours',
+                    'sellers.email',
+                    'sellers.address',
+                    'sellers.latitude',
+                    'sellers.longitude',
+                    'sellers.photo_url as image',
+                    'sellers.phone',
+                    'sellers.total_points',
+                    'sellers.is_active'
                 ])
-                ->where('is_active', true);
+                ->where('sellers.is_active', true);
 
             // Only filter by coordinates if they exist
             $query->where(function ($q) {
                 $q->where(function ($subQ) {
-                    $subQ->whereNotNull('latitude')
-                        ->whereNotNull('longitude')
-                        ->where('latitude', '!=', 0)
-                        ->where('longitude', '!=', 0);
+                    $subQ->whereNotNull('sellers.latitude')
+                        ->whereNotNull('sellers.longitude')
+                        ->where('sellers.latitude', '!=', 0)
+                        ->where('sellers.longitude', '!=', 0);
                 });
             });
 
             if ($search) {
                 $query->where(function ($q) use ($search) {
-                    $q->where('business_name', 'LIKE', "%{$search}%")
-                        ->orWhere('address', 'LIKE', "%{$search}%")
-                        ->orWhere('description', 'LIKE', "%{$search}%");
+                    $q->where('sellers.business_name', 'LIKE', "%{$search}%")
+                        ->orWhere('sellers.address', 'LIKE', "%{$search}%")
+                        ->orWhere('sellers.description', 'LIKE', "%{$search}%")
+                        ->orWhereExists(function ($subQuery) use ($search) {
+                            $subQuery->select(DB::raw(1))
+                                ->from('items')
+                                ->whereColumn('items.seller_id', 'sellers.id')
+                                ->where('items.name', 'LIKE', "%{$search}%");
+                        });
                 });
             }
 
-            $stores = $query->get();
+            $stores = $query->distinct()->get();
 
             return $stores->map(function ($store) {
                 return $this->enrichStoreData($store);
@@ -827,39 +831,45 @@ class StoreController extends Controller
         try {
             $baseQuery = DB::table('sellers')
                 ->select([
-                    'id',
-                    'business_name as name',
-                    'description',
-                    'working_hours as hours',
-                    'email',
-                    'address',
-                    'latitude',
-                    'longitude',
-                    'photo_url as image',
-                    'phone',
-                    'total_points',
-                    'is_active'
+                    'sellers.id',
+                    'sellers.business_name as name',
+                    'sellers.description',
+                    'sellers.working_hours as hours',
+                    'sellers.email',
+                    'sellers.address',
+                    'sellers.latitude',
+                    'sellers.longitude',
+                    'sellers.photo_url as image',
+                    'sellers.phone',
+                    'sellers.total_points',
+                    'sellers.is_active'
                 ])
-                ->where('is_active', true)
+                ->where('sellers.is_active', true)
                 ->where(function ($q) {
                     $q->where(function ($subQ) {
-                        $subQ->whereNotNull('latitude')
-                            ->whereNotNull('longitude')
-                            ->where('latitude', '!=', 0)
-                            ->where('longitude', '!=', 0);
+                        $subQ->whereNotNull('sellers.latitude')
+                            ->whereNotNull('sellers.longitude')
+                            ->where('sellers.latitude', '!=', 0)
+                            ->where('sellers.longitude', '!=', 0);
                     });
                 })
                 ->where(function ($q) use ($query) {
-                    $q->where('business_name', 'LIKE', "%{$query}%")
-                        ->orWhere('address', 'LIKE', "%{$query}%")
-                        ->orWhere('description', 'LIKE', "%{$query}%");
+                    $q->where('sellers.business_name', 'LIKE', "%{$query}%")
+                        ->orWhere('sellers.address', 'LIKE', "%{$query}%")
+                        ->orWhere('sellers.description', 'LIKE', "%{$query}%")
+                        ->orWhereExists(function ($subQuery) use ($query) {
+                            $subQuery->select(DB::raw(1))
+                                ->from('items')
+                                ->whereColumn('items.seller_id', 'sellers.id')
+                                ->where('items.name', 'LIKE', "%{$query}%");
+                        });
                 });
 
             if ($userLat && $userLng) {
                 $baseQuery->whereRaw($this->getDistanceWhereClause($userLat, $userLng, $radiusKm));
             }
 
-            $stores = $baseQuery->get();
+            $stores = $baseQuery->distinct()->get();
 
             return $stores->map(function ($store) {
                 return $this->enrichStoreData($store);

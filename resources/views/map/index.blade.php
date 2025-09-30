@@ -2,6 +2,13 @@
 
 @section('content')
   <div class="fullscreen-map-container">
+    <!-- Guest Banner -->
+    @if(!auth('consumer')->check())
+      <div style="position: absolute; top: 70px; left: 50%; transform: translateX(-50%); z-index: 1000; width: 90%; max-width: 800px;">
+        @include('partials.guest-banner')
+      </div>
+    @endif
+
     <!-- Search Bar (Fixed at top) -->
     <div class="search-section-fixed">
       <div class="search-container">
@@ -206,6 +213,31 @@
             <h4>🛍️ Available Items</h4>
             <div class="items-grid" id="itemsContainer">
               <!-- Items will be populated dynamically -->
+            </div>
+          </div>
+
+          <!-- Item Detail Modal -->
+          <div id="itemModal" class="item-detail-modal" style="display: none;">
+            <div class="item-modal-overlay" onclick="closeItemModal()"></div>
+            <div class="item-modal-content">
+              <button class="item-modal-close" onclick="closeItemModal()">×</button>
+              <div class="item-modal-body">
+                <div class="item-modal-image-container">
+                  <img id="itemModalImage" src="" alt="" class="item-modal-image">
+                </div>
+                <div class="item-modal-info">
+                  <h3 id="itemModalName" class="item-modal-title"></h3>
+                  <div class="item-modal-points">
+                    <span class="points-badge">
+                      <i class="bi bi-star-fill"></i>
+                      <span id="itemModalPoints"></span> Points
+                    </span>
+                  </div>
+                  <div class="item-modal-description">
+                    <p id="itemModalDescription">Eco-friendly product available at this store. Earn points by purchasing this item!</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <!-- Action Buttons -->
@@ -1608,82 +1640,241 @@
 
     .items-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
       gap: 15px;
       margin-top: 15px;
     }
 
     .item-card {
       background: white;
-      border: 1px solid #e0e0e0;
+      border: 2px solid #e9ecef;
       border-radius: 12px;
-      padding: 16px;
+      padding: 12px;
+      cursor: pointer;
       transition: all 0.3s ease;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      text-align: center;
     }
 
     .item-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      transform: translateY(-4px);
+      box-shadow: 0 6px 20px rgba(46, 139, 87, 0.2);
+      border-color: #2E8B57;
     }
 
-    .item-header {
+    .item-card-image {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+      margin-bottom: 10px;
+    }
+
+    .item-default-icon {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
+      justify-content: center;
+      background: linear-gradient(135deg, #2E8B57, #228B22);
+      color: white;
     }
 
-    .item-image {
-      width: 60px;
-      height: 60px;
-      object-fit: cover;
-      border-radius: 10px;
-      background: #f5f5f5;
-      border: 2px solid #e0e0e0;
+    .item-default-icon i {
+      font-size: 48px;
     }
 
-    .item-details {
-      flex: 1;
-    }
-
-    .item-name {
+    .item-card-name {
+      font-size: 14px;
       font-weight: 600;
-      color: #333;
-      margin: 0 0 4px 0;
-      font-size: 16px;
+      color: #2c3e50;
+      margin: 0 0 6px 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
-    .item-points {
+    .item-card-points {
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      background: linear-gradient(135deg, #22c55e, #16a34a);
+      background: linear-gradient(135deg, #2E8B57, #228B22);
       color: white;
-      padding: 6px 12px;
-      border-radius: 20px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
       font-weight: 600;
-      font-size: 14px;
     }
 
-    .item-points::before {
-      content: "⭐";
-      font-size: 12px;
+    /* Item Detail Modal */
+    .item-detail-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .item-modal-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+    }
+
+    .item-modal-content {
+      position: relative;
+      background: white;
+      border-radius: 20px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      animation: modalSlideUp 0.3s ease;
+    }
+
+    @keyframes modalSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .item-modal-close {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+      border: none;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .item-modal-close:hover {
+      background: rgba(0, 0, 0, 0.8);
+      transform: rotate(90deg);
+    }
+
+    .item-modal-body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .item-modal-image-container {
+      width: 100%;
+      height: 280px;
+      background: linear-gradient(135deg, #2E8B57, #228B22);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .item-modal-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .item-modal-default-icon {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .item-modal-default-icon i {
+      font-size: 80px;
+    }
+
+    .item-modal-info {
+      padding: 24px;
+    }
+
+    .item-modal-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #2c3e50;
+      margin: 0 0 16px 0;
+    }
+
+    .item-modal-points {
+      margin-bottom: 20px;
+    }
+
+    .points-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #2E8B57, #228B22);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 16px;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(46, 139, 87, 0.3);
+    }
+
+    .points-badge i {
+      font-size: 18px;
+    }
+
+    .item-modal-description {
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .item-modal-description p {
+      margin: 0;
     }
 
     @media (max-width: 768px) {
       .items-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
         gap: 12px;
       }
 
-      .item-card {
-        padding: 12px;
+      .item-card-image {
+        height: 100px;
       }
 
-      .item-image {
-        width: 50px;
-        height: 50px;
+      .item-card-name {
+        font-size: 13px;
+      }
+
+      .item-modal-content {
+        max-width: 95%;
+      }
+
+      .item-modal-image-container {
+        height: 220px;
+      }
+
+      .item-modal-title {
+        font-size: 20px;
       }
     }
 
@@ -2550,6 +2741,7 @@
                             <div class="store-phone">📞 ${store.phone}</div>
                         </div>
                     </div>
+                    ${store.searchQuery ? '<div class="store-matched-items" data-store-id="' + store.id + '"></div>' : ''}
                 `;
 
         storeItem.addEventListener('click', () => {
@@ -2557,6 +2749,11 @@
         });
 
         storeList.appendChild(storeItem);
+
+        // Load matching items if there's a search query
+        if (store.searchQuery) {
+          loadMatchingItems(store.id, store.searchQuery);
+        }
       });
     }
 
@@ -2615,7 +2812,7 @@
 
       try {
         showLoading();
-        const response = await fetch(`/api/stores?search=${encodeURIComponent(query)}`);
+        const response = await fetch(`/public-api/stores/search?search=${encodeURIComponent(query)}`);
         const data = await response.json();
 
         if (data.success) {
@@ -2626,6 +2823,7 @@
             store.distance = null;
             store.points_reward = parseFloat(store.points_reward) || parseFloat(store.total_points) || 0;
             store.transaction_count = parseInt(store.transaction_count) || 0;
+            store.searchQuery = query; // Store search query for matching items display
           });
 
           // Recalculate distances if user location is available
@@ -2694,6 +2892,38 @@
       }
     }
 
+    // Load matching items for a store
+    async function loadMatchingItems(storeId, searchQuery) {
+      try {
+        const response = await fetch(`/public-api/store/${storeId}/details`);
+        const data = await response.json();
+
+        if (data.success && data.data.items) {
+          const items = data.data.items.filter(item =>
+            item.name.toLowerCase().includes(searchQuery.toLowerCase())
+          );
+
+          if (items.length > 0) {
+            const container = document.querySelector(`.store-matched-items[data-store-id="${storeId}"]`);
+            if (container) {
+              container.innerHTML = `
+                <div style="padding: 8px 12px; background: #f0f9ff; border-left: 3px solid #2E8B57; margin-top: 8px;">
+                  <div style="font-size: 12px; font-weight: 600; color: #2E8B57; margin-bottom: 4px;">
+                    🔍 Matching items:
+                  </div>
+                  <div style="font-size: 11px; color: #555;">
+                    ${items.map(item => `<span style="display: inline-block; background: white; padding: 2px 8px; margin: 2px; border-radius: 12px; border: 1px solid #e0e0e0;">☕ ${item.name}</span>`).join('')}
+                  </div>
+                </div>
+              `;
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error loading matching items:', error);
+      }
+    }
+
     function clearSearch() {
       console.log('Clearing search and resetting to all stores');
 
@@ -2701,8 +2931,11 @@
       document.getElementById('clearSearch').style.display = 'none';
       document.getElementById('searchBtn').style.right = '5px';
 
-      // Reset to all stores
-      app.filteredStores = [...app.stores];
+      // Reset to all stores and remove search query
+      app.filteredStores = [...app.stores].map(store => {
+        const {searchQuery, ...storeWithoutQuery} = store;
+        return storeWithoutQuery;
+      });
 
       // Recalculate distances if needed
       if (app.userLocation) {
@@ -2961,7 +3194,7 @@
       app.selectedStore = JSON.parse(JSON.stringify(store));
 
       try {
-        const response = await fetch(`/api/store/${store.id}/details`);
+        const response = await fetch(`/public-api/store/${store.id}/details`);
         const data = await response.json();
 
         console.log(data);
@@ -3083,11 +3316,18 @@
       photos.forEach((photo, index) => {
         const galleryItem = document.createElement('div');
         galleryItem.className = `gallery-item ${photo.is_featured ? 'featured' : ''}`;
+        galleryItem.style.position = 'relative';
 
         const img = document.createElement('img');
         img.src = photo.url;
         img.alt = photo.caption || `Store photo ${index + 1}`;
         img.loading = 'lazy';
+
+        // Check if photo is frozen
+        const isFrozen = photo.caption && /^\[frozen\]/i.test(photo.caption);
+        if (isFrozen) {
+          img.style.filter = 'blur(20px)';
+        }
 
         // Add error handling for broken images
         img.onerror = function() {
@@ -3101,6 +3341,15 @@
         });
 
         galleryItem.appendChild(img);
+
+        // Add frozen overlay if needed
+        if (isFrozen) {
+          const overlay = document.createElement('div');
+          overlay.style.cssText = 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: flex; align-items: center; justify-content: center; border-radius: 8px;';
+          overlay.innerHTML = '<div style="text-align: center; color: white;"><i class="bi bi-exclamation-triangle-fill" style="color: #ffc107; font-size: 24px; margin-bottom: 8px;"></i><div style="font-size: 11px; font-weight: bold;">CONTENT UNDER REVIEW</div></div>';
+          galleryItem.appendChild(overlay);
+        }
+
         galleryContainer.appendChild(galleryItem);
       });
     }
@@ -3111,41 +3360,38 @@
       itemsGrid.innerHTML = '';
 
       if (items && items.length > 0) {
-        items.forEach(item => {
-          // Create item card
+        items.forEach((item, index) => {
           const card = document.createElement('div');
           card.className = 'item-card';
+          card.onclick = () => openItemModal(item);
 
-          // Create item header with image and details
-          const header = document.createElement('div');
-          header.className = 'item-header';
-
-          const img = document.createElement('img');
-          img.src = item.image_url || '/images/placeholder.png';
-          img.alt = item.name;
-          img.className = 'item-image';
-          img.onerror = function() {
-            this.src = '/images/placeholder.png';
-          };
-
-          const details = document.createElement('div');
-          details.className = 'item-details';
+          // Check if item has valid image
+          if (item.image_url && item.image_url.trim() !== '') {
+            const img = document.createElement('img');
+            img.src = item.image_url;
+            img.alt = item.name;
+            img.className = 'item-card-image';
+            img.onerror = function() {
+              // Replace with icon if image fails
+              this.replaceWith(createDefaultItemIcon());
+            };
+            card.appendChild(img);
+          } else {
+            // No image - use default icon
+            card.appendChild(createDefaultItemIcon());
+          }
 
           const name = document.createElement('h5');
-          name.className = 'item-name';
+          name.className = 'item-card-name';
           name.textContent = item.name;
+          name.title = item.name;
 
           const points = document.createElement('div');
-          points.className = 'item-points';
-          points.textContent = `${item.points_per_unit} pts`;
+          points.className = 'item-card-points';
+          points.innerHTML = `<i class="bi bi-star-fill"></i> ${item.points_per_unit}`;
 
-          // Assemble the card
-          details.appendChild(name);
-          details.appendChild(points);
-          header.appendChild(img);
-          header.appendChild(details);
-          card.appendChild(header);
-
+          card.appendChild(name);
+          card.appendChild(points);
           itemsGrid.appendChild(card);
         });
 
@@ -3153,6 +3399,80 @@
       } else {
         itemsContainer.style.display = 'none';
       }
+    }
+
+    function createDefaultItemIcon() {
+      const iconContainer = document.createElement('div');
+      iconContainer.className = 'item-card-image item-default-icon';
+      iconContainer.innerHTML = '<i class="bi bi-bag-check-fill"></i>';
+      return iconContainer;
+    }
+
+    let itemModalTimeout = null;
+
+    function openItemModal(item) {
+      if (itemModalTimeout) return;
+      itemModalTimeout = setTimeout(() => { itemModalTimeout = null; }, 150);
+
+      console.log('Opening item modal for:', item.name);
+
+      const modal = document.getElementById('itemModal');
+      if (!modal) {
+        console.error('Item modal not found');
+        return;
+      }
+
+      const modalImageContainer = document.querySelector('.item-modal-image-container');
+      if (!modalImageContainer) {
+        console.error('Modal image container not found');
+        return;
+      }
+
+      const modalName = document.getElementById('itemModalName');
+      const modalPoints = document.getElementById('itemModalPoints');
+
+      if (!modalName || !modalPoints) {
+        console.error('Modal elements not found');
+        return;
+      }
+
+      // Clear previous content
+      modalImageContainer.innerHTML = '';
+
+      // Check if item has valid image
+      if (item.image_url && item.image_url.trim() !== '') {
+        const img = document.createElement('img');
+        img.src = item.image_url;
+        img.alt = item.name;
+        img.id = 'itemModalImage';
+        img.className = 'item-modal-image';
+        img.onerror = function() {
+          // Replace with icon if image fails
+          modalImageContainer.innerHTML = '<div class="item-modal-default-icon"><i class="bi bi-bag-check-fill"></i></div>';
+        };
+        modalImageContainer.appendChild(img);
+      } else {
+        // No image - use default icon
+        modalImageContainer.innerHTML = '<div class="item-modal-default-icon"><i class="bi bi-bag-check-fill"></i></div>';
+      }
+
+      modalName.textContent = item.name;
+      modalPoints.textContent = item.points_per_unit;
+
+      // Show modal
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+
+      console.log('Item modal opened successfully');
+    }
+
+    function closeItemModal() {
+      console.log('Closing item modal');
+      const modal = document.getElementById('itemModal');
+      if (modal) {
+        modal.style.display = 'none';
+      }
+      document.body.style.overflow = 'auto';
     }
 
     function openPhotoModal(photo) {
@@ -3172,6 +3492,9 @@
                 cursor: pointer;
             `;
 
+      const container = document.createElement('div');
+      container.style.cssText = 'position: relative; max-width: 90vw; max-height: 90vh;';
+
       const img = document.createElement('img');
       img.src = photo.url;
       img.style.cssText = `
@@ -3181,7 +3504,23 @@
                 border-radius: 8px;
             `;
 
-      modal.appendChild(img);
+      // Check if photo is frozen
+      const isFrozen = photo.caption && /^\[frozen\]/i.test(photo.caption);
+      if (isFrozen) {
+        img.style.filter = 'blur(20px)';
+      }
+
+      container.appendChild(img);
+
+      // Add frozen overlay if needed
+      if (isFrozen) {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: flex; align-items: center; justify-content: center; border-radius: 8px;';
+        overlay.innerHTML = '<div style="text-align: center; color: white;"><i class="bi bi-exclamation-triangle-fill" style="color: #ffc107; font-size: 48px; margin-bottom: 16px; display: block;"></i><div style="font-size: 20px; font-weight: bold; text-transform: uppercase;">CONTENT UNDER REVIEW</div><p style="margin-top: 8px; font-size: 14px; opacity: 0.75;">This content is being reviewed by our moderation team</p></div>';
+        container.appendChild(overlay);
+      }
+
+      modal.appendChild(container);
 
       // Close on click
       modal.addEventListener('click', () => {

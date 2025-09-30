@@ -24,4 +24,15 @@ class EnvironmentalImpactController extends Controller
         $store_visited = $this->cPRepo->countByConsumerId($consumer_id);
         return view('environmental-impact.index', compact(['total_cups', 'store_visited']));
     }
+
+    /**
+     * Guest mode environmental impact (no authentication required)
+     */
+    public function guestIndex()
+    {
+        // Default values for guest mode (example/demo data)
+        $total_cups = 0;
+        $store_visited = 0;
+        return view('environmental-impact.index', compact(['total_cups', 'store_visited']));
+    }
 }

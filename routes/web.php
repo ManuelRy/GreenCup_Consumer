@@ -14,7 +14,10 @@ use App\Http\Controllers\{AccountController, AuthController, ConsumerController,
 
 // Root redirect
 Route::get('/', function () {
-    return redirect()->route('dashboard');
+    if (auth('consumer')->check()) {
+        return redirect()->route('dashboard');
+    }
+    return redirect()->route('guest.dashboard');
 });
 
 // Debug route for testing images
@@ -39,6 +42,18 @@ Route::middleware(['guest:consumer'])->group(function () {
     // Legacy routes for backward compatibility
     Route::get('/consumers/create', [RegisterController::class, 'index'])->name('consumers.create');
     Route::post('/consumers', [RegisterController::class, 'store'])->name('consumers.store');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Guest Mode Routes (No Authentication Required)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('guest')->name('guest.')->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'guestIndex'])->name('dashboard');
+    Route::get('/gallery', [StoreController::class, 'gallery'])->name('gallery');
+    Route::get('/map', [StoreController::class, 'map'])->name('map');
+    Route::get('/environmental-impact', [EnvironmentalImpactController::class, 'guestIndex'])->name('environmental-impact');
 });
 
 /*
@@ -166,6 +181,7 @@ Route::prefix('public-api')->name('public.api.')->group(function () {
     Route::get('/stores', [StoreController::class, 'getStores'])->name('stores');
     Route::get('/store/{id}', [StoreController::class, 'getStoreDetails'])->name('store.details');
     Route::get('/stores/search', [StoreController::class, 'search'])->name('stores.search');
+    Route::post('/stores/distance', [StoreController::class, 'calculateDistance'])->name('stores.distance');
 
     // Gallery feed (for gallery browser)
     Route::get('/gallery/feed', [StoreController::class, 'getFeed'])->name('gallery.feed');
@@ -175,6 +191,10 @@ Route::prefix('public-api')->name('public.api.')->group(function () {
     // Store profiles (for public access - different route names)
     Route::get('/seller/{id}', [StoreController::class, 'show'])->name('seller.public.show');
     Route::get('/store/{id}', [StoreController::class, 'show'])->name('store.public.show');
+
+    // Store details and items (for guest access)
+    Route::get('/store/{id}/details', [StoreController::class, 'getStoreDetails'])->name('store.public.details');
+    Route::get('/store/{id}/items', [StoreController::class, 'getStoreItems'])->name('store.public.items');
 });
 
 /*

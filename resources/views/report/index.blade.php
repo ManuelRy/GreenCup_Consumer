@@ -49,7 +49,7 @@
               <div class="row g-4">
                 @foreach($reports as $report)
                   <div class="col-12">
-                    <div class="card border-0 shadow-sm rounded-3 h-100 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 border-start border-4" style="border-left-color: #1dd1a1 !important;">
+                    <div class="card border-0 shadow-sm rounded-3 h-100 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 border-start" style="border-left-color: #1dd1a1 !important;">
                       <div class="card-body p-4">
                         <div class="row align-items-center">
                           <div class="col-md-8">

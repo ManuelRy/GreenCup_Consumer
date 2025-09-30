@@ -2,6 +2,13 @@
 
 @section('content')
 <div class="environmental-impact-container">
+    <!-- Guest Banner -->
+    @if(!auth('consumer')->check())
+      <div class="container py-3">
+        @include('partials.guest-banner')
+      </div>
+    @endif
+
     <!-- Hero Section -->
     <div class="hero-section">
         <div class="hero-content">
@@ -164,6 +171,37 @@
         </div>
     </div>
     @endif
+
+    <!-- Quick Actions Section -->
+    <div class="quick-actions-section">
+        <h2 class="section-title">⚡ Quick Actions</h2>
+        <div class="quick-actions-grid">
+            <a href="{{ route('account') }}" class="quick-action-card account-card">
+                <div class="action-icon">👤</div>
+                <div class="action-label">Account</div>
+            </a>
+            <a href="{{ route('reward.index') }}" class="quick-action-card rewards-card">
+                <div class="action-icon">🎁</div>
+                <div class="action-label">Rewards</div>
+            </a>
+            <a href="{{ route('gallery') }}" class="quick-action-card gallery-card">
+                <div class="action-icon">🛍️</div>
+                <div class="action-label">Shop Gallery</div>
+            </a>
+            <a href="{{ route('scan.receipt') }}" class="quick-action-card scan-card highlighted">
+                <div class="action-icon">📱</div>
+                <div class="action-label">Scan QR</div>
+            </a>
+            <a href="{{ route('map') }}" class="quick-action-card locations-card">
+                <div class="action-icon">📍</div>
+                <div class="action-label">Locations</div>
+            </a>
+            <a href="{{ route('environmental-impact.index') }}" class="quick-action-card environmental-card active">
+                <div class="action-icon">🌱</div>
+                <div class="action-label">Environmental Tracking</div>
+            </a>
+        </div>
+    </div>
 
     <!-- Call to Action -->
     <div class="cta-section">
@@ -462,6 +500,85 @@
     line-height: 1.4;
 }
 
+/* Quick Actions Section */
+.quick-actions-section {
+    padding: 40px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+.quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin-top: 24px;
+}
+
+.quick-action-card {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 24px 16px;
+    text-align: center;
+    text-decoration: none;
+    color: #374151;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.quick-action-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    text-decoration: none;
+    color: #374151;
+}
+
+.quick-action-card.highlighted {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: white;
+    border-color: #22c55e;
+}
+
+.quick-action-card.highlighted:hover {
+    color: white;
+    box-shadow: 0 8px 25px rgba(34, 197, 94, 0.3);
+}
+
+.quick-action-card.active {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    border-color: #3b82f6;
+}
+
+.quick-action-card.active:hover {
+    color: white;
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+}
+
+.action-icon {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.action-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+/* Specific card styling */
+.account-card:hover { border-color: #6b7280; }
+.rewards-card:hover { border-color: #f59e0b; }
+.gallery-card:hover { border-color: #8b5cf6; }
+.locations-card:hover { border-color: #ef4444; }
+.environmental-card { border-color: #3b82f6; }
+
 /* CTA Section */
 .cta-section {
     background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
@@ -572,6 +689,11 @@
         grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     }
 
+    .quick-actions-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
     .cta-buttons {
         flex-direction: column;
         align-items: center;
@@ -591,14 +713,30 @@
 
     .impact-stats,
     .benefits-section,
-    .achievements-section {
+    .achievements-section,
+    .quick-actions-section {
         padding: 30px 15px;
     }
 
     .stat-card,
     .benefit-card,
-    .achievement-badge {
+    .achievement-badge,
+    .quick-action-card {
         padding: 20px;
+    }
+
+    .quick-actions-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .action-icon {
+        font-size: 2rem;
+        margin-bottom: 8px;
+    }
+
+    .action-label {
+        font-size: 0.8rem;
     }
 
     .section-title {
