@@ -693,7 +693,9 @@
               'Content-Type': 'application/json',
               'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
             },
-            body: JSON.stringify({})
+            body: JSON.stringify({
+              quantity: 1
+            })
           })
           .then(response => {
             if (!response.ok) {

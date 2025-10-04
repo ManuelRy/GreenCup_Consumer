@@ -162,8 +162,8 @@
                             <span class="fw-semibold text-dark small">{{ number_format($wallet->spent) }}</span>
                           </div>
                           <div class="col-4">
-                            <small class="text-muted d-block">Visits</small>
-                            <span class="fw-semibold text-dark small">15</span>
+                            <small class="text-muted d-block">Balance</small>
+                            <span class="fw-semibold text-dark small">{{ number_format($wallet->coins) }}</span>
                           </div>
                         </div>
                       </div>

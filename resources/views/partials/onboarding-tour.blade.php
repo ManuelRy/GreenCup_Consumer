@@ -33,13 +33,13 @@
     </div>
 
     <!-- Tour Overlay -->
-    <div id="tourOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 9998; pointer-events: none; transition: all 0.3s ease;"></div>
+    <div id="tourOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 10050; pointer-events: none; transition: all 0.3s ease;"></div>
 
     <!-- Tour Spotlight -->
-    <div id="tourSpotlight" style="display: none; position: fixed; z-index: 9999; pointer-events: none; border: 3px solid #1dd1a1; border-radius: 12px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7), 0 0 30px rgba(29, 209, 161, 0.8); transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);"></div>
+    <div id="tourSpotlight" style="display: none; position: fixed; z-index: 10051; pointer-events: none; border: 3px solid #1dd1a1; border-radius: 12px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7), 0 0 30px rgba(29, 209, 161, 0.8); transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);"></div>
 
     <!-- Tour Tooltip -->
-    <div id="tourTooltip" style="display: none; position: fixed; z-index: 10000; background: white; border-radius: 16px; padding: 24px; max-width: 400px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: auto;">
+    <div id="tourTooltip" style="display: none; position: fixed; z-index: 10052; background: white; border-radius: 16px; padding: 24px; max-width: 400px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: auto;">
         <div class="d-flex justify-content-between align-items-start mb-3">
             <div class="tour-step-badge" style="background: linear-gradient(135deg, #1dd1a1, #10ac84); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">
                 Step <span id="currentStep">1</span> of <span id="totalSteps">5</span>
@@ -270,6 +270,34 @@
 
             document.getElementById('totalSteps').textContent = tourSteps.length;
 
+            // On mobile, open the offcanvas sidebar to show navigation
+            const isMobile = window.innerWidth < 992;
+            if (isMobile) {
+                console.log('Mobile detected, opening offcanvas...');
+                const offcanvasElement = document.getElementById('mobileNav');
+                if (offcanvasElement) {
+                    // Make offcanvas visible for tour
+                    offcanvasElement.classList.add('show');
+                    offcanvasElement.style.visibility = 'visible';
+
+                    const backdrop = document.createElement('div');
+                    backdrop.className = 'offcanvas-backdrop fade show';
+                    backdrop.id = 'tour-offcanvas-backdrop';
+                    backdrop.style.zIndex = '10049';
+                    document.body.appendChild(backdrop);
+
+                    // Set offcanvas z-index to be above backdrop
+                    offcanvasElement.style.zIndex = '10050';
+
+                    // Wait for offcanvas animation
+                    setTimeout(() => {
+                        console.log('Showing first step...');
+                        showStep(currentStepIndex);
+                    }, 350);
+                    return;
+                }
+            }
+
             console.log('Showing first step...');
             showStep(currentStepIndex);
         }, 500);
@@ -285,7 +313,18 @@
         console.log('Showing step', index + 1, ':', step.title);
         console.log('Looking for target:', step.target);
 
-        const targetElement = document.querySelector(step.target);
+        let targetElement = document.querySelector(step.target);
+
+        // On mobile, navigation is in offcanvas sidebar, so we need to check there
+        const isMobile = window.innerWidth < 992;
+        if (!targetElement && isMobile) {
+            console.log('Desktop nav not found, checking mobile offcanvas nav...');
+            const offcanvas = document.querySelector('#mobileNav');
+            if (offcanvas) {
+                targetElement = offcanvas.querySelector(step.target);
+                console.log('Found in mobile offcanvas:', targetElement);
+            }
+        }
 
         if (!targetElement) {
             console.error('Target element not found for selector:', step.target);
@@ -420,6 +459,21 @@
 
         const welcomeModal = bootstrap.Modal.getInstance(document.getElementById('welcomeModal'));
         if (welcomeModal) welcomeModal.hide();
+
+        // Close mobile offcanvas if it's open
+        const offcanvasElement = document.getElementById('mobileNav');
+        if (offcanvasElement && offcanvasElement.classList.contains('show')) {
+            console.log('Closing mobile offcanvas...');
+            offcanvasElement.classList.remove('show');
+            offcanvasElement.style.visibility = '';
+            offcanvasElement.style.zIndex = '';
+        }
+
+        // Remove backdrop if exists
+        const backdrop = document.getElementById('tour-offcanvas-backdrop');
+        if (backdrop) {
+            backdrop.remove();
+        }
 
         // Mark tour as completed
         localStorage.setItem('greencup_tour_completed', 'true');

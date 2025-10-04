@@ -227,7 +227,21 @@
         </div>
         <h2>Success!</h2>
         <p>You earned <strong id="points-amount">0</strong> points</p>
-        <button class="btn primary large" onclick="location.reload()">Scan Another</button>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 24px;">
+            <button class="btn primary large" onclick="location.reload()" style="flex: 1; min-width: 140px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
+                    <path d="M3 7v6h6M21 17v-6h-6M3 13a9 9 0 0 1 15-6.7L21 11M3 13l3 5 3-5"/>
+                </svg>
+                Scan Again
+            </button>
+            <button class="btn secondary large" onclick="window.location.href='{{ route('dashboard') }}'" style="flex: 1; min-width: 140px; background: #6b7280; border-color: #6b7280;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                Dashboard
+            </button>
+        </div>
     </div>
 </div>
 

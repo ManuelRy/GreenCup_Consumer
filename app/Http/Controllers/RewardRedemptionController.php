@@ -122,49 +122,68 @@ class RewardRedemptionController extends Controller
         return view('reward-redemption.index', compact('sellers'));
     }
 
-    public function redeem($id)
+    public function redeem(Request $request, $id)
     {
         try {
+            $validated = $request->validate([
+                'quantity' => 'required|integer|min:1',
+            ]);
+
+            $quantity = $validated['quantity'];
+
             DB::beginTransaction();
             // get the reward
             $reward = $this->rRepo->get($id);
             if (!$reward || !$reward->isValid()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Not found'
+                    'message' => 'Reward is not available or has expired'
                 ], 404);
             }
+
+            // Check if reward can accommodate the requested quantity
+            if (!$reward->canRedeemQuantity($quantity)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Insufficient stock. Only ' . $reward->remaining_stock . ' items available'
+                ], 400);
+            }
+
             $consumer_id = Auth::id();
             $seller_id = $reward->seller_id;
-            $reward_points = $reward->points_per_unit;
-            // check if the reward point is enough to redeem
+            $total_points = $reward->points_required * $quantity;
+
+            // check if the consumer has enough points
             $cp = $this->cPRepo->getByConsumerAndSeller($consumer_id, $seller_id);
-            if ($cp->coins < $reward_points) {
-                if (!$reward) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Cannot redeem'
-                    ], 404);
-                }
+            if ($cp->coins < $total_points) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Insufficient points. You need ' . number_format($total_points) . ' points but only have ' . number_format($cp->coins)
+                ], 400);
             }
+
             // deduct the coins from consumer
-            $this->cPRepo->redeem($consumer_id, $seller_id, $reward_points);
+            $this->cPRepo->redeem($consumer_id, $seller_id, $total_points, $reward);
             // add the quantity redeemed to the reward model
-            $this->rRepo->redeem($reward->id, 1);
+            $this->rRepo->redeem($reward->id, $quantity);
             // create a new redeem history
-            $this->rRepo->createHistory($consumer_id, $reward->id);
+            $this->rRepo->createHistory($consumer_id, $reward->id, $quantity);
             // add the deducted coins to seller
-            // $this->sRepo->addPoints($seller_id, $reward_points);
+            $this->sRepo->addPoints($seller_id, $total_points);
             DB::commit();
             return response()->json([
                 'success' => true,
-                'receipt' => "Redeem successfully"
+                'message' => "Successfully redeemed {$quantity} item(s) for {$total_points} points",
+                'quantity' => $quantity,
+                'points_spent' => $total_points,
+                'remaining_balance' => $cp->coins - $total_points,
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Reward redemption error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Error checking reward'
+                'message' => 'Error processing redemption: ' . $e->getMessage()
             ], 500);
         }
     }

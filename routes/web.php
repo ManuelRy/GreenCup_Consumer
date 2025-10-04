@@ -17,7 +17,7 @@ Route::get('/', function () {
     if (auth('consumer')->check()) {
         return redirect()->route('dashboard');
     }
-    return redirect()->route('guest.dashboard');
+    return redirect()->route('login');
 });
 
 // Debug route for testing images

@@ -20,6 +20,12 @@ class Reward extends Model
         'seller_id',
     ];
 
+    protected $casts = [
+        'valid_from' => 'datetime',
+        'valid_until' => 'datetime',
+        'is_active' => 'boolean',
+    ];
+
     public function seller()
     {
         return $this->belongsTo(Seller::class);
@@ -54,5 +60,41 @@ class Reward extends Model
         $isActive = (bool) $this->is_active;
 
         return $hasStock && $withinDateRange && $isActive;
+    }
+
+    public function isExpired(): bool
+    {
+        return Carbon::now()->isAfter($this->valid_until);
+    }
+
+    public function hasStarted(): bool
+    {
+        return Carbon::now()->isAfter($this->valid_from);
+    }
+
+    public function getRemainingStockAttribute(): int
+    {
+        return max(0, $this->quantity - $this->quantity_redeemed);
+    }
+
+    public function getTimeUntilStartAttribute(): ?string
+    {
+        if ($this->hasStarted()) {
+            return null;
+        }
+        return $this->valid_from->diffForHumans();
+    }
+
+    public function getTimeUntilExpiryAttribute(): ?string
+    {
+        if ($this->isExpired()) {
+            return 'Expired';
+        }
+        return $this->valid_until->diffForHumans();
+    }
+
+    public function canRedeemQuantity(int $quantity): bool
+    {
+        return $this->remaining_stock >= $quantity && $quantity > 0;
     }
 }

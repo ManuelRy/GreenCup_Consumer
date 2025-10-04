@@ -34,6 +34,8 @@ class ConsumerPointRepository
       ],
       [
         'coins' => 0,
+        'earned' => 0,
+        'spent' => 0,
       ]
     );
   }
@@ -47,21 +49,50 @@ class ConsumerPointRepository
     $cp = $this->get($id);
     return $cp ? $cp->update($data) : false;
   }
-  public function claim($consumer_id, $seller_id, $points)
+  public function claim($consumer_id, $seller_id, $points, $description = null, $receipt_code = null)
   {
     $cp = $this->getByConsumerAndSeller($consumer_id, $seller_id);
     $cp->earned += $points;
     $cp->coins += $points;
     $cp->save();
+
+    // Create point transaction record for earning
+    \App\Models\PointTransaction::create([
+      'consumer_id' => $consumer_id,
+      'seller_id' => $seller_id,
+      'points' => $points,
+      'units_scanned' => 1,
+      'type' => 'earn',
+      'description' => $description ?: 'Points earned from receipt',
+      'receipt_code' => $receipt_code,
+      'scanned_at' => now(),
+    ]);
+
     return $cp;
   }
 
-  public function redeem($consumer_id, $seller_id, $points)
+  public function redeem($consumer_id, $seller_id, $points, $reward = null)
   {
     $cp = $this->getByConsumerAndSeller($consumer_id, $seller_id);
     $cp->spent += $points;
     $cp->coins -= $points;
     $cp->save();
+
+    // Create point transaction record for spending
+    $description = $reward
+      ? "Redeemed: {$reward->name}"
+      : 'Reward redemption';
+
+    \App\Models\PointTransaction::create([
+      'consumer_id' => $consumer_id,
+      'seller_id' => $seller_id,
+      'points' => $points,
+      'units_scanned' => 1,
+      'type' => 'spend',
+      'description' => $description,
+      'scanned_at' => now(),
+    ]);
+
     return $cp;
   }
 

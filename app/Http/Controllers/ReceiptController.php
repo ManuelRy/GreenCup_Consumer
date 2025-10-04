@@ -124,7 +124,7 @@ class ReceiptController extends Controller
                 'claimed_by_consumer_id' => $consumer_id,
             ]);
             // update consumer points
-            $consumer_point =   $this->cPRepo->claim($consumer_id, $pending->seller_id, $pending->total_points);
+            $consumer_point = $this->cPRepo->claim($consumer_id, $pending->seller_id, $pending->total_points, $description, $pending->receipt_code);
             // create new earn history
             $this->eHRepo->create([
                 'consumer_id' => $consumer_id,

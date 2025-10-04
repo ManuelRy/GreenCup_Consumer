@@ -17,6 +17,7 @@ class PointTransaction extends Model
         'points',
         'type',
         'description',
+        'receipt_code',
         'scanned_at',
     ];
 

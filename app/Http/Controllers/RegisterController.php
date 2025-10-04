@@ -19,14 +19,23 @@ class RegisterController extends Controller
     }
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'full_name'     => 'required|string|max:255',
+        $validated = $request->validate([
+            'first_name'    => 'required|string|max:255',
+            'last_name'     => 'required|string|max:255',
             'email'         => 'required|email|unique:consumers,email',
             'phone_number'  => 'nullable|string|max:20',
-            'gender'        => 'required|in:male,female,other',
-            'date_of_birth' => 'nullable|date',
             'password'      => 'required|string|min:8|confirmed',
         ]);
+
+        // Combine first_name and last_name into full_name
+        $data = [
+            'full_name'     => $validated['first_name'] . ' ' . $validated['last_name'],
+            'email'         => $validated['email'],
+            'phone_number'  => $validated['phone_number'] ?? null,
+            'password'      => $validated['password'],
+            'gender'        => 'other', // Default value since form doesn't have it
+            'date_of_birth' => null, // Default value since form doesn't have it
+        ];
 
         $consumer = $this->repo->create($data);
 
