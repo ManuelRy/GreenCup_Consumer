@@ -96,13 +96,55 @@ class ConsumerPointRepository
     return $cp;
   }
 
-  public function refund($consumer_id, $seller_id, $points)
+  public function refund($consumer_id, $seller_id, $points, $type = 'spend')
   {
     $cp = $this->getByConsumerAndSeller($consumer_id, $seller_id);
-    $cp->spent -= $points;
-    $cp->coins += $points;
+
+    if ($type === 'spend') {
+      // Refunding spent points (reward redemption refund)
+      $cp->spent -= $points;
+      $cp->coins += $points;
+      $description = 'Refund for reward redemption';
+      $transaction_type = 'refund';
+    } else {
+      // Refunding earned points (receipt rejection)
+      $cp->earned -= $points;
+      $cp->coins -= $points;
+      $description = 'Receipt rejected by seller';
+      $transaction_type = 'rejected';
+    }
+
     $cp->save();
+
+    // Create point transaction record
+    \App\Models\PointTransaction::create([
+      'consumer_id' => $consumer_id,
+      'seller_id' => $seller_id,
+      'points' => $points,
+      'units_scanned' => 1,
+      'type' => $transaction_type,
+      'description' => $description,
+      'scanned_at' => now(),
+    ]);
+
     return $cp;
+  }
+
+  public function approve($consumer_id, $seller_id, $points, $receipt_code)
+  {
+    // Just create a transaction record for approval (points already claimed)
+    \App\Models\PointTransaction::create([
+      'consumer_id' => $consumer_id,
+      'seller_id' => $seller_id,
+      'points' => $points,
+      'units_scanned' => 1,
+      'type' => 'approved',
+      'description' => 'Receipt approved by seller',
+      'receipt_code' => $receipt_code,
+      'scanned_at' => now(),
+    ]);
+
+    return $this->getByConsumerAndSeller($consumer_id, $seller_id);
   }
   public function countByConsumerId($id): int
   {

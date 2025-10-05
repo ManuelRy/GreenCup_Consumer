@@ -168,8 +168,7 @@ class RewardRedemptionController extends Controller
             $this->rRepo->redeem($reward->id, $quantity);
             // create a new redeem history
             $this->rRepo->createHistory($consumer_id, $reward->id, $quantity);
-            // add the deducted coins to seller
-            $this->sRepo->addPoints($seller_id, $total_points);
+            // NOTE: Points will be added to seller only when they approve the redemption
             DB::commit();
             return response()->json([
                 'success' => true,
@@ -197,7 +196,7 @@ class RewardRedemptionController extends Controller
     public function history()
     {
         // TODO: Implement logic to show redemption history
-        return view('reward-redemption.history');
+        return view('reward-redemption.history');      
     }
 
     public function show($redemption)

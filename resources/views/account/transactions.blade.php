@@ -111,6 +111,9 @@
                                             <div class="d-flex align-items-start justify-content-between">
                                                 <div class="flex-grow-1 me-3">
                                                     <h6 class="card-title mb-1 fw-semibold text-truncate">
+                                                        @if($transaction->transaction_type === 'reward_redemption')
+                                                            <i class="fas fa-gift text-primary me-1"></i>
+                                                        @endif
                                                         {{ $transaction->description ?: 'Transaction' }}
                                                     </h6>
 
@@ -137,6 +140,27 @@
                                                                 <i class="fas fa-receipt me-1"></i>
                                                                 {{ $transaction->receipt_code }}
                                                             </span>
+                                                        </div>
+                                                    @endif
+
+                                                    @if($transaction->transaction_type === 'reward_redemption' && $transaction->reward_status)
+                                                        <div class="small mt-1">
+                                                            @if($transaction->reward_status === 'pending')
+                                                                <span class="badge bg-warning text-dark">
+                                                                    <i class="fas fa-clock me-1"></i>
+                                                                    Pending Approval
+                                                                </span>
+                                                            @elseif($transaction->reward_status === 'approved')
+                                                                <span class="badge bg-success">
+                                                                    <i class="fas fa-check-circle me-1"></i>
+                                                                    Approved
+                                                                </span>
+                                                            @elseif($transaction->reward_status === 'rejected')
+                                                                <span class="badge bg-danger">
+                                                                    <i class="fas fa-times-circle me-1"></i>
+                                                                    Rejected
+                                                                </span>
+                                                            @endif
                                                         </div>
                                                     @endif
 

@@ -3318,13 +3318,14 @@
         galleryItem.className = `gallery-item ${photo.is_featured ? 'featured' : ''}`;
         galleryItem.style.position = 'relative';
 
+        // Check if photo is frozen and clean the caption
+        const isFrozen = photo.caption && /^\[frozen\]/i.test(photo.caption);
+        const cleanCaption = photo.caption ? photo.caption.replace(/^\[frozen\]\s*/i, '') : '';
+
         const img = document.createElement('img');
         img.src = photo.url;
-        img.alt = photo.caption || `Store photo ${index + 1}`;
+        img.alt = cleanCaption || `Store photo ${index + 1}`;
         img.loading = 'lazy';
-
-        // Check if photo is frozen
-        const isFrozen = photo.caption && /^\[frozen\]/i.test(photo.caption);
         if (isFrozen) {
           img.style.filter = 'blur(20px)';
         }

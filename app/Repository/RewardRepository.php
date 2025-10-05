@@ -37,7 +37,8 @@ class RewardRepository
       $histories[] = RedeemHistory::create([
         'consumer_id' => $consumer_id,
         'reward_id' => $reward_id,
-        'is_redeemed' => true,
+        'is_redeemed' => false,
+        'status' => 'pending',
       ]);
     }
     return collect($histories);

@@ -544,6 +544,11 @@ class StoreController extends Controller
             $query = DB::table('seller_photos as sp')
                 ->join('sellers as s', 's.id', '=', 'sp.seller_id')
                 ->where('s.is_active', true)
+                ->where(function($q) {
+                    $q->whereNull('sp.photo_caption')
+                      ->orWhere('sp.photo_caption', '')
+                      ->orWhere('sp.photo_caption', 'NOT LIKE', '[FROZEN] %');
+                })
                 ->select([
                     'sp.id',
                     'sp.photo_url',
@@ -766,6 +771,11 @@ class StoreController extends Controller
             if (DB::getSchemaBuilder()->hasTable('seller_photos')) {
                 $dbPhotos = DB::table('seller_photos')
                     ->where('seller_id', $sellerId)
+                    ->where(function($q) {
+                        $q->whereNull('photo_caption')
+                          ->orWhere('photo_caption', '')
+                          ->orWhere('photo_caption', 'NOT LIKE', '[FROZEN] %');
+                    })
                     ->orderByDesc('is_featured')
                     ->orderBy('sort_order')
                     ->orderByDesc('created_at')

@@ -10,6 +10,16 @@ class RedeemHistory extends Model
         'consumer_id',
         'reward_id',
         'is_redeemed',
+        'status',
+        'approved_at',
+        'rejected_at',
+        'rejection_reason',
+    ];
+
+    protected $casts = [
+        'is_redeemed' => 'boolean',
+        'approved_at' => 'datetime',
+        'rejected_at' => 'datetime',
     ];
 
     public function consumer()

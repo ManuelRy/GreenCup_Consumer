@@ -51,39 +51,108 @@ class AccountController extends Controller
     public function transactionHistory(Request $request)
     {
         $consumer = Auth::user();
-        // Filtering logic (optional, basic example)
-        $query = DB::table('point_transactions as pt')
+
+        // Build point transactions query
+        $pointTransactionsQuery = DB::table('point_transactions as pt')
             ->leftJoin('sellers as s', 's.id', '=', 'pt.seller_id')
             ->where('pt.consumer_id', $consumer->id);
 
+        // Apply type filter for point transactions
         if ($request->filled('type')) {
-            $query->where('pt.type', $request->type);
-        }
-        if ($request->filled('store')) {
-            $query->where('pt.seller_id', $request->store);
-        }
-        if ($request->filled('date_from')) {
-            $query->whereDate('pt.scanned_at', '>=', $request->date_from);
-        }
-        if ($request->filled('date_to')) {
-            $query->whereDate('pt.scanned_at', '<=', $request->date_to);
+            if ($request->type === 'earn') {
+                $pointTransactionsQuery->where('pt.type', 'earn');
+            } elseif ($request->type === 'spend') {
+                $pointTransactionsQuery->where('pt.type', 'spend');
+            }
         }
 
-        $transactions = $query
-            ->select([
-                'pt.id',
-                'pt.points',
-                'pt.type',
-                'pt.description',
-                'pt.units_scanned',
-                'pt.scanned_at as transaction_date',
-                'pt.receipt_code',
-                'pt.created_at',
-                's.business_name as store_name',
-                's.address as store_location',
-                's.phone as store_phone',
-            ])
-            ->orderBy('pt.scanned_at', 'desc')
+        // Apply store filter
+        if ($request->filled('store')) {
+            $pointTransactionsQuery->where('pt.seller_id', $request->store);
+        }
+
+        // Apply date filters
+        if ($request->filled('date_from')) {
+            $pointTransactionsQuery->whereDate('pt.scanned_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $pointTransactionsQuery->whereDate('pt.scanned_at', '<=', $request->date_to);
+        }
+
+        $pointTransactionsQuery->select([
+            'pt.id',
+            'pt.points',
+            'pt.type',
+            'pt.description',
+            'pt.units_scanned',
+            'pt.scanned_at as transaction_date',
+            'pt.receipt_code',
+            'pt.created_at',
+            's.business_name as store_name',
+            's.address as store_location',
+            's.phone as store_phone',
+            DB::raw("'point_transaction' as transaction_type"),
+            DB::raw('NULL as reward_name'),
+            DB::raw('NULL as reward_status'),
+            DB::raw('NULL as status_date')
+        ]);
+
+        // Build reward redemptions query
+        $rewardRedemptionsQuery = DB::table('redeem_histories as rh')
+            ->join('rewards as r', 'r.id', '=', 'rh.reward_id')
+            ->leftJoin('sellers as s', 's.id', '=', 'r.seller_id')
+            ->where('rh.consumer_id', $consumer->id);
+
+        // Apply type filter for reward redemptions (only show when type is 'spend' or not filtered)
+        if ($request->filled('type')) {
+            if ($request->type === 'earn') {
+                // Don't include reward redemptions for 'earn' filter
+                $rewardRedemptionsQuery->whereRaw('1 = 0'); // This will exclude all reward redemptions
+            }
+            // If type is 'spend', include all reward redemptions (no additional filter needed)
+        }
+
+        // Apply store filter
+        if ($request->filled('store')) {
+            $rewardRedemptionsQuery->where('r.seller_id', $request->store);
+        }
+
+        // Apply date filters based on status dates or created_at
+        if ($request->filled('date_from')) {
+            $rewardRedemptionsQuery->whereRaw(
+                'DATE(COALESCE(rh.approved_at, rh.rejected_at, rh.created_at)) >= ?',
+                [$request->date_from]
+            );
+        }
+        if ($request->filled('date_to')) {
+            $rewardRedemptionsQuery->whereRaw(
+                'DATE(COALESCE(rh.approved_at, rh.rejected_at, rh.created_at)) <= ?',
+                [$request->date_to]
+            );
+        }
+
+        $rewardRedemptionsQuery->select([
+            'rh.id',
+            'r.points_required as points',
+            DB::raw("'spend' as type"),
+            DB::raw("CONCAT('Reward: ', r.name) as description"),
+            DB::raw('NULL as units_scanned'),
+            DB::raw('COALESCE(rh.approved_at, rh.rejected_at, rh.created_at) as transaction_date'),
+            DB::raw('NULL as receipt_code'),
+            'rh.created_at',
+            's.business_name as store_name',
+            's.address as store_location',
+            's.phone as store_phone',
+            DB::raw("'reward_redemption' as transaction_type"),
+            'r.name as reward_name',
+            'rh.status as reward_status',
+            DB::raw('COALESCE(rh.approved_at, rh.rejected_at) as status_date')
+        ]);
+
+        // Combine both queries using UNION
+        $transactions = $pointTransactionsQuery
+            ->unionAll($rewardRedemptionsQuery)
+            ->orderBy('transaction_date', 'desc')
             ->paginate(10);
 
         // Get all stores for filter dropdown
@@ -102,7 +171,7 @@ class AccountController extends Controller
                 'date_of_birth' => 'nullable|date|before:today',
             ]);
             $this->cRepo->update($id, $data);
-            
+
             return redirect()->route('account')->with('success', 'Profile updated successfully!');
         } catch (\Throwable $e) {
             abort(500, 'Something went wrong');

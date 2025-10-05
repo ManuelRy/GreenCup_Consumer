@@ -17,8 +17,11 @@ class ReceiptController extends Controller
     private ConsumerPointRepository $cPRepo;
     private EarnHistoryRepository $eHRepo;
 
-    public function __construct(PendingTransactionRepository $pTRepo, ConsumerPointRepository $cPRepo, EarnHistoryRepository $eHRepo)
-    {
+    public function __construct(
+        PendingTransactionRepository $pTRepo,
+        ConsumerPointRepository $cPRepo,
+        EarnHistoryRepository $eHRepo
+    ) {
         $this->pTRepo = $pTRepo;
         $this->cPRepo = $cPRepo;
         $this->eHRepo = $eHRepo;
@@ -204,6 +207,132 @@ class ReceiptController extends Controller
                 'success' => false,
                 'message' => 'Error fetching receipt history'
             ], 500);
+        }
+    }
+
+    /**
+     * Handle point rejection by seller
+     * This would typically be called by a webhook or API from the seller system
+     */
+    public function handleRejection(Request $request)
+    {
+        $request->validate([
+            'receipt_code' => 'required|string',
+            'reason' => 'string|nullable'
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $pending = $this->pTRepo->getByCode($request->receipt_code);
+            if (!$pending) {
+                throw new \Exception('Invalid receipt code');
+            }
+
+            if ($pending->status !== 'claimed') {
+                throw new \Exception('Receipt is not in claimed status');
+            }
+
+            if (!$pending->claimed_by_consumer_id) {
+                throw new \Exception('Receipt was not claimed by any consumer');
+            }
+
+            // Update pending transaction status to rejected
+            $this->pTRepo->update($pending->id, [
+                'status' => 'rejected',
+            ]);
+
+            // Return points to consumer (deduct earned points and coins)
+            $this->cPRepo->refund($pending->claimed_by_consumer_id, $pending->seller_id, $pending->total_points, 'earn');
+
+            // Log the rejection for admin purposes
+            Log::info('Point transaction rejected', [
+                'receipt_code' => $pending->receipt_code,
+                'consumer_id' => $pending->claimed_by_consumer_id,
+                'seller_id' => $pending->seller_id,
+                'points' => $pending->total_points,
+                'reason' => $request->reason
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Transaction rejected and points returned to consumer',
+                'points_returned' => $pending->total_points,
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error handling rejection: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * Handle point approval by seller
+     * This confirms the points are valid and should remain with the consumer
+     */
+    public function handleApproval(Request $request)
+    {
+        $request->validate([
+            'receipt_code' => 'required|string',
+            'message' => 'string|nullable'
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $pending = $this->pTRepo->getByCode($request->receipt_code);
+            if (!$pending) {
+                throw new \Exception('Invalid receipt code');
+            }
+
+            if ($pending->status !== 'claimed') {
+                throw new \Exception('Receipt is not in claimed status');
+            }
+
+            if (!$pending->claimed_by_consumer_id) {
+                throw new \Exception('Receipt was not claimed by any consumer');
+            }
+
+            // Update pending transaction status to approved
+            $this->pTRepo->update($pending->id, [
+                'status' => 'approved',
+            ]);
+
+            // Create approval transaction record
+            $this->cPRepo->approve($pending->claimed_by_consumer_id, $pending->seller_id, $pending->total_points, $pending->receipt_code);
+
+            // Log the approval for admin purposes
+            Log::info('Point transaction approved', [
+                'receipt_code' => $pending->receipt_code,
+                'consumer_id' => $pending->claimed_by_consumer_id,
+                'seller_id' => $pending->seller_id,
+                'points' => $pending->total_points,
+                'message' => $request->message
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Transaction approved successfully',
+                'points_confirmed' => $pending->total_points,
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error handling approval: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 400);
         }
     }
 }
