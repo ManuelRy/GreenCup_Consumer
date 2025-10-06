@@ -87,7 +87,7 @@ Route::middleware(['auth:consumer'])->group(function () {
     Route::get('/scan-receipt', [ReceiptController::class, 'scan'])->name('scan.receipt');
 
     // Notifications
-    Route::get('/notifications', [NotificationController::class, 'indexPage'])->name('notifications.index');
+    // Route::get('/notifications', [NotificationController::class, 'indexPage'])->name('notifications.index');
 
     // AJAX routes for notifications (using web middleware for session auth)
     Route::get('/ajax/notifications', function() {
@@ -125,9 +125,9 @@ Route::middleware(['auth:consumer'])->group(function () {
             ]);
         }
     })->name('ajax.notifications');
-    Route::get('/ajax/notifications/count', [NotificationController::class, 'getUnreadCount'])->name('ajax.notifications.count');
-    Route::post('/ajax/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('ajax.notifications.read');
-    Route::post('/ajax/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('ajax.notifications.read-all');
+    // Route::get('/ajax/notifications/count', [NotificationController::class, 'getUnreadCount'])->name('ajax.notifications.count');
+    // Route::post('/ajax/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('ajax.notifications.read');
+    // Route::post('/ajax/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('ajax.notifications.read-all');
 
     // Test route to create test receipt (for testing approve/reject)
     Route::get('/test-receipt', function() {

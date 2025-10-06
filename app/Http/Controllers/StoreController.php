@@ -335,10 +335,10 @@ class StoreController extends Controller
 
         try {
             $stores = $this->searchStoresByQuery(
-                $request->query,
-                $request->user_lat,
-                $request->user_lng,
-                $request->radius ?? 50
+                $request->input('query'),
+                $request->input('user_lat'),
+                $request->input('user_lng'),
+                $request->input('radius', 50)
             );
 
             return response()->json([

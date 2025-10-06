@@ -260,13 +260,49 @@ function syncInputs() {
   }
 }
 
-function applySearchAndFilter() {
+async function applySearchAndFilter() {
   const query = (document.getElementById('storeSearch')?.value || '').toLowerCase().trim();
   const filter = document.getElementById('storeFilter')?.value || 'all';
-  let filtered = [...app.stores];
-  if (query) filtered = filtered.filter(s => s.name.toLowerCase().includes(query) || (s.address && s.address.toLowerCase().includes(query)));
-  if (filter !== 'all') filtered = filtered.filter(s => s.rank_class === filter);
-  app.filteredStores = filtered;
+
+  // If there's a search query, use the backend API
+  if (query) {
+    try {
+      const response = await fetch(`/public-api/gallery/search?q=${encodeURIComponent(query)}`);
+      const data = await response.json();
+
+      if (data.success) {
+        app.filteredStores = data.sellers.map(seller => ({
+          id: seller.id,
+          name: seller.business_name,
+          address: seller.address,
+          phone: seller.phone,
+          image: seller.photo_url,
+          total_points: parseInt(seller.total_points) || 0,
+          rank_class: seller.rank_class || getRankClass(parseInt(seller.total_points) || 0),
+          rank_text: seller.rank_text || getRankText(parseInt(seller.total_points) || 0),
+          rank_icon: seller.rank_icon || getRankIcon(parseInt(seller.total_points) || 0)
+        }));
+      } else {
+        app.filteredStores = [];
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+      // Fallback to client-side search on error
+      app.filteredStores = app.stores.filter(s =>
+        s.name.toLowerCase().includes(query) ||
+        (s.address && s.address.toLowerCase().includes(query))
+      );
+    }
+  } else {
+    // No search query - use all stores
+    app.filteredStores = [...app.stores];
+  }
+
+  // Apply rank filter
+  if (filter !== 'all') {
+    app.filteredStores = app.filteredStores.filter(s => s.rank_class === filter);
+  }
+
   renderStores();
   updateStoresCount();
 }

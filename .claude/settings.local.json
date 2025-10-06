@@ -7,7 +7,11 @@
       "Read(//c/Users/ASUS/Desktop/work//**)",
       "Read(//c/Users/ASUS/Desktop/work/**)",
       "Bash(xargs ls:*)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(curl -s \"http://127.0.0.1:8001/public-api/stores/search?query=test\")",
+      "Bash(php:*)",
+      "Bash(curl -s \"http://127.0.0.1:8001/public-api/stores/search?query=DR\")",
+      "Bash(curl -s \"http://127.0.0.1:8001/public-api/stores/search?query=business\")"
     ],
     "deny": [],
     "ask": []

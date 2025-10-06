@@ -2099,6 +2099,20 @@
       minZoom: 6
     };
 
+    // Utility Functions
+    // Debounce helper function - Must be defined before use
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
+
     // Application State
     let app = {
       map: null,
@@ -2206,23 +2220,39 @@
         btn.addEventListener('click', () => changeMapStyle(btn.dataset.style, btn));
       });
 
-      // Search functionality
+      // Search functionality with debounce
       const searchInput = document.getElementById('searchInput');
       const searchBtn = document.getElementById('searchBtn');
       const clearBtn = document.getElementById('clearSearch');
+
+      // Create debounced search function (500ms delay)
+      const debouncedSearch = debounce(handleSearch, 500);
 
       searchBtn.addEventListener('click', handleSearch);
       clearBtn.addEventListener('click', clearSearch);
 
       searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') handleSearch();
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          handleSearch(); // Immediate search on Enter
+        }
       });
 
       searchInput.addEventListener('input', (e) => {
         const hasValue = e.target.value.length > 0;
         clearBtn.style.display = hasValue ? 'block' : 'none';
         searchBtn.style.right = hasValue ? '40px' : '5px';
-        handleSearch();
+
+        // Show visual feedback for minimum character requirement
+        const query = e.target.value.trim();
+        if (query.length > 0 && query.length < 2) {
+          searchInput.style.borderColor = '#fbbf24'; // Yellow border
+        } else {
+          searchInput.style.borderColor = ''; // Reset
+        }
+
+        // Use debounced search for smooth typing experience
+        debouncedSearch();
       });
 
       // Sort and filter controls
@@ -2802,6 +2832,7 @@
 
     async function handleSearch() {
       const query = document.getElementById('searchInput').value.trim();
+
       if (!query) {
         // If input is empty, reset to all stores
         app.filteredStores = [...app.stores];
@@ -2810,9 +2841,15 @@
         return;
       }
 
+      // Minimum 2 characters required for search
+      if (query.length < 2) {
+        return; // Don't search yet, wait for more characters
+      }
+
       try {
         showLoading();
-        const response = await fetch(`/public-api/stores/search?search=${encodeURIComponent(query)}`);
+        // Fixed: Use 'query' parameter instead of 'search'
+        const response = await fetch(`/public-api/stores/search?query=${encodeURIComponent(query)}`);
         const data = await response.json();
 
         if (data.success) {
