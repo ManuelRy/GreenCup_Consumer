@@ -1047,6 +1047,7 @@ body {
     font-family: inherit;
     font-size: 14px;
     padding: var(--space-3) var(--space-6);
+    min-height: 44px; /* Prevent height collapse on mobile */
 }
 
 .btn.secondary {
@@ -1073,6 +1074,7 @@ body {
 .btn.large {
     padding: var(--space-4) var(--space-8);
     font-size: 16px;
+    min-height: 52px;
 }
 
 .btn:disabled {
@@ -1085,6 +1087,8 @@ body {
     display: flex;
     align-items: center;
     gap: var(--space-2);
+    white-space: nowrap; /* Prevent text wrapping */
+    transition: opacity 0.2s ease, visibility 0.2s ease;
 }
 
 .btn-loader {
@@ -1100,10 +1104,10 @@ body {
 
 /* Spinner */
 .spinner {
-    width: 16px;
-    height: 16px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-top: 2px solid var(--white);
+    width: 20px; /* Larger for better mobile visibility */
+    height: 20px;
+    border: 2.5px solid rgba(255, 255, 255, 0.3);
+    border-top: 2.5px solid var(--white);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
 }
@@ -1325,6 +1329,17 @@ body {
         width: calc(100% - var(--space-8));
     }
 
+    /* Modal footer mobile styles */
+    .modal-footer {
+        flex-direction: column;
+        gap: var(--space-3);
+    }
+
+    .modal-footer .btn {
+        width: 100%;
+        flex: none;
+    }
+
     .toast {
         top: var(--space-4);
         right: var(--space-4);
@@ -1539,9 +1554,11 @@ function setLoadingState(button, loading) {
 
     if (loading) {
         content.style.opacity = '0';
+        content.style.visibility = 'hidden';
         loader.classList.remove('hidden');
     } else {
         content.style.opacity = '1';
+        content.style.visibility = 'visible';
         loader.classList.add('hidden');
     }
 }
