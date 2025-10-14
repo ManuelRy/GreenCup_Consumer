@@ -166,6 +166,9 @@ class StoreController extends Controller
             // Add items with their image_url
             $storeDetails->items = $this->getStoreItems($id);
 
+            // Add available rewards for the store
+            $storeDetails->rewards = $this->getStoreRewards($id);
+
             return response()->json(['success' => true, 'data' => $storeDetails]);
         } catch (\Exception $e) {
             Log::error('Get store details error: ' . $e->getMessage());
@@ -209,6 +212,58 @@ class StoreController extends Controller
             });
         } catch (\Exception $e) {
             Log::error('Error fetching items for store ' . $storeId . ': ' . $e->getMessage());
+            return collect([]);
+        }
+    }
+
+    /**
+     * Get store rewards (valid rewards only)
+     */
+    private function getStoreRewards($storeId)
+    {
+        try {
+            $rewards = DB::table('rewards')
+                ->where('seller_id', $storeId)
+                ->where('is_active', true)
+                ->where('valid_until', '>=', Carbon::now())
+                ->where('valid_from', '<=', Carbon::now())
+                ->whereRaw('quantity > quantity_redeemed')
+                ->select([
+                    'id',
+                    'name',
+                    'description',
+                    'points_required',
+                    'quantity',
+                    'quantity_redeemed',
+                    'image_path',
+                    'valid_until'
+                ])
+                ->orderBy('points_required')
+                ->get();
+
+            return $rewards->map(function ($reward) {
+                // Format image path properly
+                $imagePath = $reward->image_path;
+                if ($imagePath) {
+                    if (str_starts_with($imagePath, 'images/')) {
+                        $imagePath = asset($imagePath);
+                    } elseif (!str_starts_with($imagePath, 'http')) {
+                        $imagePath = $this->fileRepo->get(ltrim($imagePath, '/'));
+                    }
+                }
+
+                return (object)[
+                    'id' => $reward->id,
+                    'name' => $reward->name,
+                    'description' => $reward->description,
+                    'points_required' => $reward->points_required,
+                    'remaining_stock' => max(0, $reward->quantity - $reward->quantity_redeemed),
+                    'image_url' => $imagePath,
+                    'expires_at' => $reward->valid_until
+                ];
+            });
+        } catch (\Exception $e) {
+            Log::error('Error fetching rewards for store ' . $storeId . ': ' . $e->getMessage());
             return collect([]);
         }
     }

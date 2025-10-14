@@ -115,6 +115,11 @@
                   <i class="bi bi-cart-check me-1"></i>Available Items
                 </button>
               </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="rewards-tab" data-bs-toggle="tab" data-bs-target="#rewardsPane" type="button" role="tab">
+                  <i class="bi bi-gift me-1"></i>Rewards
+                </button>
+              </li>
             </ul>
           </div>
 
@@ -135,6 +140,13 @@
               <div class="tab-pane fade" id="itemsPane" role="tabpanel">
                 <div id="storeItemsGrid" class="row g-3">
                   <!-- Items will be loaded here -->
+                </div>
+              </div>
+
+              <!-- Rewards Tab -->
+              <div class="tab-pane fade" id="rewardsPane" role="tabpanel">
+                <div id="storeRewardsGrid" class="row g-3">
+                  <!-- Rewards will be loaded here -->
                 </div>
               </div>
             </div>
@@ -164,6 +176,33 @@
         </div>
         <div class="item-modal-description">
           <p id="itemModalDescription">Eco-friendly product available at this store. Earn points by purchasing this item!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Reward Detail Modal -->
+<div id="rewardModal" class="item-detail-modal" style="display: none;">
+  <div class="item-modal-overlay" onclick="closeRewardModal()"></div>
+  <div class="item-modal-content">
+    <button class="item-modal-close" onclick="closeRewardModal()">×</button>
+    <div class="item-modal-body">
+      <div class="item-modal-image-container reward-modal-bg">
+        <img id="rewardModalImage" src="" alt="" class="item-modal-image">
+      </div>
+      <div class="item-modal-info">
+        <h3 id="rewardModalName" class="item-modal-title"></h3>
+        <div class="item-modal-points">
+          <span class="rewards-badge">
+            <i class="bi bi-gift-fill"></i>
+            <span id="rewardModalPoints"></span> Points
+          </span>
+          <span class="stock-badge" id="rewardModalStock"></span>
+        </div>
+        <div class="item-modal-description">
+          <p id="rewardModalDescription"></p>
+          <small class="text-muted" id="rewardModalExpiry"></small>
         </div>
       </div>
     </div>
@@ -391,10 +430,15 @@ function selectStore(storeId) {
   // Load posts asynchronously
   loadStorePosts(storeId);
 
-  // Clear items grid when switching stores to avoid showing old data
+  // Clear items and rewards grids when switching stores to avoid showing old data
   const itemsGrid = document.getElementById('storeItemsGrid');
   if (itemsGrid) {
     itemsGrid.innerHTML = '';
+  }
+
+  const rewardsGrid = document.getElementById('storeRewardsGrid');
+  if (rewardsGrid) {
+    rewardsGrid.innerHTML = '';
   }
 
   // If items tab is currently active, reload items for the new store
@@ -402,6 +446,13 @@ function selectStore(storeId) {
     // Show loading state when switching stores while on items tab
     itemsGrid.innerHTML = '<div class="text-center p-4"><div class="spinner-border text-success"></div><p class="mt-2 text-muted">Loading items...</p></div>';
     loadStoreItems();
+  }
+
+  // If rewards tab is currently active, reload rewards for the new store
+  if (document.getElementById('rewards-tab').classList.contains('active')) {
+    // Show loading state when switching stores while on rewards tab
+    rewardsGrid.innerHTML = '<div class="text-center p-4"><div class="spinner-border text-success"></div><p class="mt-2 text-muted">Loading rewards...</p></div>';
+    loadStoreRewards();
   }
 
   // Close mobile menu
@@ -734,11 +785,16 @@ function getRankIcon(points) {
   return '⭐';
 }
 
-// Load store items when items tab is clicked
+// Load store items and rewards when tabs are clicked
 document.addEventListener('DOMContentLoaded', () => {
   const itemsTab = document.getElementById('items-tab');
   if (itemsTab) {
     itemsTab.addEventListener('click', loadStoreItems);
+  }
+
+  const rewardsTab = document.getElementById('rewards-tab');
+  if (rewardsTab) {
+    rewardsTab.addEventListener('click', loadStoreRewards);
   }
 });
 
@@ -883,6 +939,171 @@ function openItemModal(item) {
 function closeItemModal() {
   console.log('Closing item modal');
   const modal = document.getElementById('itemModal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+  document.body.style.overflow = 'auto';
+}
+
+let isLoadingRewards = false;
+
+async function loadStoreRewards() {
+  if (!app.selectedStore || isLoadingRewards) return;
+
+  isLoadingRewards = true;
+  const rewardsGrid = document.getElementById('storeRewardsGrid');
+  rewardsGrid.innerHTML = '<div class="text-center p-4"><div class="spinner-border text-success"></div><p class="mt-2 text-muted">Loading rewards...</p></div>';
+
+  try {
+    const response = await fetch(`/public-api/store/${app.selectedStore.id}/details`);
+    const data = await response.json();
+
+    console.log('Store rewards data:', data);
+
+    if (data.success && data.data.rewards && data.data.rewards.length > 0) {
+      renderStoreRewards(data.data.rewards);
+    } else {
+      rewardsGrid.innerHTML = '<div class="text-center p-5 text-muted"><i class="bi bi-gift display-4 mb-3 d-block"></i><p>No rewards available at this store yet</p></div>';
+    }
+  } catch (error) {
+    console.error('Error loading rewards:', error);
+    rewardsGrid.innerHTML = '<div class="text-center p-5 text-danger"><i class="bi bi-exclamation-triangle display-4 mb-3 d-block"></i><p>Failed to load rewards</p></div>';
+  } finally {
+    isLoadingRewards = false;
+  }
+}
+
+function renderStoreRewards(rewards) {
+  const rewardsGrid = document.getElementById('storeRewardsGrid');
+  rewardsGrid.innerHTML = '';
+
+  rewards.forEach(reward => {
+    const col = document.createElement('div');
+    col.className = 'col-md-3 col-sm-6 col-6';
+
+    const card = document.createElement('div');
+    card.className = 'reward-card';
+    card.onclick = () => openRewardModal(reward);
+    card.style.cursor = 'pointer';
+
+    // Check if reward has valid image
+    if (reward.image_url && reward.image_url.trim() !== '') {
+      const img = document.createElement('img');
+      img.src = reward.image_url;
+      img.alt = reward.name;
+      img.className = 'reward-card-image';
+      img.onerror = function() {
+        // Replace with icon if image fails
+        this.replaceWith(createDefaultRewardIcon());
+      };
+      card.appendChild(img);
+    } else {
+      // No image - use default icon
+      card.appendChild(createDefaultRewardIcon());
+    }
+
+    const nameEl = document.createElement('h5');
+    nameEl.className = 'reward-card-name';
+    nameEl.title = reward.name;
+    nameEl.textContent = reward.name;
+
+    const pointsEl = document.createElement('div');
+    pointsEl.className = 'reward-card-points';
+    pointsEl.innerHTML = `<i class="bi bi-gift-fill"></i> ${reward.points_required}`;
+
+    const stockEl = document.createElement('div');
+    stockEl.className = 'reward-card-stock';
+    stockEl.textContent = `${reward.remaining_stock} left`;
+
+    card.appendChild(nameEl);
+    card.appendChild(pointsEl);
+    card.appendChild(stockEl);
+    col.appendChild(card);
+    rewardsGrid.appendChild(col);
+  });
+}
+
+function createDefaultRewardIcon() {
+  const iconContainer = document.createElement('div');
+  iconContainer.className = 'reward-card-image reward-default-icon';
+  iconContainer.innerHTML = '<i class="bi bi-gift-fill"></i>';
+  return iconContainer;
+}
+
+let rewardModalTimeout = null;
+
+function openRewardModal(reward) {
+  if (rewardModalTimeout) return;
+  rewardModalTimeout = setTimeout(() => { rewardModalTimeout = null; }, 150);
+
+  console.log('Opening reward modal for:', reward.name);
+
+  const modal = document.getElementById('rewardModal');
+  if (!modal) {
+    console.error('Reward modal not found');
+    return;
+  }
+
+  const modalImageContainer = modal.querySelector('.item-modal-image-container');
+  if (!modalImageContainer) {
+    console.error('Modal image container not found');
+    return;
+  }
+
+  const modalName = document.getElementById('rewardModalName');
+  const modalPoints = document.getElementById('rewardModalPoints');
+  const modalStock = document.getElementById('rewardModalStock');
+  const modalDescription = document.getElementById('rewardModalDescription');
+  const modalExpiry = document.getElementById('rewardModalExpiry');
+
+  if (!modalName || !modalPoints || !modalStock || !modalDescription || !modalExpiry) {
+    console.error('Modal elements not found');
+    return;
+  }
+
+  // Clear previous content
+  modalImageContainer.innerHTML = '';
+
+  // Check if reward has valid image
+  if (reward.image_url && reward.image_url.trim() !== '') {
+    const img = document.createElement('img');
+    img.src = reward.image_url;
+    img.alt = reward.name;
+    img.id = 'rewardModalImage';
+    img.className = 'item-modal-image';
+    img.onerror = function() {
+      // Replace with icon if image fails
+      modalImageContainer.innerHTML = '<div class="item-modal-default-icon reward-modal-icon"><i class="bi bi-gift-fill"></i></div>';
+    };
+    modalImageContainer.appendChild(img);
+  } else {
+    // No image - use default icon
+    modalImageContainer.innerHTML = '<div class="item-modal-default-icon reward-modal-icon"><i class="bi bi-gift-fill"></i></div>';
+  }
+
+  modalName.textContent = reward.name;
+  modalPoints.textContent = reward.points_required;
+  modalStock.textContent = `${reward.remaining_stock} in stock`;
+  modalDescription.textContent = reward.description || 'Redeem this reward at the store!';
+
+  // Format expiry date
+  if (reward.expires_at) {
+    const expiryDate = new Date(reward.expires_at);
+    modalExpiry.textContent = `Expires: ${expiryDate.toLocaleDateString()}`;
+  } else {
+    modalExpiry.textContent = '';
+  }
+
+  // Show modal
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+
+  console.log('Reward modal opened successfully');
+}
+
+function closeRewardModal() {
+  console.log('Closing reward modal');
+  const modal = document.getElementById('rewardModal');
   if (modal) {
     modal.style.display = 'none';
   }
@@ -1116,6 +1337,121 @@ function closeItemModal() {
 
   .item-modal-title {
     font-size: 20px;
+  }
+}
+
+/* Reward Card Styles */
+.reward-card {
+  background: white;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  padding: 12px;
+  transition: all 0.3s ease;
+  text-align: center;
+  height: 100%;
+}
+
+.reward-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(255, 99, 71, 0.2);
+  border-color: #FF6347;
+}
+
+.reward-card-image {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  margin-bottom: 10px;
+}
+
+.reward-default-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #FF6347, #FF4500);
+  color: white;
+}
+
+.reward-default-icon i {
+  font-size: 48px;
+}
+
+.reward-card-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 8px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reward-card-points {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(135deg, #FF6347, #FF4500);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.reward-card-stock {
+  font-size: 11px;
+  color: #6c757d;
+  margin-top: 4px;
+}
+
+/* Reward Modal Styles */
+.reward-modal-bg {
+  background: linear-gradient(135deg, #FF6347, #FF4500) !important;
+}
+
+.reward-modal-icon {
+  color: white !important;
+}
+
+.rewards-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #FF6347, #FF4500);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 16px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(255, 99, 71, 0.3);
+  margin-right: 8px;
+}
+
+.rewards-badge i {
+  font-size: 18px;
+}
+
+.stock-badge {
+  display: inline-flex;
+  align-items: center;
+  background: #e9ecef;
+  color: #495057;
+  padding: 8px 16px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .reward-card-image {
+    height: 100px;
+  }
+
+  .reward-card-name {
+    font-size: 13px;
   }
 }
 </style>
