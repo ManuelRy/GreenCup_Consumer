@@ -21,5 +21,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Schema::defaultStringLength(191);
+         // Force HTTPS in production to fix "Network Error: Failed to fetch"
+        if ($this->app->environment('production')) {
+            \URL::forceScheme('https');
+        }
     }
 }
