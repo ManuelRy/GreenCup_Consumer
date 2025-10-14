@@ -481,13 +481,7 @@ class StoreController extends Controller
                 $rankIcon = $this->getRankIcon($points);
 
                 // Ensure seller profile image is properly formatted
-                $profileImage = $store->image;
-                if ($profileImage && !str_starts_with($profileImage, 'http') && !str_starts_with($profileImage, '/')) {
-                    $profileImage = '/storage/sellers/' . $profileImage;
-                }
-                if ($profileImage && str_starts_with($profileImage, '/storage/')) {
-                    $profileImage = asset($profileImage);
-                }
+                $profileImage = $this->resolveSellerImage($store->image);
 
                 return (object)[
                     'id' => $store->id,
@@ -500,8 +494,8 @@ class StoreController extends Controller
                     'longitude' => floatval($store->longitude),
                     'phone' => $store->phone,
                     'email' => $store->email,
-                    'image' => $profileImage ?: asset('images/store-placeholder.png'), // fallback image
-                    'photo_url' => $profileImage ?: asset('images/store-placeholder.png'), // explicit photo_url field
+                    'image' => $profileImage,
+                    'photo_url' => $profileImage,
                     'is_active' => $store->is_active,
 
                     // Points data (same as gallery)
@@ -561,7 +555,8 @@ class StoreController extends Controller
                     's.address',
                     's.phone',
                     's.total_points',
-                    's.description'
+                    's.description',
+                    's.photo_url as store_photo'
                 ]);
 
             // Filter by specific seller if provided
@@ -589,6 +584,7 @@ class StoreController extends Controller
 
                 $timeAgo = $this->getTimeAgo($post->created_at);
                 $points = $post->total_points ?? 0;
+                $storeImage = $this->resolveSellerImage($post->store_photo);
 
                 $processedPost = (object)[
                     'id' => $post->id,
@@ -605,7 +601,8 @@ class StoreController extends Controller
                     'total_points' => $points,
                     'rank_class' => $this->getRankClass($points),
                     'rank_text' => $this->getRankText($points),
-                    'rank_icon' => $this->getRankIcon($points)
+                    'rank_icon' => $this->getRankIcon($points),
+                    'store_image' => $storeImage
                 ];
 
                 $processedPosts->push($processedPost);
@@ -713,6 +710,10 @@ class StoreController extends Controller
      */
     private function enrichStoreData($store)
     {
+        $resolvedImage = $this->resolveSellerImage($store->image);
+        $store->image = $resolvedImage;
+        $store->photo_url = $resolvedImage;
+
         // Generate consistent phone if missing (only field that can be fake)
         if (empty($store->phone)) {
             $store->phone = $this->generateConsistentPhone($store->id);
@@ -888,6 +889,39 @@ class StoreController extends Controller
             Log::error('Error searching stores: ' . $e->getMessage());
             return collect([]);
         }
+    }
+
+    private function resolveSellerImage(?string $path, ?string $default = null): ?string
+    {
+        if (empty($path)) {
+            return $default;
+        }
+
+        $trimmed = trim($path);
+
+        if (str_starts_with($trimmed, 'http://') || str_starts_with($trimmed, 'https://')) {
+            return $trimmed;
+        }
+
+        $normalized = ltrim($trimmed, '/');
+
+        if (str_starts_with($normalized, 'storage/')) {
+            return asset($normalized);
+        }
+
+        if (str_starts_with($normalized, 'public/')) {
+            $normalized = substr($normalized, 7);
+        }
+
+        if (
+            str_starts_with($normalized, 'seller_photos/') ||
+            str_starts_with($normalized, 'sellers/') ||
+            str_starts_with($normalized, 'store_photos/')
+        ) {
+            return asset('storage/' . $normalized);
+        }
+
+        return asset('storage/sellers/' . $normalized);
     }
 
     /**

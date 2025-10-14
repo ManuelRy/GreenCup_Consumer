@@ -476,7 +476,19 @@ async function loadStorePosts(storeId, page = 1) {
     const response = await fetch(`/public-api/gallery/feed?seller_id=${storeId}&page=${page}`);
     const data = await response.json();
     if (data.success) {
-      const posts = data.posts.map(post => ({id: post.id, photo_url: post.photo_url, caption: post.caption || '', time_ago: post.time_ago || 'Recently', is_featured: post.is_featured || false}));
+      const posts = data.posts.map(post => ({
+        id: post.id,
+        photo_url: post.photo_url,
+        caption: post.caption || '',
+        time_ago: post.time_ago || 'Recently',
+        is_featured: post.is_featured || false,
+        store_image: post.store_image || (app.selectedStore ? app.selectedStore.image : null),
+        business_name: post.business_name || (app.selectedStore ? app.selectedStore.name : ''),
+        rank_class: post.rank_class || (app.selectedStore ? app.selectedStore.rank_class : 'standard'),
+        rank_text: post.rank_text || (app.selectedStore ? app.selectedStore.rank_text : 'Standard'),
+        total_points: typeof post.total_points === 'number' ? post.total_points : (app.selectedStore ? app.selectedStore.total_points : 0),
+        address: post.address || (app.selectedStore ? app.selectedStore.address : 'Location not available')
+      }));
       if (page === 1) app.posts = posts; else app.posts.push(...posts);
       app.hasMorePosts = data.hasMore || false;
       renderPosts();
