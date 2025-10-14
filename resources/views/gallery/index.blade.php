@@ -112,7 +112,7 @@
               </li>
               <li class="nav-item" role="presentation">
                 <button class="nav-link" id="items-tab" data-bs-toggle="tab" data-bs-target="#itemsPane" type="button" role="tab">
-                  <i class="bi bi-cart-check me-1"></i>Available Items
+                  <i class="bi bi-cart-check me-1"></i>Items
                 </button>
               </li>
               <li class="nav-item" role="presentation">
@@ -203,6 +203,11 @@
         <div class="item-modal-description">
           <p id="rewardModalDescription"></p>
           <small class="text-muted" id="rewardModalExpiry"></small>
+        </div>
+        <div class="reward-modal-actions">
+          <button class="btn btn-primary reward-redeem-btn" id="rewardRedeemBtn" onclick="goToRewardPage()">
+            <i class="bi bi-gift-fill me-2"></i>View in Rewards
+          </button>
         </div>
       </div>
     </div>
@@ -1031,12 +1036,16 @@ function createDefaultRewardIcon() {
 }
 
 let rewardModalTimeout = null;
+let currentRewardId = null;
 
 function openRewardModal(reward) {
   if (rewardModalTimeout) return;
   rewardModalTimeout = setTimeout(() => { rewardModalTimeout = null; }, 150);
 
   console.log('Opening reward modal for:', reward.name);
+
+  // Store the current reward ID for navigation
+  currentRewardId = reward.id;
 
   const modal = document.getElementById('rewardModal');
   if (!modal) {
@@ -1108,6 +1117,16 @@ function closeRewardModal() {
     modal.style.display = 'none';
   }
   document.body.style.overflow = 'auto';
+}
+
+function goToRewardPage() {
+  if (currentRewardId) {
+    // Navigate to rewards page with the specific reward ID as a hash/anchor
+    window.location.href = `/rewards?focus=${currentRewardId}`;
+  } else {
+    // Fallback to rewards page without focus
+    window.location.href = '/rewards';
+  }
 }
 </script>
 
@@ -1445,6 +1464,30 @@ function closeRewardModal() {
   font-weight: 600;
 }
 
+.reward-modal-actions {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e9ecef;
+}
+
+.reward-redeem-btn {
+  width: 100%;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #FF6347, #FF4500);
+  border: none;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(255, 99, 71, 0.3);
+}
+
+.reward-redeem-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 99, 71, 0.4);
+  background: linear-gradient(135deg, #FF4500, #FF6347);
+}
+
 @media (max-width: 768px) {
   .reward-card-image {
     height: 100px;
@@ -1452,6 +1495,11 @@ function closeRewardModal() {
 
   .reward-card-name {
     font-size: 13px;
+  }
+
+  .reward-redeem-btn {
+    font-size: 14px;
+    padding: 10px 20px;
   }
 }
 </style>

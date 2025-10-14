@@ -411,6 +411,17 @@
       let selectedShop = null;
       let filterTimeout = null;
 
+      // Check if there's a focus parameter in the URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const focusRewardId = urlParams.get('focus');
+
+      if (focusRewardId) {
+        // Wait a moment for the page to fully load, then scroll to the reward
+        setTimeout(() => {
+          scrollToAndHighlightReward(focusRewardId);
+        }, 500);
+      }
+
       // Temporary: Log all clicks to debug
       document.addEventListener('click', function(e) {
         console.log('Global click on:', e.target.tagName, e.target.className);
@@ -916,6 +927,68 @@
         card.style.transition = `all 0.6s ease ${index * 0.1}s`;
         observer.observe(card);
       });
+
+      // Function to scroll to and highlight a specific reward
+      function scrollToAndHighlightReward(rewardId) {
+        console.log('Looking for reward with ID:', rewardId);
+
+        // Find the reward card by data-reward-id attribute
+        const rewardCards = document.querySelectorAll('.reward-card, .reward-preview-card');
+        let targetCard = null;
+
+        rewardCards.forEach(card => {
+          try {
+            // Check if card has data-reward attribute
+            const rewardData = card.dataset.reward;
+            if (rewardData) {
+              const reward = JSON.parse(rewardData);
+              if (reward.id == rewardId) {
+                targetCard = card;
+              }
+            }
+          } catch (e) {
+            console.error('Error parsing reward data:', e);
+          }
+        });
+
+        if (targetCard) {
+          console.log('Found target reward card:', targetCard);
+
+          // Scroll to the card with smooth behavior
+          targetCard.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+          });
+
+          // Add a highlight animation
+          targetCard.style.animation = 'highlightPulse 2s ease-in-out 3';
+
+          // Optionally, show the preview modal after scrolling
+          setTimeout(() => {
+            if (typeof showRewardPreview === 'function') {
+              showRewardPreview(targetCard);
+            }
+          }, 1000);
+        } else {
+          console.warn('Reward with ID', rewardId, 'not found on page');
+        }
+      }
+
+      // Make the function globally accessible
+      window.scrollToAndHighlightReward = scrollToAndHighlightReward;
     });
   </script>
+
+  <style>
+    @keyframes highlightPulse {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(255, 99, 71, 0);
+        transform: scale(1);
+      }
+      50% {
+        box-shadow: 0 0 0 15px rgba(255, 99, 71, 0.4);
+        transform: scale(1.05);
+      }
+    }
+  </style>
 @endsection
