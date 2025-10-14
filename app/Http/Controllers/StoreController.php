@@ -222,43 +222,23 @@ class StoreController extends Controller
     private function getStoreRewards($storeId)
     {
         try {
-            $rewards = DB::table('rewards')
-                ->where('seller_id', $storeId)
+            // Use Reward model to leverage the image_path accessor
+            $rewards = \App\Models\Reward::where('seller_id', $storeId)
                 ->where('is_active', true)
                 ->where('valid_until', '>=', Carbon::now())
                 ->where('valid_from', '<=', Carbon::now())
                 ->whereRaw('quantity > quantity_redeemed')
-                ->select([
-                    'id',
-                    'name',
-                    'description',
-                    'points_required',
-                    'quantity',
-                    'quantity_redeemed',
-                    'image_path',
-                    'valid_until'
-                ])
                 ->orderBy('points_required')
                 ->get();
 
             return $rewards->map(function ($reward) {
-                // Format image path properly
-                $imagePath = $reward->image_path;
-                if ($imagePath) {
-                    if (str_starts_with($imagePath, 'images/')) {
-                        $imagePath = asset($imagePath);
-                    } elseif (!str_starts_with($imagePath, 'http')) {
-                        $imagePath = $this->fileRepo->get(ltrim($imagePath, '/'));
-                    }
-                }
-
                 return (object)[
                     'id' => $reward->id,
                     'name' => $reward->name,
                     'description' => $reward->description,
                     'points_required' => $reward->points_required,
-                    'remaining_stock' => max(0, $reward->quantity - $reward->quantity_redeemed),
-                    'image_url' => $imagePath,
+                    'remaining_stock' => $reward->remaining_stock,
+                    'image_url' => $reward->image_url, // Uses the accessor which handles normalization
                     'expires_at' => $reward->valid_until
                 ];
             });
