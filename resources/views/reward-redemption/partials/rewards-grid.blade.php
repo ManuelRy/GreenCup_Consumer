@@ -115,8 +115,8 @@
               @else
                 <button class="reward-redeem-btn locked" disabled>
                   <i class="fas fa-lock"></i>
-                  <span class="d-none d-md-inline">Locked</span>
-                  <span class="d-md-none">🔒</span>
+                  <span class="d-none d-md-inline">Insufficient Points</span>
+                  <span class="d-md-none">Need Pts</span>
                 </button>
               @endif
             </div>
