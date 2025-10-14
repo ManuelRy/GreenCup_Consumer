@@ -284,62 +284,27 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(255, 255, 255, 0.95);
+        background: rgba(255, 255, 255, 0.15);
         border-radius: inherit;
         pointer-events: none;
-        backdrop-filter: brightness(1.3) contrast(1.1);
-        -webkit-backdrop-filter: brightness(1.3) contrast(1.1);
     }
 
-    /* Make text inside focused area perfectly visible with dark, anti-aliased font */
-    #tourSpotlight ~ * [class*="nav-link"],
-    #tourSpotlight ~ * .nav-link,
-    #tourSpotlight ~ * a,
-    #tourSpotlight ~ * button,
-    #tourSpotlight ~ * span,
-    #tourSpotlight ~ * .text-white,
-    #tourSpotlight ~ * .text-light,
-    .tour-active .nav-link,
-    .tour-active a,
-    .tour-active button span {
-        position: relative;
-        z-index: 10052 !important;
-    }
-
-    /* Direct styling for elements within spotlight area */
-    body.tour-active *[style*="10051"] ~ * .nav-link,
-    body.tour-active *[style*="10051"] ~ * a,
-    body.tour-active *[style*="10051"] ~ * span,
-    body.tour-active *[style*="10051"] ~ * i {
-        color: #1a1a1a !important;
-        text-shadow: 0 0 1px rgba(255, 255, 255, 0.9),
-                     0 0 2px rgba(255, 255, 255, 0.8) !important;
-        -webkit-font-smoothing: antialiased !important;
-        -moz-osx-font-smoothing: grayscale !important;
-        font-weight: 600 !important;
-        filter: contrast(1.2) brightness(1.1);
-    }
-
-    /* Highlighted element styling - very dark and crisp */
+    /* Highlighted element styling - very dark and crisp text */
     .tour-highlighted,
-    .tour-highlighted * {
-        color: #1a1a1a !important;
-        text-shadow: 0 0 1px rgba(255, 255, 255, 0.9),
-                     0 0 2px rgba(255, 255, 255, 0.8) !important;
+    .tour-highlighted span,
+    .tour-highlighted i,
+    .tour-highlighted a {
+        color: #000000 !important;
         -webkit-font-smoothing: antialiased !important;
         -moz-osx-font-smoothing: grayscale !important;
-        font-weight: 600 !important;
-        filter: contrast(1.2) brightness(1.1) !important;
-        opacity: 1 !important;
+        font-weight: 700 !important;
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
     }
 
-    /* Ensure SVG icons are also dark */
-    .tour-highlighted svg,
-    .tour-highlighted i,
-    .tour-highlighted .bi {
-        color: #1a1a1a !important;
-        fill: #1a1a1a !important;
-        filter: contrast(1.3) brightness(0.9) !important;
+    /* Ensure icons are visible */
+    .tour-highlighted .bi::before,
+    .tour-highlighted i::before {
+        color: #000000 !important;
     }
 
 
@@ -626,30 +591,10 @@
         // Remove previous highlight styling
         document.querySelectorAll('.tour-highlighted').forEach(el => {
             el.classList.remove('tour-highlighted');
-            el.style.removeProperty('color');
-            el.style.removeProperty('text-shadow');
-            el.style.removeProperty('-webkit-font-smoothing');
-            el.style.removeProperty('-moz-osx-font-smoothing');
-            el.style.removeProperty('font-weight');
-            el.style.removeProperty('filter');
         });
 
-        // Add dark, anti-aliased text styling to focused element and its children
-        const applyDarkTextStyle = (element) => {
-            element.classList.add('tour-highlighted');
-            element.style.color = '#1a1a1a';
-            element.style.textShadow = '0 0 1px rgba(255, 255, 255, 0.9), 0 0 2px rgba(255, 255, 255, 0.8)';
-            element.style.webkitFontSmoothing = 'antialiased';
-            element.style.mozOsxFontSmoothing = 'grayscale';
-            element.style.fontWeight = '600';
-            element.style.filter = 'contrast(1.2) brightness(1.1)';
-        };
-
-        applyDarkTextStyle(targetElement);
-        
-        // Apply to all child text elements
-        const textElements = targetElement.querySelectorAll('span, i, a, button, .text-white, .text-light, [class*="text-"]');
-        textElements.forEach(el => applyDarkTextStyle(el));
+        // Add dark, anti-aliased text styling to focused element
+        targetElement.classList.add('tour-highlighted');
 
         // For mobile sidebar, use parent li element if target is inside offcanvas
         let elementToHighlight = targetElement;
@@ -782,12 +727,6 @@
         // Remove highlight styling from all elements
         document.querySelectorAll('.tour-highlighted').forEach(el => {
             el.classList.remove('tour-highlighted');
-            el.style.removeProperty('color');
-            el.style.removeProperty('text-shadow');
-            el.style.removeProperty('-webkit-font-smoothing');
-            el.style.removeProperty('-moz-osx-font-smoothing');
-            el.style.removeProperty('font-weight');
-            el.style.removeProperty('filter');
         });
 
         document.getElementById('tourOverlay').style.display = 'none';
