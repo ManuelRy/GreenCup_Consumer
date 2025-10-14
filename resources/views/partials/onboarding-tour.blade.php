@@ -36,7 +36,7 @@
     <div id="tourOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 10050; pointer-events: none; transition: all 0.3s ease;"></div>
 
     <!-- Tour Spotlight -->
-    <div id="tourSpotlight" style="display: none; position: fixed; z-index: 10051; pointer-events: none; border: 4px solid #1dd1a1; border-radius: 12px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.85), 0 0 40px rgba(29, 209, 161, 1), inset 0 0 20px rgba(29, 209, 161, 0.3); transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); background: rgba(255, 255, 255, 0.25);"></div>
+    <div id="tourSpotlight" style="display: none; position: fixed; z-index: 10051; pointer-events: none; border: 4px solid #1dd1a1; border-radius: 12px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.85), 0 0 40px rgba(29, 209, 161, 1), inset 0 0 20px rgba(29, 209, 161, 0.3); transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); background: rgba(255, 255, 255, 0.5);"></div>
 
     <!-- Tour Tooltip -->
     <div id="tourTooltip" style="display: none; position: fixed; z-index: 10052; background: white; border-radius: 16px; padding: 24px; max-width: 400px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: auto;">
@@ -81,21 +81,21 @@
     }
 
     @keyframes pulse-glow {
-        0%, 100% { 
-            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.85), 
-                        0 0 40px rgba(29, 209, 161, 1), 
+        0%, 100% {
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.85),
+                        0 0 40px rgba(29, 209, 161, 1),
                         0 0 60px rgba(29, 209, 161, 0.6),
                         inset 0 0 20px rgba(29, 209, 161, 0.3);
             border-color: #1dd1a1;
-            background: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.5);
         }
-        50% { 
-            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.85), 
-                        0 0 60px rgba(29, 209, 161, 1), 
+        50% {
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.85),
+                        0 0 60px rgba(29, 209, 161, 1),
                         0 0 80px rgba(29, 209, 161, 0.8),
                         inset 0 0 30px rgba(29, 209, 161, 0.5);
             border-color: #10ac84;
-            background: rgba(255, 255, 255, 0.35);
+            background: rgba(255, 255, 255, 0.65);
         }
     }
 
@@ -274,6 +274,19 @@
     /* Prevent body scroll during tour */
     body.tour-active {
         overflow: hidden !important;
+    }
+
+    /* Make spotlight content even brighter and clearer */
+    #tourSpotlight::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: inherit;
+        pointer-events: none;
     }
 </style>
 
@@ -554,10 +567,15 @@
         const rect = targetElement.getBoundingClientRect();
         const spotlight = document.getElementById('tourSpotlight');
         spotlight.style.display = 'block';
-        spotlight.style.top = `${rect.top - 8}px`;
-        spotlight.style.left = `${rect.left - 8}px`;
-        spotlight.style.width = `${rect.width + 16}px`;
-        spotlight.style.height = `${rect.height + 16}px`;
+        
+        // Add extra padding for mobile sidebar items
+        const isMobileSidebar = isMobile && targetElement.closest('.offcanvas');
+        const padding = isMobileSidebar ? 4 : 8;
+        
+        spotlight.style.top = `${rect.top - padding}px`;
+        spotlight.style.left = `${rect.left - padding}px`;
+        spotlight.style.width = `${rect.width + (padding * 2)}px`;
+        spotlight.style.height = `${rect.height + (padding * 2)}px`;
 
         // Position tooltip
         const tooltip = document.getElementById('tourTooltip');
