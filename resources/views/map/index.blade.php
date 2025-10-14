@@ -197,6 +197,14 @@
             <p id="storeDesc">Store description will appear here...</p>
           </div>
 
+          <!-- Store Profile Photo -->
+          <div class="store-profile-photo" id="storeProfilePhotoSection" style="display: none;">
+            <h4>🏪 Store Profile</h4>
+            <div class="profile-photo-container">
+              <img id="storeProfilePhoto" src="" alt="Store Profile" class="store-profile-image">
+            </div>
+          </div>
+
           <!-- Store Photo Gallery -->
           <div class="store-gallery" id="storeGallery" style="display: none;">
             <div class="gallery-header">
@@ -1443,6 +1451,37 @@
       font-size: 14px;
       color: #555;
       line-height: 1.5;
+    }
+
+    /* Store Profile Photo Styles */
+    .store-profile-photo {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .store-profile-photo h4 {
+      margin: 0 0 15px 0;
+      font-size: 16px;
+      color: #333;
+    }
+
+    .profile-photo-container {
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      background: #fff;
+    }
+
+    .store-profile-image {
+      width: 100%;
+      height: auto;
+      max-height: 400px;
+      object-fit: cover;
+      display: block;
+      border-radius: 12px;
     }
 
     /* Store Gallery Styles */
@@ -3318,6 +3357,23 @@
       rankBadge.className = `rank-badge-large ${rankClass}`;
       rankIconElement.textContent = rankIcon;
       rankTextElement.textContent = `${rankText} • ${points} pts`;
+
+      // Display store profile photo
+      const profilePhotoSection = document.getElementById('storeProfilePhotoSection');
+      const profilePhotoImg = document.getElementById('storeProfilePhoto');
+
+      if (store.photo_url) {
+        profilePhotoImg.src = store.photo_url;
+        profilePhotoImg.alt = store.name + ' Profile';
+        profilePhotoImg.onerror = function() {
+          profilePhotoSection.style.display = 'none';
+        };
+        profilePhotoImg.onload = function() {
+          profilePhotoSection.style.display = 'block';
+        };
+      } else {
+        profilePhotoSection.style.display = 'none';
+      }
 
       // Populate photo gallery
       populateStoreGallery(store.photos || [], store.total_photos || 0);
