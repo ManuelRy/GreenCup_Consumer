@@ -30,92 +30,93 @@
           ];
           $availableQty = $rewardData['available_qty'];
         @endphp
-        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-4 reward-card" 
-             data-category="{{ $reward->category ?? '' }}" 
+        <div class="col-6 col-md-4 col-lg-3 mb-3 mb-md-4 reward-card"
+             data-category="{{ $reward->category ?? '' }}"
              data-points="{{ $reward->points_required }}"
              data-name="{{ strtolower($reward->name) }}"
              data-shop="{{ strtolower($seller->business_name) }}">
-          <div class="card h-100 reward-item border-0 shadow-sm reward-preview-card" 
-               data-reward='@json($rewardData)' 
+          <div class="modern-reward-card h-100 reward-preview-card"
+               data-reward='@json($rewardData)'
                data-seller_id='@json($seller->id)'
                data-shop='@json($seller->business_name)'
-               style="cursor: pointer; transition: all 0.3s ease;"
                onclick="showRewardPreview(this); event.stopPropagation();"
                title="Click to preview this reward">
-            @if ($coins >= $reward->points_required && $availableQty > 0)
-              <div class="position-absolute top-0 end-0 z-3">
-                <div class="bg-success text-white px-3 py-1 rounded-bottom-start-3 fw-semibold small">
-                  AVAILABLE
-                </div>
-              </div>
-            @endif
-            
-            @if($reward->image_url)
-              <div class="position-relative overflow-hidden">
-                <img src="{{ $reward->image_url }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ $reward->name }}">
-                <div class="position-absolute bottom-0 start-0 end-0 bg-dark bg-opacity-75 text-white p-3">
-                  <div class="d-flex justify-content-between align-items-end">
-                    <div>
-                      <div class="h4 fw-bold mb-0">{{ number_format($reward->points_required) }}</div>
-                      <div class="small opacity-75">POINTS</div>
-                    </div>
-                    <div class="text-end">
-                      <div class="small opacity-75 mb-1">{{ $availableQty }} left</div>
-                      <i class="fas fa-eye fs-4"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            @else
-              <div class="d-flex align-items-center justify-content-center bg-light" style="height: 200px;">
-                <div class="text-center text-muted">
-                  <i class="fas fa-image fs-1 mb-2"></i>
-                  <div>No Image</div>
-                </div>
-              </div>
-            @endif
 
-            <div class="card-body p-3">
-              <h6 class="card-title fw-bold mb-2">{{ $reward->name }}</h6>
-              <p class="card-text text-muted small mb-3">{{ Str::limit($reward->description, 80) }}</p>
+            <!-- Card Image Section -->
+            <div class="reward-card-image-wrapper">
+              @if($reward->image_url)
+                <img src="{{ $reward->image_url }}" class="reward-card-img" alt="{{ $reward->name }}">
+              @else
+                <div class="reward-card-no-image">
+                  <i class="fas fa-gift"></i>
+                </div>
+              @endif
 
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="badge bg-primary">{{ $reward->category ?? 'General' }}</span>
-                <span class="fw-bold text-success">{{ number_format($reward->points_required) }} pts</span>
+              <!-- Status Badge -->
+              @if ($coins >= $reward->points_required && $availableQty > 0)
+                <div class="reward-status-badge available">
+                  <i class="fas fa-check-circle"></i>
+                </div>
+              @elseif($availableQty <= 0)
+                <div class="reward-status-badge out-of-stock">
+                  <i class="fas fa-times-circle"></i>
+                </div>
+              @else
+                <div class="reward-status-badge locked">
+                  <i class="fas fa-lock"></i>
+                </div>
+              @endif
+
+              <!-- Hover Overlay -->
+              <div class="reward-hover-overlay">
+                <div class="reward-hover-content">
+                  <i class="fas fa-eye"></i>
+                  <span>View Details</span>
+                </div>
               </div>
-              
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <small class="text-muted">
-                  <i class="fas fa-box me-1"></i>Stock: {{ $availableQty }} available
-                </small>
+            </div>
+
+            <!-- Card Content -->
+            <div class="reward-card-content">
+              <h6 class="reward-card-title">{{ $reward->name }}</h6>
+
+              <div class="reward-card-points">
+                <i class="fas fa-coins"></i>
+                <span>{{ number_format($reward->points_required) }}</span>
+              </div>
+
+              <div class="reward-card-stock">
+                <i class="fas fa-box"></i>
+                <span>{{ $availableQty }} left</span>
                 @if($availableQty <= 5 && $availableQty > 0)
-                  <small class="text-warning">
-                    <i class="fas fa-exclamation-triangle me-1"></i>Limited Stock!
-                  </small>
-                @elseif($availableQty == 0)
-                  <small class="text-danger">
-                    <i class="fas fa-times-circle me-1"></i>Out of Stock
-                  </small>
+                  <span class="stock-warning">⚠️</span>
                 @endif
               </div>
 
+              <!-- Redeem Button -->
               @if ($availableQty <= 0)
-                <button class="btn btn-danger w-100 fw-semibold" disabled>
-                  <i class="fas fa-times-circle me-2"></i>OUT OF STOCK
+                <button class="reward-redeem-btn out-of-stock" disabled>
+                  <i class="fas fa-times-circle"></i>
+                  <span class="d-none d-md-inline">Out of Stock</span>
+                  <span class="d-md-none">N/A</span>
                 </button>
               @elseif ($coins >= $reward->points_required)
-                <button class="btn btn-success w-100 fw-semibold redeem-btn" 
-                        data-reward='@json($rewardData)' 
+                <button class="reward-redeem-btn available redeem-btn"
+                        data-reward='@json($rewardData)'
                         data-seller_id='@json($seller->id)'
                         data-shop='@json($seller->business_name)'
                         data-debug-reward-id="{{ $reward->id ?? 'NULL' }}"
                         data-debug-reward-name="{{ $reward->name ?? 'NULL' }}"
                         onclick="event.stopPropagation();">
-                  <i class="fas fa-gift me-2"></i>REDEEM REWARD
+                  <i class="fas fa-gift"></i>
+                  <span class="d-none d-md-inline">Redeem</span>
+                  <span class="d-md-none">Get</span>
                 </button>
               @else
-                <button class="btn btn-secondary w-100 fw-semibold" disabled>
-                  <i class="fas fa-lock me-2"></i>Insufficient Points
+                <button class="reward-redeem-btn locked" disabled>
+                  <i class="fas fa-lock"></i>
+                  <span class="d-none d-md-inline">Locked</span>
+                  <span class="d-md-none">🔒</span>
                 </button>
               @endif
             </div>

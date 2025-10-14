@@ -990,5 +990,415 @@
         transform: scale(1.05);
       }
     }
+
+    /* Modern Reward Card Styling */
+    .modern-reward-card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      border: 2px solid transparent;
+      position: relative;
+    }
+
+    .modern-reward-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 32px rgba(29, 209, 161, 0.25);
+      border-color: rgba(29, 209, 161, 0.3);
+    }
+
+    .modern-reward-card:active {
+      transform: translateY(-4px);
+    }
+
+    /* Image Wrapper */
+    .reward-card-image-wrapper {
+      position: relative;
+      width: 100%;
+      padding-top: 100%; /* 1:1 Aspect Ratio */
+      overflow: hidden;
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    }
+
+    .reward-card-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+
+    .modern-reward-card:hover .reward-card-img {
+      transform: scale(1.1);
+    }
+
+    .reward-card-no-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #FF6347, #FF4500);
+      color: white;
+      font-size: clamp(2rem, 8vw, 3.5rem);
+    }
+
+    /* Status Badge */
+    .reward-status-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      z-index: 2;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      animation: bounceIn 0.6s ease;
+    }
+
+    .reward-status-badge.available {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+    }
+
+    .reward-status-badge.locked {
+      background: linear-gradient(135deg, #94a3b8, #64748b);
+      color: white;
+    }
+
+    .reward-status-badge.out-of-stock {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+    }
+
+    @keyframes bounceIn {
+      0% {
+        transform: scale(0);
+      }
+      50% {
+        transform: scale(1.2);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    /* Hover Overlay */
+    .reward-hover-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(29, 209, 161, 0.95);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 1;
+    }
+
+    .modern-reward-card:hover .reward-hover-overlay {
+      opacity: 1;
+    }
+
+    .reward-hover-content {
+      color: white;
+      text-align: center;
+      transform: translateY(20px);
+      transition: transform 0.3s ease;
+    }
+
+    .modern-reward-card:hover .reward-hover-content {
+      transform: translateY(0);
+    }
+
+    .reward-hover-content i {
+      font-size: clamp(1.5rem, 6vw, 2.5rem);
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .reward-hover-content span {
+      font-size: clamp(0.75rem, 3vw, 1rem);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Card Content */
+    .reward-card-content {
+      padding: 12px;
+    }
+
+    .reward-card-title {
+      font-size: clamp(0.875rem, 3.5vw, 1rem);
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0 0 10px 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      min-height: 2.5em;
+      line-height: 1.25;
+    }
+
+    .reward-card-points {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: linear-gradient(135deg, #FF6347, #FF4500);
+      color: white;
+      padding: 6px 10px;
+      border-radius: 20px;
+      font-size: clamp(0.75rem, 3vw, 0.875rem);
+      font-weight: 700;
+      margin-bottom: 8px;
+      box-shadow: 0 2px 8px rgba(255, 99, 71, 0.3);
+    }
+
+    .reward-card-points i {
+      font-size: clamp(0.75rem, 3vw, 0.875rem);
+    }
+
+    .reward-card-stock {
+      font-size: clamp(0.7rem, 2.8vw, 0.8rem);
+      color: #64748b;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .reward-card-stock i {
+      font-size: clamp(0.7rem, 2.8vw, 0.8rem);
+    }
+
+    .stock-warning {
+      margin-left: auto;
+      font-size: clamp(0.875rem, 3.5vw, 1rem);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.5;
+      }
+    }
+
+    /* Redeem Button */
+    .reward-redeem-btn {
+      width: 100%;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-size: clamp(0.75rem, 3vw, 0.875rem);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+    }
+
+    .reward-redeem-btn.available {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+    }
+
+    .reward-redeem-btn.available:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(34, 197, 94, 0.4);
+      background: linear-gradient(135deg, #16a34a, #15803d);
+    }
+
+    .reward-redeem-btn.available:active {
+      transform: translateY(0);
+    }
+
+    .reward-redeem-btn.locked {
+      background: linear-gradient(135deg, #cbd5e1, #94a3b8);
+      color: white;
+      cursor: not-allowed;
+    }
+
+    .reward-redeem-btn.out-of-stock {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+      cursor: not-allowed;
+    }
+
+    .reward-redeem-btn i {
+      font-size: clamp(0.875rem, 3.5vw, 1rem);
+    }
+
+    /* Shop Section Header */
+    .shop-section h4 {
+      font-size: clamp(1.25rem, 5vw, 1.75rem);
+      color: #1e293b;
+      margin-bottom: 16px;
+    }
+
+    .shop-section h4 i {
+      color: #1dd1a1;
+    }
+
+    .shop-section .badge {
+      font-size: clamp(0.75rem, 3vw, 0.875rem);
+      padding: 8px 16px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #22c55e, #16a34a) !important;
+    }
+
+    /* Mobile Specific Optimizations */
+    @media (max-width: 768px) {
+      .modern-reward-card {
+        border-radius: 12px;
+      }
+
+      .modern-reward-card:hover {
+        transform: translateY(-4px);
+      }
+
+      .reward-card-content {
+        padding: 10px;
+      }
+
+      .reward-status-badge {
+        width: 28px;
+        height: 28px;
+        top: 6px;
+        right: 6px;
+        font-size: 12px;
+      }
+
+      .reward-card-points {
+        padding: 5px 8px;
+        font-size: 0.7rem;
+      }
+
+      .reward-redeem-btn {
+        padding: 8px 12px;
+        font-size: 0.7rem;
+        letter-spacing: 0.3px;
+      }
+
+      .reward-hover-overlay {
+        display: none; /* Disable hover overlay on mobile */
+      }
+
+      .shop-section {
+        margin-bottom: 2rem !important;
+      }
+
+      .shop-section h4 {
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .reward-card-content {
+        padding: 8px;
+      }
+
+      .reward-card-title {
+        font-size: 0.8rem;
+        min-height: 2em;
+        margin-bottom: 8px;
+      }
+
+      .reward-card-points {
+        padding: 4px 8px;
+        font-size: 0.65rem;
+        margin-bottom: 6px;
+      }
+
+      .reward-card-stock {
+        font-size: 0.65rem;
+        margin-bottom: 8px;
+      }
+
+      .reward-redeem-btn {
+        padding: 6px 10px;
+        font-size: 0.65rem;
+        border-radius: 8px;
+      }
+
+      .reward-status-badge {
+        width: 24px;
+        height: 24px;
+        font-size: 10px;
+      }
+
+      /* Tighter grid spacing on very small screens */
+      .reward-card {
+        padding-left: 6px !important;
+        padding-right: 6px !important;
+        margin-bottom: 12px !important;
+      }
+    }
+
+    /* Loading and Animation States */
+    .reward-card {
+      animation: fadeInUp 0.6s ease backwards;
+    }
+
+    .reward-card:nth-child(1) { animation-delay: 0.05s; }
+    .reward-card:nth-child(2) { animation-delay: 0.1s; }
+    .reward-card:nth-child(3) { animation-delay: 0.15s; }
+    .reward-card:nth-child(4) { animation-delay: 0.2s; }
+    .reward-card:nth-child(5) { animation-delay: 0.25s; }
+    .reward-card:nth-child(6) { animation-delay: 0.3s; }
+    .reward-card:nth-child(7) { animation-delay: 0.35s; }
+    .reward-card:nth-child(8) { animation-delay: 0.4s; }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Smooth scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Better focus states for accessibility */
+    .modern-reward-card:focus-within {
+      outline: 3px solid #1dd1a1;
+      outline-offset: 2px;
+    }
+
+    .reward-redeem-btn:focus {
+      outline: 2px solid #1dd1a1;
+      outline-offset: 2px;
+    }
   </style>
 @endsection
