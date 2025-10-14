@@ -8,7 +8,7 @@ class FileRepository
 {
   public function host(): string
   {
-    return 'http://188.166.186.208';
+    return 'https://188.166.186.208';
   }
 
   public function base(): string
