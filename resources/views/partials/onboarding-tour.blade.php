@@ -36,7 +36,7 @@
     <div id="tourOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 10050; pointer-events: none; transition: all 0.3s ease;"></div>
 
     <!-- Tour Spotlight -->
-    <div id="tourSpotlight" style="display: none; position: fixed; z-index: 10051; pointer-events: none; border: 4px solid #1dd1a1; border-radius: 12px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.85), 0 0 40px rgba(29, 209, 161, 1), inset 0 0 20px rgba(29, 209, 161, 0.3); transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); background: rgba(255, 255, 255, 0.5);"></div>
+    <div id="tourSpotlight" style="display: none; position: fixed; z-index: 10051; pointer-events: none; border: 4px solid #1dd1a1; border-radius: 12px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.85), 0 0 40px rgba(29, 209, 161, 1), inset 0 0 20px rgba(29, 209, 161, 0.3); transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); background: transparent;"></div>
 
     <!-- Tour Tooltip -->
     <div id="tourTooltip" style="display: none; position: fixed; z-index: 10052; background: white; border-radius: 16px; padding: 24px; max-width: 400px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: auto;">
@@ -87,7 +87,7 @@
                         0 0 60px rgba(29, 209, 161, 0.6),
                         inset 0 0 20px rgba(29, 209, 161, 0.3);
             border-color: #1dd1a1;
-            background: rgba(255, 255, 255, 0.5);
+            background: transparent;
         }
         50% {
             box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.85),
@@ -95,7 +95,7 @@
                         0 0 80px rgba(29, 209, 161, 0.8),
                         inset 0 0 30px rgba(29, 209, 161, 0.5);
             border-color: #10ac84;
-            background: rgba(255, 255, 255, 0.65);
+            background: transparent;
         }
     }
 
@@ -284,10 +284,65 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.95);
         border-radius: inherit;
         pointer-events: none;
+        backdrop-filter: brightness(1.3) contrast(1.1);
+        -webkit-backdrop-filter: brightness(1.3) contrast(1.1);
     }
+
+    /* Make text inside focused area perfectly visible with dark, anti-aliased font */
+    #tourSpotlight ~ * [class*="nav-link"],
+    #tourSpotlight ~ * .nav-link,
+    #tourSpotlight ~ * a,
+    #tourSpotlight ~ * button,
+    #tourSpotlight ~ * span,
+    #tourSpotlight ~ * .text-white,
+    #tourSpotlight ~ * .text-light,
+    .tour-active .nav-link,
+    .tour-active a,
+    .tour-active button span {
+        position: relative;
+        z-index: 10052 !important;
+    }
+
+    /* Direct styling for elements within spotlight area */
+    body.tour-active *[style*="10051"] ~ * .nav-link,
+    body.tour-active *[style*="10051"] ~ * a,
+    body.tour-active *[style*="10051"] ~ * span,
+    body.tour-active *[style*="10051"] ~ * i {
+        color: #1a1a1a !important;
+        text-shadow: 0 0 1px rgba(255, 255, 255, 0.9),
+                     0 0 2px rgba(255, 255, 255, 0.8) !important;
+        -webkit-font-smoothing: antialiased !important;
+        -moz-osx-font-smoothing: grayscale !important;
+        font-weight: 600 !important;
+        filter: contrast(1.2) brightness(1.1);
+    }
+
+    /* Highlighted element styling - very dark and crisp */
+    .tour-highlighted,
+    .tour-highlighted * {
+        color: #1a1a1a !important;
+        text-shadow: 0 0 1px rgba(255, 255, 255, 0.9),
+                     0 0 2px rgba(255, 255, 255, 0.8) !important;
+        -webkit-font-smoothing: antialiased !important;
+        -moz-osx-font-smoothing: grayscale !important;
+        font-weight: 600 !important;
+        filter: contrast(1.2) brightness(1.1) !important;
+        opacity: 1 !important;
+    }
+
+    /* Ensure SVG icons are also dark */
+    .tour-highlighted svg,
+    .tour-highlighted i,
+    .tour-highlighted .bi {
+        color: #1a1a1a !important;
+        fill: #1a1a1a !important;
+        filter: contrast(1.3) brightness(0.9) !important;
+    }
+
+
 </style>
 
 <script>
@@ -567,11 +622,39 @@
         const rect = targetElement.getBoundingClientRect();
         const spotlight = document.getElementById('tourSpotlight');
         spotlight.style.display = 'block';
+
+        // Remove previous highlight styling
+        document.querySelectorAll('.tour-highlighted').forEach(el => {
+            el.classList.remove('tour-highlighted');
+            el.style.removeProperty('color');
+            el.style.removeProperty('text-shadow');
+            el.style.removeProperty('-webkit-font-smoothing');
+            el.style.removeProperty('-moz-osx-font-smoothing');
+            el.style.removeProperty('font-weight');
+            el.style.removeProperty('filter');
+        });
+
+        // Add dark, anti-aliased text styling to focused element and its children
+        const applyDarkTextStyle = (element) => {
+            element.classList.add('tour-highlighted');
+            element.style.color = '#1a1a1a';
+            element.style.textShadow = '0 0 1px rgba(255, 255, 255, 0.9), 0 0 2px rgba(255, 255, 255, 0.8)';
+            element.style.webkitFontSmoothing = 'antialiased';
+            element.style.mozOsxFontSmoothing = 'grayscale';
+            element.style.fontWeight = '600';
+            element.style.filter = 'contrast(1.2) brightness(1.1)';
+        };
+
+        applyDarkTextStyle(targetElement);
         
+        // Apply to all child text elements
+        const textElements = targetElement.querySelectorAll('span, i, a, button, .text-white, .text-light, [class*="text-"]');
+        textElements.forEach(el => applyDarkTextStyle(el));
+
         // For mobile sidebar, use parent li element if target is inside offcanvas
         let elementToHighlight = targetElement;
         const isMobileSidebar = isMobile && targetElement.closest('.offcanvas');
-        
+
         if (isMobileSidebar && targetElement.tagName === 'A' && targetElement.closest('li')) {
             elementToHighlight = targetElement.closest('li');
             const parentRect = elementToHighlight.getBoundingClientRect();
@@ -695,6 +778,17 @@
 
         // Remove tour body class
         document.body.classList.remove('tour-active');
+
+        // Remove highlight styling from all elements
+        document.querySelectorAll('.tour-highlighted').forEach(el => {
+            el.classList.remove('tour-highlighted');
+            el.style.removeProperty('color');
+            el.style.removeProperty('text-shadow');
+            el.style.removeProperty('-webkit-font-smoothing');
+            el.style.removeProperty('-moz-osx-font-smoothing');
+            el.style.removeProperty('font-weight');
+            el.style.removeProperty('filter');
+        });
 
         document.getElementById('tourOverlay').style.display = 'none';
         document.getElementById('tourSpotlight').style.display = 'none';
