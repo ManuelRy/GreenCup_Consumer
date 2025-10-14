@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Repository\SellerRepository;
+use App\Repository\FileRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -12,10 +13,12 @@ use Carbon\Carbon;
 class StoreController extends Controller
 {
     private SellerRepository $sRepo;
+    private FileRepository $fileRepo;
 
-    public function __construct(SellerRepository $sRepo)
+    public function __construct(SellerRepository $sRepo, FileRepository $fileRepo)
     {
         $this->sRepo = $sRepo;
+        $this->fileRepo = $fileRepo;
     }
     /*
     |--------------------------------------------------------------------------
@@ -574,13 +577,8 @@ class StoreController extends Controller
             $processedPosts = collect();
 
             foreach ($posts as $post) {
-                $photoUrl = $post->photo_url;
-                if (!str_starts_with($photoUrl, 'http') && !str_starts_with($photoUrl, '/')) {
-                    $photoUrl = '/storage/seller_photos/' . $photoUrl;
-                }
-                if (str_starts_with($photoUrl, '/storage/')) {
-                    $photoUrl = asset($photoUrl);
-                }
+                // Use the same normalization logic for photo URLs
+                $photoUrl = $this->resolveSellerImage($post->photo_url);
 
                 $timeAgo = $this->getTimeAgo($post->created_at);
                 $points = $post->total_points ?? 0;
@@ -783,13 +781,8 @@ class StoreController extends Controller
                     ->get(['id', 'photo_url', 'caption', 'category', 'is_featured', 'sort_order', 'created_at']);
 
                 foreach ($dbPhotos as $photo) {
-                    $photoUrl = $photo->photo_url;
-                    if (!str_starts_with($photoUrl, 'http') && !str_starts_with($photoUrl, '/')) {
-                        $photoUrl = '/storage/seller_photos/' . $photoUrl;
-                    }
-                    if (str_starts_with($photoUrl, '/storage/')) {
-                        $photoUrl = asset($photoUrl);
-                    }
+                    // Use the same normalization logic as seller images
+                    $photoUrl = $this->resolveSellerImage($photo->photo_url);
 
                     $photos->push((object)[
                         'id' => $photo->id,
@@ -810,10 +803,8 @@ class StoreController extends Controller
                     ->first(['photo_url', 'photo_caption']);
 
                 if ($seller && $seller->photo_url) {
-                    $photoUrl = $seller->photo_url;
-                    if (str_starts_with($photoUrl, '/storage/')) {
-                        $photoUrl = asset($photoUrl);
-                    }
+                    // Use the same normalization logic
+                    $photoUrl = $this->resolveSellerImage($seller->photo_url);
 
                     $photos->push((object)[
                         'id' => 0,
@@ -899,12 +890,26 @@ class StoreController extends Controller
 
         $trimmed = trim($path);
 
+        // If it already starts with http:// or https://, it's a full URL
+        // Use FileRepository to normalize it
         if (str_starts_with($trimmed, 'http://') || str_starts_with($trimmed, 'https://')) {
-            return $trimmed;
+            return $this->normalizeRemoteUrl($trimmed);
+        }
+
+        // If it starts with //, add https:
+        if (str_starts_with($trimmed, '//')) {
+            return $this->normalizeRemoteUrl('https:' . $trimmed);
         }
 
         $normalized = ltrim($trimmed, '/');
 
+        // If it doesn't start with http, it might be a relative path to the file server
+        // Use FileRepository to get the proper URL
+        if (!str_starts_with($normalized, 'http')) {
+            return $this->fileRepo->get($normalized);
+        }
+
+        // Legacy handling for local storage paths
         if (str_starts_with($normalized, 'storage/')) {
             return asset($normalized);
         }
@@ -922,6 +927,40 @@ class StoreController extends Controller
         }
 
         return asset('storage/sellers/' . $normalized);
+    }
+
+    /**
+     * Normalize remote URL using FileRepository (similar to NormalizesRemoteUrl trait)
+     */
+    private function normalizeRemoteUrl(?string $value): ?string
+    {
+        if (empty($value)) {
+            return null;
+        }
+
+        if (str_starts_with($value, '//')) {
+            $value = 'https:' . $value;
+        }
+
+        if (!str_starts_with($value, 'http')) {
+            return $this->fileRepo->get(ltrim($value, '/'));
+        }
+
+        $host = parse_url($value, PHP_URL_HOST);
+
+        if ($host && $host === $this->fileRepo->remoteHost()) {
+            $relative = $this->fileRepo->extractRelativePathFromUrl($value);
+
+            if ($relative) {
+                return $this->fileRepo->get($relative);
+            }
+        }
+
+        if (str_starts_with($value, 'http://')) {
+            $value = str_replace('http://', 'https://', $value);
+        }
+
+        return $value;
     }
 
     /**
