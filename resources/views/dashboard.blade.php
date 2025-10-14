@@ -255,7 +255,7 @@
                       <div class="fs-2 mb-2">
                         <i class="fas fa-leaf"></i>
                       </div>
-                      <div class="fw-semibold small">Environmental Impact</div>
+                      <div class="fw-semibold small">Impacts</div>
                     </a>
                   </div>
                   @if($consumer->id === null)
