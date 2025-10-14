@@ -3307,26 +3307,37 @@
       const modalAvatar = document.getElementById('modalStoreAvatar');
       const avatarFallback = document.getElementById('modalAvatarFallback');
 
-      // Remove any existing image
+      // Clear any previous state first
       const existingImg = modalAvatar.querySelector('img');
       if (existingImg) {
         existingImg.remove();
       }
+      
+      // Always hide fallback first, then show only if needed
+      avatarFallback.style.display = 'none';
 
-      if (store.photo_url) {
+      if (store.photo_url && store.photo_url.trim() !== '') {
+        console.log('Store has photo_url:', store.photo_url);
         const avatarImg = document.createElement('img');
         avatarImg.src = store.photo_url;
         avatarImg.alt = store.name;
+        avatarImg.style.width = '100%';
+        avatarImg.style.height = '100%';
+        avatarImg.style.objectFit = 'cover';
+        avatarImg.style.display = 'block';
         avatarImg.onerror = function() {
-          this.style.display = 'none';
+          console.error('Failed to load avatar image:', store.photo_url);
+          this.remove();
           avatarFallback.style.display = 'flex';
           avatarFallback.textContent = store.name.charAt(0).toUpperCase();
         };
         avatarImg.onload = function() {
+          console.log('Avatar image loaded successfully');
           avatarFallback.style.display = 'none';
         };
         modalAvatar.appendChild(avatarImg);
       } else {
+        console.log('Store has no photo_url, showing fallback');
         avatarFallback.style.display = 'flex';
         avatarFallback.textContent = store.name.charAt(0).toUpperCase();
       }
