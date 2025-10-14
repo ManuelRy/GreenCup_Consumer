@@ -850,7 +850,13 @@ body {
     justify-content: center;
     padding: var(--space-4);
     z-index: 1000;
-    backdrop-filter: blur(4px);
+}
+
+@supports ((-webkit-backdrop-filter: blur(4px)) or (backdrop-filter: blur(4px))) {
+    .modal-overlay {
+        -webkit-backdrop-filter: blur(4px);
+        backdrop-filter: blur(4px);
+    }
 }
 
 .modal-overlay.hidden {
@@ -866,16 +872,17 @@ body {
     overflow: hidden;
     box-shadow: var(--shadow-xl);
     animation: modalSlide 0.3s ease-out;
+    will-change: transform, opacity;
 }
 
 @keyframes modalSlide {
     from {
         opacity: 0;
-        transform: translateY(20px) scale(0.95);
+        transform: translate3d(0, 20px, 0);
     }
     to {
         opacity: 1;
-        transform: translateY(0) scale(1);
+        transform: translate3d(0, 0, 0);
     }
 }
 
@@ -1127,7 +1134,14 @@ body {
     align-items: center;
     justify-content: center;
     z-index: 2000;
-    backdrop-filter: blur(10px);
+    will-change: opacity;
+}
+
+@supports ((-webkit-backdrop-filter: blur(10px)) or (backdrop-filter: blur(10px))) {
+    .success-screen {
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+    }
 }
 
 .success-screen.hidden {
@@ -1151,7 +1165,7 @@ body {
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate3d(-50%, -50%, 0);
     width: 80px;
     height: 80px;
     background: var(--white);
@@ -1162,19 +1176,20 @@ body {
     color: var(--primary);
     z-index: 3;
     animation: checkmarkBounce 0.6s ease-out;
+    will-change: transform, opacity;
 }
 
 @keyframes checkmarkBounce {
     0% {
-        transform: translate(-50%, -50%) scale(0);
+        transform: translate3d(-50%, -50%, 0) scale(0);
         opacity: 0;
     }
     50% {
-        transform: translate(-50%, -50%) scale(1.1);
+        transform: translate3d(-50%, -50%, 0) scale(1.1);
         opacity: 1;
     }
     100% {
-        transform: translate(-50%, -50%) scale(1);
+        transform: translate3d(-50%, -50%, 0) scale(1);
     }
 }
 
@@ -1182,10 +1197,11 @@ body {
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate3d(-50%, -50%, 0);
     border: 3px solid rgba(255, 255, 255, 0.3);
     border-radius: 50%;
     animation: ripple 2s ease-out infinite;
+    will-change: transform, opacity;
 }
 
 .ripple-ring {
@@ -1207,11 +1223,11 @@ body {
 
 @keyframes ripple {
     0% {
-        transform: translate(-50%, -50%) scale(0);
+        transform: translate3d(-50%, -50%, 0) scale(0);
         opacity: 1;
     }
     100% {
-        transform: translate(-50%, -50%) scale(1);
+        transform: translate3d(-50%, -50%, 0) scale(1);
         opacity: 0;
     }
 }
@@ -1276,6 +1292,24 @@ body {
 }
 
 /* Responsive Design */
+@media (max-width: 768px) {
+    /* Disable heavy backdrop blur and looping effects on small devices to prevent flicker */
+    .modal-overlay,
+    .success-screen {
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+    }
+
+    .modal-container {
+        animation-duration: 0.24s;
+    }
+
+    .ripple-ring {
+        animation-iteration-count: 1;
+        animation-fill-mode: forwards;
+    }
+}
+
 @media (max-width: 640px) {
     .app-content {
         padding: var(--space-4);
