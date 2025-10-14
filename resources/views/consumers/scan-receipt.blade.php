@@ -1646,7 +1646,6 @@ function extractReceiptCode(decodedText) {
 function isValidReceiptCode(code) {
     if (!code || typeof code !== 'string') return false;
     if (code.length < 3) return false;
-    if (code.toLowerCase() === 'demo123') return true;
     return /^[a-zA-Z0-9-_]+$/.test(code);
 }
 
@@ -1654,10 +1653,6 @@ function onScanSuccess(decodedText, decodedResult) {
     if (isProcessing) return;
     pauseScanner();
     let receiptCode = extractReceiptCode(decodedText);
-    if (receiptCode.toLowerCase().startsWith('demo')) {
-        showDemoReceipt();
-        return;
-    }
     checkReceipt(receiptCode);
 }
 
@@ -1779,10 +1774,6 @@ function displayReceipt(receipt) {
 
 function claimPoints() {
     if (!currentReceiptCode || isProcessing) return;
-    if (currentReceiptCode === 'DEMO123') {
-        claimDemoPoints();
-        return;
-    }
 
     isProcessing = true;
     const claimButton = document.getElementById('claim-button');
@@ -1824,33 +1815,6 @@ function escapeHtml(text) {
     return text.replace(/[&<>"']/g, m => map[m]);
 }
 
-function showDemoReceipt() {
-    const demoReceipt = {
-        receipt_code: 'DEMO123',
-        store_name: 'Demo Coffee Shop',
-        store_address: '123 Main Street, Phnom Penh',
-        status: 'pending',
-        total_points: 5,
-        total_quantity: 3,
-        items: [
-            { name: 'Coffee', quantity: 2, points_per_unit: 1, total_points: 2 },
-            { name: 'Reusable Cup', quantity: 1, points_per_unit: 3, total_points: 3 }
-        ],
-        created_at: 'Dec 15, 2024 2:30 PM'
-    };
-    currentReceiptCode = 'DEMO123';
-    showModal();
-    setLoadingState(document.getElementById('claim-button'), false);
-    displayReceipt(demoReceipt);
-}
-
-function claimDemoPoints() {
-    closeModal();
-    showSuccess(5);
-    const currentPoints = parseInt(document.getElementById('current-points').textContent) || 0;
-    updatePointsDisplay(currentPoints + 5);
-}
-
 // Event Listeners
 document.addEventListener('DOMContentLoaded', function() {
     // Form submission
@@ -1860,14 +1824,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (code && !isProcessing) {
             const submitButton = this.querySelector('.submit-button');
             setLoadingState(submitButton, true);
-
-            if (code.toLowerCase() === 'demo123') {
-                setTimeout(() => {
-                    setLoadingState(submitButton, false);
-                    showDemoReceipt();
-                }, 500);
-                return;
-            }
 
             setTimeout(() => {
                 setLoadingState(submitButton, false);
