@@ -568,14 +568,24 @@
         const spotlight = document.getElementById('tourSpotlight');
         spotlight.style.display = 'block';
         
-        // Add extra padding for mobile sidebar items
+        // For mobile sidebar, use parent li element if target is inside offcanvas
+        let elementToHighlight = targetElement;
         const isMobileSidebar = isMobile && targetElement.closest('.offcanvas');
-        const padding = isMobileSidebar ? 4 : 8;
         
-        spotlight.style.top = `${rect.top - padding}px`;
-        spotlight.style.left = `${rect.left - padding}px`;
-        spotlight.style.width = `${rect.width + (padding * 2)}px`;
-        spotlight.style.height = `${rect.height + (padding * 2)}px`;
+        if (isMobileSidebar && targetElement.tagName === 'A' && targetElement.closest('li')) {
+            elementToHighlight = targetElement.closest('li');
+            const parentRect = elementToHighlight.getBoundingClientRect();
+            spotlight.style.top = `${parentRect.top}px`;
+            spotlight.style.left = `${parentRect.left}px`;
+            spotlight.style.width = `${parentRect.width}px`;
+            spotlight.style.height = `${parentRect.height}px`;
+        } else {
+            const padding = isMobileSidebar ? 4 : 8;
+            spotlight.style.top = `${rect.top - padding}px`;
+            spotlight.style.left = `${rect.left - padding}px`;
+            spotlight.style.width = `${rect.width + (padding * 2)}px`;
+            spotlight.style.height = `${rect.height + (padding * 2)}px`;
+        }
 
         // Position tooltip
         const tooltip = document.getElementById('tourTooltip');
