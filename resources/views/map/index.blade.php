@@ -3276,11 +3276,13 @@
         console.log(data);
 
         if (data.success) {
-          // Preserve the distance from the original store object
+          // Preserve the distance and photo_url from the original store object
           const storeDetails = {
             ...data.data,
             points_reward: app.selectedStore.points_reward,
-            distance: app.selectedStore.distance
+            distance: app.selectedStore.distance,
+            // Ensure photo_url is preserved if API doesn't return it
+            photo_url: data.data.photo_url || app.selectedStore.photo_url
           };
           populateStoreModal(storeDetails);
         } else {
@@ -3312,7 +3314,7 @@
       if (existingImg) {
         existingImg.remove();
       }
-      
+
       // Always hide fallback first, then show only if needed
       avatarFallback.style.display = 'none';
 
