@@ -1555,6 +1555,12 @@ function resumeScanner() {
         catch { setTimeout(() => { initializeCamera(); }, 500); }
     }
 }
+function pauseScanner() {
+    if (scanner) {
+        try { scanner.pause(true); }
+        catch {}
+    }
+}
 
 function retryCamera() {
     if (scanner) { try { scanner.clear(); } catch (e) {} scanner = null; }
@@ -1569,6 +1575,7 @@ function focusManualInput() {
 }
 
 function showModal() {
+    pauseScanner();
     document.getElementById('receipt-modal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 }
@@ -1645,6 +1652,7 @@ function isValidReceiptCode(code) {
 
 function onScanSuccess(decodedText, decodedResult) {
     if (isProcessing) return;
+    pauseScanner();
     let receiptCode = extractReceiptCode(decodedText);
     if (receiptCode.toLowerCase().startsWith('demo')) {
         showDemoReceipt();
@@ -1662,6 +1670,7 @@ function checkReceipt(code) {
     }
     isProcessing = true;
     currentReceiptCode = code;
+    pauseScanner();
     showModal();
 
     const claimButton = document.getElementById('claim-button');
@@ -1900,3 +1909,4 @@ window.addEventListener('beforeunload', function() {
 </script>
 
 @endsection
+
