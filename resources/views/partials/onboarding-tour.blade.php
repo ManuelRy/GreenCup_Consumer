@@ -125,6 +125,142 @@
         0% { opacity: 0; transform: scale(0.9) translateY(10px); }
         100% { opacity: 1; transform: scale(1) translateY(0); }
     }
+
+    /* Mobile Responsive Styles */
+    @media (max-width: 991px) {
+        #tourTooltip {
+            max-width: 90vw !important;
+            padding: 20px !important;
+            border-radius: 12px !important;
+            left: 50% !important;
+            transform: translateX(-50%);
+        }
+
+        #tourTooltip h4 {
+            font-size: 1.1rem;
+        }
+
+        #tourTooltip p {
+            font-size: 0.9rem;
+        }
+
+        .tour-step-badge {
+            font-size: 0.7rem !important;
+            padding: 3px 10px !important;
+        }
+
+        #tourTooltip .btn {
+            font-size: 0.85rem;
+            padding: 8px 16px;
+        }
+
+        .progress-dot {
+            width: 8px;
+            height: 8px;
+        }
+
+        .progress-dot.active {
+            width: 20px;
+        }
+
+        /* Ensure tour elements are above offcanvas */
+        #tourOverlay {
+            z-index: 10060 !important;
+        }
+
+        #tourSpotlight {
+            z-index: 10061 !important;
+        }
+
+        #tourTooltip {
+            z-index: 10062 !important;
+        }
+
+        /* Welcome modal adjustments for mobile */
+        .modal-dialog {
+            margin: 1rem !important;
+        }
+
+        #welcomeScreen {
+            padding: 2rem 1.5rem !important;
+        }
+
+        #welcomeScreen h1 {
+            font-size: 1.75rem !important;
+        }
+
+        #welcomeScreen p {
+            font-size: 1rem !important;
+        }
+
+        #welcomeScreen .btn-lg {
+            padding: 10px 30px !important;
+            font-size: 1rem !important;
+        }
+    }
+
+    @media (max-width: 576px) {
+        #tourTooltip {
+            padding: 16px !important;
+            max-width: 95vw !important;
+            position: fixed !important;
+            bottom: 20px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            top: auto !important;
+        }
+
+        #tourTooltip h4 {
+            font-size: 1rem;
+            margin-bottom: 8px !important;
+        }
+
+        #tourTooltip p {
+            font-size: 0.85rem;
+        }
+
+        #tourTooltip .btn {
+            font-size: 0.8rem;
+            padding: 6px 12px;
+        }
+
+        #tourSpotlight {
+            border-width: 2px !important;
+        }
+
+        .tour-step-badge {
+            font-size: 0.65rem !important;
+        }
+
+        /* Fixed bottom position for mobile tooltip */
+        #tourTooltip .d-flex {
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        #tourTooltip .btn-outline-secondary,
+        #tourTooltip .btn-success {
+            flex: 1 1 45%;
+            min-width: 80px;
+        }
+
+        .tour-progress {
+            order: -1;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+    }
+
+    /* Ensure offcanvas is visible during tour */
+    .offcanvas.show {
+        visibility: visible !important;
+    }
+
+    /* Prevent body scroll during tour */
+    body.tour-active {
+        overflow: hidden !important;
+    }
 </style>
 
 <script>
@@ -135,30 +271,42 @@
         tourSteps = [
             {
                 target: '.nav-link[href*="dashboard"]',
+                mobileTarget: '#mobileNav .nav-link[href*="dashboard"]',
                 title: '📊 Dashboard',
                 description: 'Your central hub to view points, recent activity, and environmental impact at a glance.',
                 position: 'bottom'
             },
             {
-                target: '.nav-link[href*="scan-receipt"]',
-                title: '📱 Scan QR Code',
-                description: 'Scan your receipt QR codes here to earn points instantly! Every eco-friendly purchase counts.',
-                position: 'bottom'
-            },
-            {
-                target: '.nav-link[href*="rewards"]',
+                target: '.nav-link[href*="reward"]',
+                mobileTarget: '#mobileNav .nav-link[href*="reward"]',
                 title: '🎁 Rewards',
                 description: 'Redeem your points for exciting rewards and exclusive offers from our partner stores.',
                 position: 'bottom'
             },
             {
+                target: '.nav-link[href*="gallery"], .nav-link[href*="products"]',
+                mobileTarget: '#mobileNav .nav-link[href*="gallery"]',
+                title: '🛍️ Products Gallery',
+                description: 'Browse eco-friendly products and rewards from all participating stores.',
+                position: 'bottom'
+            },
+            {
                 target: '.nav-link[href*="map"]',
+                mobileTarget: '#mobileNav .nav-link[href*="map"]',
                 title: '📍 Store Locator',
                 description: 'Find nearby participating stores on the map and discover their available eco-products.',
                 position: 'bottom'
             },
             {
+                target: '.nav-link[href*="scan"]',
+                mobileTarget: '#mobileNav .nav-link[href*="scan"]',
+                title: '📱 Scan QR Code',
+                description: 'Scan your receipt QR codes here to earn points instantly! Every eco-friendly purchase counts.',
+                position: 'bottom'
+            },
+            {
                 target: '.nav-link[href*="environmental-impact"]',
+                mobileTarget: '#mobileNav .nav-link[href*="environmental-impact"]',
                 title: '🌱 Environmental Impact',
                 description: 'Track your positive impact! See how many cups saved, CO₂ reduced, and achievements earned.',
                 position: 'bottom'
@@ -167,31 +315,43 @@
     @else
         tourSteps = [
             {
-                target: '.nav-link[href*="gallery"]',
+                target: '.nav-link[href*="dashboard"]',
+                mobileTarget: '#guestNav .nav-link[href*="dashboard"]',
+                title: '📊 Dashboard',
+                description: 'View your dashboard and see how GreenCup rewards eco-friendly choices!',
+                position: 'bottom'
+            },
+            {
+                target: '.nav-link[href*="gallery"], .nav-link[href*="products"]',
+                mobileTarget: '#guestNav .nav-link[href*="gallery"]',
                 title: '🛍️ Products Gallery',
                 description: 'Browse eco-friendly products from all participating stores. Sign up to start earning rewards!',
                 position: 'bottom'
             },
             {
                 target: '.nav-link[href*="map"]',
+                mobileTarget: '#guestNav .nav-link[href*="map"]',
                 title: '📍 Store Locator',
                 description: 'Find nearby participating stores on the map and discover their available eco-products.',
                 position: 'bottom'
             },
             {
                 target: '.nav-link[href*="environmental-impact"]',
+                mobileTarget: '#guestNav .nav-link[href*="environmental-impact"]',
                 title: '🌱 Environmental Impact',
                 description: 'Learn about the environmental benefits of using reusable cups. Create an account to track your own impact!',
                 position: 'bottom'
             },
             {
-                target: '.btn-success[href*="register"]',
+                target: '.btn-success[href*="register"], a[href*="register"]',
+                mobileTarget: '#guestNav a[href*="register"]',
                 title: '🎉 Create Free Account',
                 description: 'Sign up to start earning points, track your environmental impact, and unlock exclusive rewards!',
                 position: 'left'
             },
             {
-                target: '.btn-outline-success[href*="login"]',
+                target: '.btn-outline-success[href*="login"], a[href*="login"]:not(.btn-success)',
+                mobileTarget: '#guestNav a[href*="login"]',
                 title: '🔐 Login',
                 description: 'Already have an account? Login here to access all your rewards and track your progress.',
                 position: 'left'
@@ -264,6 +424,9 @@
             tourActive = true;
             currentStepIndex = 0;
 
+            // Add body class for tour
+            document.body.classList.add('tour-active');
+
             const overlay = document.getElementById('tourOverlay');
             overlay.style.display = 'block';
             console.log('Overlay displayed');
@@ -274,20 +437,35 @@
             const isMobile = window.innerWidth < 992;
             if (isMobile) {
                 console.log('Mobile detected, opening offcanvas...');
-                const offcanvasElement = document.getElementById('mobileNav');
+
+                // Determine which offcanvas to open (guest or authenticated user)
+                @auth('consumer')
+                    const offcanvasElement = document.getElementById('mobileNav');
+                @else
+                    const offcanvasElement = document.getElementById('guestNav');
+                @endauth
+
                 if (offcanvasElement) {
+                    console.log('Opening offcanvas:', offcanvasElement.id);
+
                     // Make offcanvas visible for tour
                     offcanvasElement.classList.add('show');
                     offcanvasElement.style.visibility = 'visible';
+                    offcanvasElement.style.transform = 'none';
 
+                    // Create backdrop
                     const backdrop = document.createElement('div');
                     backdrop.className = 'offcanvas-backdrop fade show';
                     backdrop.id = 'tour-offcanvas-backdrop';
                     backdrop.style.zIndex = '10049';
                     document.body.appendChild(backdrop);
 
-                    // Set offcanvas z-index to be above backdrop
+                    // Set offcanvas z-index to be above backdrop but below tour elements
                     offcanvasElement.style.zIndex = '10050';
+
+                    // Add body class to prevent scrolling
+                    document.body.classList.add('offcanvas-open');
+                    document.body.style.overflow = 'hidden';
 
                     // Wait for offcanvas animation
                     setTimeout(() => {
@@ -295,6 +473,8 @@
                         showStep(currentStepIndex);
                     }, 350);
                     return;
+                } else {
+                    console.error('Offcanvas element not found');
                 }
             }
 
@@ -311,23 +491,23 @@
 
         const step = tourSteps[index];
         console.log('Showing step', index + 1, ':', step.title);
-        console.log('Looking for target:', step.target);
 
-        let targetElement = document.querySelector(step.target);
-
-        // On mobile, navigation is in offcanvas sidebar, so we need to check there
         const isMobile = window.innerWidth < 992;
-        if (!targetElement && isMobile) {
-            console.log('Desktop nav not found, checking mobile offcanvas nav...');
-            const offcanvas = document.querySelector('#mobileNav');
-            if (offcanvas) {
-                targetElement = offcanvas.querySelector(step.target);
-                console.log('Found in mobile offcanvas:', targetElement);
-            }
+        const targetSelector = isMobile && step.mobileTarget ? step.mobileTarget : step.target;
+        console.log('Looking for target:', targetSelector, '(mobile:', isMobile, ')');
+
+        let targetElement = document.querySelector(targetSelector);
+
+        // Fallback: try the other selector if not found
+        if (!targetElement) {
+            console.log('Primary target not found, trying fallback...');
+            const fallbackSelector = isMobile ? step.target : (step.mobileTarget || step.target);
+            targetElement = document.querySelector(fallbackSelector);
+            console.log('Fallback result:', targetElement ? 'Found' : 'Not found');
         }
 
         if (!targetElement) {
-            console.error('Target element not found for selector:', step.target);
+            console.error('Target element not found for selector:', targetSelector);
             console.log('Available navigation links:', document.querySelectorAll('.nav-link'));
 
             // Try to skip this step and move to next
@@ -375,41 +555,58 @@
 
         let tooltipTop, tooltipLeft;
         const tooltipRect = tooltip.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
 
         console.log('Tooltip dimensions:', tooltipRect.width, 'x', tooltipRect.height);
+        console.log('Viewport:', viewportWidth, 'x', viewportHeight);
 
-        switch(step.position) {
-            case 'bottom':
-                tooltipTop = rect.bottom + 20;
-                tooltipLeft = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
-                break;
-            case 'top':
-                tooltipTop = rect.top - tooltipRect.height - 20;
-                tooltipLeft = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
-                break;
-            case 'left':
-                tooltipTop = rect.top + (rect.height / 2) - (tooltipRect.height / 2);
-                tooltipLeft = rect.left - tooltipRect.width - 20;
-                break;
-            case 'right':
-                tooltipTop = rect.top + (rect.height / 2) - (tooltipRect.height / 2);
-                tooltipLeft = rect.right + 20;
-                break;
-            default:
-                tooltipTop = rect.bottom + 20;
-                tooltipLeft = rect.left;
+        // Mobile specific positioning (fixed bottom)
+        if (isMobile && viewportWidth <= 576) {
+            console.log('Mobile mode: positioning tooltip at bottom');
+            tooltip.style.position = 'fixed';
+            tooltip.style.bottom = '20px';
+            tooltip.style.left = '50%';
+            tooltip.style.top = 'auto';
+            tooltip.style.transform = 'translateX(-50%)';
+        } else {
+            // Desktop/tablet positioning
+            tooltip.style.position = 'fixed';
+            tooltip.style.transform = 'none';
+
+            switch(step.position) {
+                case 'bottom':
+                    tooltipTop = rect.bottom + 20;
+                    tooltipLeft = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+                    break;
+                case 'top':
+                    tooltipTop = rect.top - tooltipRect.height - 20;
+                    tooltipLeft = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+                    break;
+                case 'left':
+                    tooltipTop = rect.top + (rect.height / 2) - (tooltipRect.height / 2);
+                    tooltipLeft = rect.left - tooltipRect.width - 20;
+                    break;
+                case 'right':
+                    tooltipTop = rect.top + (rect.height / 2) - (tooltipRect.height / 2);
+                    tooltipLeft = rect.right + 20;
+                    break;
+                default:
+                    tooltipTop = rect.bottom + 20;
+                    tooltipLeft = rect.left;
+            }
+
+            // Keep tooltip within viewport
+            const maxLeft = viewportWidth - tooltipRect.width - 20;
+            const maxTop = viewportHeight - tooltipRect.height - 20;
+            tooltipLeft = Math.max(20, Math.min(tooltipLeft, maxLeft));
+            tooltipTop = Math.max(20, Math.min(tooltipTop, maxTop));
+
+            tooltip.style.top = `${tooltipTop}px`;
+            tooltip.style.left = `${tooltipLeft}px`;
         }
 
-        // Keep tooltip within viewport
-        const maxLeft = window.innerWidth - tooltipRect.width - 20;
-        const maxTop = window.innerHeight - tooltipRect.height - 20;
-        tooltipLeft = Math.max(20, Math.min(tooltipLeft, maxLeft));
-        tooltipTop = Math.max(20, Math.min(tooltipTop, maxTop));
-
-        tooltip.style.top = `${tooltipTop}px`;
-        tooltip.style.left = `${tooltipLeft}px`;
-
-        console.log('Tooltip positioned at:', tooltipTop, 'x', tooltipLeft);
+        console.log('Tooltip positioned');
 
         // Make tooltip visible with animation
         setTimeout(() => {
@@ -453,6 +650,10 @@
 
     function finishTour() {
         tourActive = false;
+
+        // Remove tour body class
+        document.body.classList.remove('tour-active');
+
         document.getElementById('tourOverlay').style.display = 'none';
         document.getElementById('tourSpotlight').style.display = 'none';
         document.getElementById('tourTooltip').style.display = 'none';
@@ -460,13 +661,19 @@
         const welcomeModal = bootstrap.Modal.getInstance(document.getElementById('welcomeModal'));
         if (welcomeModal) welcomeModal.hide();
 
-        // Close mobile offcanvas if it's open
-        const offcanvasElement = document.getElementById('mobileNav');
+        // Close mobile offcanvas if it's open (check both authenticated and guest)
+        @auth('consumer')
+            const offcanvasElement = document.getElementById('mobileNav');
+        @else
+            const offcanvasElement = document.getElementById('guestNav');
+        @endauth
+
         if (offcanvasElement && offcanvasElement.classList.contains('show')) {
-            console.log('Closing mobile offcanvas...');
+            console.log('Closing offcanvas:', offcanvasElement.id);
             offcanvasElement.classList.remove('show');
             offcanvasElement.style.visibility = '';
             offcanvasElement.style.zIndex = '';
+            offcanvasElement.style.transform = '';
         }
 
         // Remove backdrop if exists
@@ -474,6 +681,11 @@
         if (backdrop) {
             backdrop.remove();
         }
+
+        // Re-enable body scrolling
+        document.body.classList.remove('offcanvas-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
 
         // Mark tour as completed
         localStorage.setItem('greencup_tour_completed', 'true');
@@ -518,6 +730,38 @@
             skipTour();
         }
     });
+
+    // Add touch gesture support for mobile
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    document.addEventListener('touchstart', (e) => {
+        if (!tourActive) return;
+        touchStartX = e.changedTouches[0].screenX;
+    }, false);
+
+    document.addEventListener('touchend', (e) => {
+        if (!tourActive) return;
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    }, false);
+
+    function handleSwipe() {
+        const swipeThreshold = 50; // minimum distance for swipe
+        const diff = touchStartX - touchEndX;
+
+        if (Math.abs(diff) < swipeThreshold) return;
+
+        if (diff > 0) {
+            // Swipe left - next step
+            console.log('Swipe left detected - next step');
+            nextStep();
+        } else {
+            // Swipe right - previous step
+            console.log('Swipe right detected - previous step');
+            previousStep();
+        }
+    }
 
     // Restart tour function (can be called manually)
     window.restartTour = function() {

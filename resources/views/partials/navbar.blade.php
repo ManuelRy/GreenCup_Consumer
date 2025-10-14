@@ -250,6 +250,13 @@
                             <i class="bi bi-clock-history me-2"></i>Transactions
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-0" href="javascript:void(0)" 
+                            data-bs-dismiss="offcanvas"
+                            onclick="if(typeof restartTour === 'function') { restartTour(); } else { console.error('Tour function not available'); }">
+                            <i class="bi bi-play-circle me-2"></i>Start Tour
+                        </a>
+                    </li>
                 </ul>
 
                 <form action="{{ route('logout') }}" method="POST" class="mt-3">
