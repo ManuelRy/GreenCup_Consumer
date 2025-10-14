@@ -1080,21 +1080,57 @@ class StoreController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | Ranking System Helper Methods
+    | Ranking System Helper Methods - Using Database Ranks
     |--------------------------------------------------------------------------
     */
+
+    /**
+     * Get the rank for a given points value
+     * This now uses the actual ranks table from the database
+     */
+    private function getRankForPoints($points)
+    {
+        try {
+            $numPoints = floatval($points);
+
+            // Get the rank from the database based on points
+            $rank = DB::table('ranks')
+                ->where('min_points', '<=', $numPoints)
+                ->orderBy('min_points', 'desc')
+                ->first(['name', 'min_points']);
+
+            // If no rank found, return the lowest rank
+            if (!$rank) {
+                $rank = DB::table('ranks')
+                    ->orderBy('min_points', 'asc')
+                    ->first(['name', 'min_points']);
+            }
+
+            // Fallback if ranks table is empty
+            if (!$rank) {
+                return (object)[
+                    'name' => 'Standard',
+                    'min_points' => 0
+                ];
+            }
+
+            return $rank;
+        } catch (\Exception $e) {
+            Log::error('Error getting rank for points: ' . $e->getMessage());
+            return (object)[
+                'name' => 'Standard',
+                'min_points' => 0
+            ];
+        }
+    }
 
     /**
      * Get rank class based on points
      */
     private function getRankClass($points)
     {
-        $numPoints = floatval($points);
-        if ($numPoints >= 2000) return 'platinum';
-        if ($numPoints >= 1000) return 'gold';
-        if ($numPoints >= 500) return 'silver';
-        if ($numPoints >= 100) return 'bronze';
-        return 'standard';
+        $rank = $this->getRankForPoints($points);
+        return strtolower($rank->name);
     }
 
     /**
@@ -1102,12 +1138,8 @@ class StoreController extends Controller
      */
     private function getRankText($points)
     {
-        $numPoints = floatval($points);
-        if ($numPoints >= 2000) return 'Platinum';
-        if ($numPoints >= 1000) return 'Gold';
-        if ($numPoints >= 500) return 'Silver';
-        if ($numPoints >= 100) return 'Bronze';
-        return 'Standard';
+        $rank = $this->getRankForPoints($points);
+        return $rank->name;
     }
 
     /**
@@ -1115,11 +1147,18 @@ class StoreController extends Controller
      */
     private function getRankIcon($points)
     {
-        $numPoints = floatval($points);
-        if ($numPoints >= 2000) return '👑';
-        if ($numPoints >= 1000) return '🥇';
-        if ($numPoints >= 500) return '🥈';
-        if ($numPoints >= 100) return '🥉';
-        return '⭐';
+        $rank = $this->getRankForPoints($points);
+        $rankName = strtolower($rank->name);
+
+        // Map rank names to icons
+        $iconMap = [
+            'platinum' => '👑',
+            'gold' => '🥇',
+            'silver' => '🥈',
+            'bronze' => '🥉',
+            'standard' => '⭐'
+        ];
+
+        return $iconMap[$rankName] ?? '⭐';
     }
 }

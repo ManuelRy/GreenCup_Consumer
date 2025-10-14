@@ -26,9 +26,14 @@
             'available_qty' => ($reward->quantity ?? 0) - ($reward->quantity_redeemed ?? 0),
             'image_url' => $reward->image_url,
             'category' => $reward->category,
-            'is_available' => $reward->is_available
+            'is_available' => $reward->is_available,
+            'expiry_details' => $reward->expiry_details,
+            'status' => $reward->status,
+            'status_label' => $reward->status_label,
+            'status_color' => $reward->status_color
           ];
           $availableQty = $rewardData['available_qty'];
+          $expiryDetails = $reward->expiry_details;
         @endphp
         <div class="col-6 col-md-4 col-lg-3 mb-3 mb-md-4 reward-card"
              data-category="{{ $reward->category ?? '' }}"
@@ -53,7 +58,19 @@
               @endif
 
               <!-- Status Badge -->
-              @if ($coins >= $reward->points_required && $availableQty > 0)
+              @if($reward->status == 'expired')
+                <div class="reward-status-badge expired">
+                  <i class="fas fa-clock"></i>
+                </div>
+              @elseif($reward->status == 'coming_soon')
+                <div class="reward-status-badge coming-soon">
+                  <i class="fas fa-hourglass-start"></i>
+                </div>
+              @elseif($reward->status == 'expiring_soon')
+                <div class="reward-status-badge expiring-soon">
+                  <i class="fas fa-exclamation-triangle"></i>
+                </div>
+              @elseif ($coins >= $reward->points_required && $availableQty > 0)
                 <div class="reward-status-badge available">
                   <i class="fas fa-check-circle"></i>
                 </div>
@@ -91,6 +108,18 @@
                 @if($availableQty <= 5 && $availableQty > 0)
                   <span class="stock-warning">⚠️</span>
                 @endif
+              </div>
+
+              <!-- Expiration Info -->
+              <div class="reward-card-expiry {{ $expiryDetails['urgency'] }}">
+                <i class="fas
+                  @if($expiryDetails['urgency'] == 'expired') fa-times-circle
+                  @elseif($expiryDetails['urgency'] == 'urgent') fa-fire
+                  @elseif($expiryDetails['urgency'] == 'soon') fa-exclamation-triangle
+                  @elseif($expiryDetails['urgency'] == 'future') fa-hourglass-start
+                  @else fa-calendar-check
+                  @endif"></i>
+                <span class="expiry-text">{{ $expiryDetails['text'] }}</span>
               </div>
 
               <!-- Redeem Button -->

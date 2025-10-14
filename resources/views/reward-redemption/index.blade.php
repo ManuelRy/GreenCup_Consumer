@@ -1082,6 +1082,22 @@
       color: white;
     }
 
+    .reward-status-badge.expired {
+      background: linear-gradient(135deg, #64748b, #475569);
+      color: white;
+    }
+
+    .reward-status-badge.coming-soon {
+      background: linear-gradient(135deg, #06b6d4, #0891b2);
+      color: white;
+    }
+
+    .reward-status-badge.expiring-soon {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: white;
+      animation: pulse 2s infinite;
+    }
+
     @keyframes bounceIn {
       0% {
         transform: scale(0);
@@ -1186,6 +1202,56 @@
 
     .reward-card-stock i {
       font-size: clamp(0.7rem, 2.8vw, 0.8rem);
+    }
+
+    /* Expiration Info */
+    .reward-card-expiry {
+      font-size: clamp(0.65rem, 2.6vw, 0.75rem);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+
+    .reward-card-expiry.normal {
+      background: rgba(34, 197, 94, 0.1);
+      color: #16a34a;
+    }
+
+    .reward-card-expiry.soon {
+      background: rgba(245, 158, 11, 0.15);
+      color: #d97706;
+      animation: pulse 2s infinite;
+    }
+
+    .reward-card-expiry.urgent {
+      background: rgba(239, 68, 68, 0.15);
+      color: #dc2626;
+      animation: pulse 1.5s infinite;
+    }
+
+    .reward-card-expiry.expired {
+      background: rgba(100, 116, 139, 0.1);
+      color: #64748b;
+    }
+
+    .reward-card-expiry.future {
+      background: rgba(6, 182, 212, 0.1);
+      color: #0891b2;
+    }
+
+    .reward-card-expiry i {
+      font-size: clamp(0.65rem, 2.6vw, 0.75rem);
+    }
+
+    .expiry-text {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
     }
 
     .stock-warning {

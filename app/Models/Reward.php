@@ -73,6 +73,65 @@ class Reward extends Model
         return Carbon::now()->isAfter($this->valid_from);
     }
 
+    public function isExpiringSoon(): bool
+    {
+        if ($this->isExpired()) {
+            return false;
+        }
+        $now = Carbon::now();
+        $hoursUntilExpiry = $now->diffInHours($this->valid_until, false);
+        return $hoursUntilExpiry <= 48 && $hoursUntilExpiry > 0;
+    }
+
+    public function isComingSoon(): bool
+    {
+        return !$this->hasStarted();
+    }
+
+    public function getStatusAttribute(): string
+    {
+        if (!$this->is_active) {
+            return 'inactive';
+        }
+        if ($this->isExpired()) {
+            return 'expired';
+        }
+        if ($this->remaining_stock <= 0) {
+            return 'out_of_stock';
+        }
+        if ($this->isComingSoon()) {
+            return 'coming_soon';
+        }
+        if ($this->isExpiringSoon()) {
+            return 'expiring_soon';
+        }
+        return 'available';
+    }
+
+    public function getStatusLabelAttribute(): string
+    {
+        return match($this->status) {
+            'expired' => 'Expired',
+            'out_of_stock' => 'Out of Stock',
+            'coming_soon' => 'Coming Soon',
+            'expiring_soon' => 'Expiring Soon',
+            'inactive' => 'Inactive',
+            default => 'Available'
+        };
+    }
+
+    public function getStatusColorAttribute(): string
+    {
+        return match($this->status) {
+            'expired' => 'danger',
+            'out_of_stock' => 'secondary',
+            'coming_soon' => 'info',
+            'expiring_soon' => 'warning',
+            'inactive' => 'dark',
+            default => 'success'
+        };
+    }
+
     public function getRemainingStockAttribute(): int
     {
         return max(0, $this->quantity - $this->quantity_redeemed);
@@ -92,6 +151,56 @@ class Reward extends Model
             return 'Expired';
         }
         return $this->valid_until->diffForHumans();
+    }
+
+    public function getExpiryDetailsAttribute(): array
+    {
+        $now = Carbon::now();
+
+        if ($this->isExpired()) {
+            return [
+                'status' => 'expired',
+                'text' => 'Expired ' . $this->valid_until->diffForHumans(),
+                'date' => $this->valid_until->format('M d, Y'),
+                'urgency' => 'expired'
+            ];
+        }
+
+        if ($this->isComingSoon()) {
+            return [
+                'status' => 'coming_soon',
+                'text' => 'Starts ' . $this->valid_from->diffForHumans(),
+                'date' => $this->valid_from->format('M d, Y'),
+                'urgency' => 'future'
+            ];
+        }
+
+        $hoursUntilExpiry = $now->diffInHours($this->valid_until, false);
+
+        if ($hoursUntilExpiry <= 24) {
+            return [
+                'status' => 'urgent',
+                'text' => 'Expires in ' . $now->diffForHumans($this->valid_until, true),
+                'date' => $this->valid_until->format('M d, Y h:i A'),
+                'urgency' => 'urgent'
+            ];
+        }
+
+        if ($hoursUntilExpiry <= 48) {
+            return [
+                'status' => 'warning',
+                'text' => 'Expires ' . $this->valid_until->diffForHumans(),
+                'date' => $this->valid_until->format('M d, Y'),
+                'urgency' => 'soon'
+            ];
+        }
+
+        return [
+            'status' => 'normal',
+            'text' => 'Valid until ' . $this->valid_until->format('M d, Y'),
+            'date' => $this->valid_until->format('M d, Y'),
+            'urgency' => 'normal'
+        ];
     }
 
     public function canRedeemQuantity(int $quantity): bool
