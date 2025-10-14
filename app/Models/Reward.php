@@ -4,9 +4,12 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\NormalizesRemoteUrl;
 
 class Reward extends Model
 {
+    use NormalizesRemoteUrl;
+
     protected $fillable = [
         'name',
         'description',
@@ -31,24 +34,22 @@ class Reward extends Model
         return $this->belongsTo(Seller::class);
     }
 
-    public function getImageUrlAttribute()
+    public function getImagePathAttribute($value): ?string
     {
-        if (!$this->image_path) {
+        if (empty($value)) {
             return null;
         }
-        
-        // If it's already a full URL, return as is
-        if (str_starts_with($this->image_path, 'http')) {
-            return $this->image_path;
+
+        if (str_starts_with($value, 'images/')) {
+            return asset($value);
         }
-        
-        // If it starts with 'images/', treat it as a public asset
-        if (str_starts_with($this->image_path, 'images/')) {
-            return asset($this->image_path);
-        }
-        
-        // Otherwise, assume it's in storage
-        return asset('storage/' . $this->image_path);
+
+        return $this->normalizeRemoteUrl($value);
+    }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        return $this->image_path;
     }
 
     public function isValid(): bool

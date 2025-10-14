@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Traits\NormalizesRemoteUrl;
 
 class Seller extends Model
 {
-    use HasFactory;
+    use HasFactory, NormalizesRemoteUrl;
 
     protected $fillable = [
         'business_name',
@@ -72,5 +73,10 @@ class Seller extends Model
     public function photos()
     {
         return $this->hasMany(SellerPhoto::class)->orderByDesc('is_featured')->orderBy('sort_order')->orderByDesc('created_at');
+    }
+
+    public function getPhotoUrlAttribute($value): ?string
+    {
+        return $this->normalizeRemoteUrl($value);
     }
 }

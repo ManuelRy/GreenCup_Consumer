@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\FileProxyController;
 use App\Http\Controllers\RewardRedemptionController;
 use App\Http\Controllers\EnvironmentalImpactController;
 use App\Http\Controllers\{AccountController, AuthController, ConsumerController, DashboardController, LoginController, StoreController, ReceiptController, RegisterController};
@@ -20,6 +21,11 @@ Route::get('/', function () {
     }
     return redirect()->route('login');
 });
+
+// File proxy route to serve remote assets securely over HTTPS
+Route::get('/files/{path}', [FileProxyController::class, 'show'])
+    ->where('path', '.*')
+    ->name('files.proxy');
 
 // Debug route for testing images
 Route::get('/test-images', function () {

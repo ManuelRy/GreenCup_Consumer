@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Traits\NormalizesRemoteUrl;
 
 class Item extends Model
 {
-    use HasFactory;
+    use HasFactory, NormalizesRemoteUrl;
 
     protected $fillable = [
         'name',
@@ -27,5 +28,10 @@ class Item extends Model
     public function qrCodes(): HasMany
     {
         return $this->hasMany(QrCode::class);
+    }
+
+    public function getImageUrlAttribute($value): ?string
+    {
+        return $this->normalizeRemoteUrl($value);
     }
 }

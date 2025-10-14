@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Traits\NormalizesRemoteUrl;
 
 class SellerPhoto extends Model
 {
-    use HasFactory;
+    use HasFactory, NormalizesRemoteUrl;
 
     protected $table = 'seller_photos';
 
@@ -48,5 +49,10 @@ class SellerPhoto extends Model
         }
 
         return $caption ?: null;
+    }
+
+    public function getPhotoUrlAttribute($value): ?string
+    {
+        return $this->normalizeRemoteUrl($value);
     }
 }

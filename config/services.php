@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'files' => [
+        'host' => env('FILES_HOST', 'http://188.166.186.208'),
+        'use_proxy' => env('FILES_USE_PROXY', true),
+    ],
+
 ];
