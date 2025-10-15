@@ -30,6 +30,9 @@ class RewardRepository
 
   public function createHistory($consumer_id, $reward_id, $quantity = 1)
   {
+    // Get the reward to set expiration
+    $reward = $this->get($reward_id);
+
     // Create a single history record with the specified quantity
     return RedeemHistory::create([
       'consumer_id' => $consumer_id,
@@ -37,6 +40,7 @@ class RewardRepository
       'quantity' => $quantity,
       'is_redeemed' => false,
       'status' => 'pending',
+      'expires_at' => $reward ? $reward->valid_until : null, // Set expiration to reward's expiration
     ]);
   }
 }
