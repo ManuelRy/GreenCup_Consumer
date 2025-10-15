@@ -704,13 +704,16 @@
           })
           .then(data => {
             if (data.success) {
-              alert('Reward redeemed successfully!');
-              console.log('Redemption:', data);
               bootstrap.Modal.getInstance(
                 document.getElementById('mockRedeemModal')
               ).hide();
-              // Reload the rewards to reflect updated state
-              applyFilters();
+
+              // Show success message
+              alert('Reward redeemed successfully! Redirecting to My Rewards...');
+              console.log('Redemption:', data);
+
+              // Redirect to My Rewards page
+              window.location.href = '{{ route("reward.my") }}';
             } else {
               let msg = data.message || 'Unknown error while redeeming reward.';
               alert(msg);
