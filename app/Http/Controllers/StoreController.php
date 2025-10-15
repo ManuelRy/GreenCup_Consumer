@@ -830,19 +830,25 @@ class StoreController extends Controller
                     ->whereNotNull('photo_url')
                     ->first(['photo_url', 'photo_caption']);
 
+                // Only add seller's main photo if it's not frozen
                 if ($seller && $seller->photo_url) {
-                    // Use the same normalization logic
-                    $photoUrl = $this->resolveSellerImage($seller->photo_url);
+                    $caption = $seller->photo_caption ?? '';
+                    $isFrozen = str_starts_with(strtoupper($caption), '[FROZEN]');
 
-                    $photos->push((object)[
-                        'id' => 0,
-                        'url' => $photoUrl,
-                        'caption' => $seller->photo_caption ?? '',
-                        'category' => 'store',
-                        'is_featured' => true,
-                        'sort_order' => 0,
-                        'created_at' => now()
-                    ]);
+                    if (!$isFrozen) {
+                        // Use the same normalization logic
+                        $photoUrl = $this->resolveSellerImage($seller->photo_url);
+
+                        $photos->push((object)[
+                            'id' => 0,
+                            'url' => $photoUrl,
+                            'caption' => $caption,
+                            'category' => 'store',
+                            'is_featured' => true,
+                            'sort_order' => 0,
+                            'created_at' => now()
+                        ]);
+                    }
                 }
             }
 
