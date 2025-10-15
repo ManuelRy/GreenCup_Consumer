@@ -270,7 +270,7 @@ class RewardRedemptionController extends Controller
             $reward = $redemption->reward;
             if ($reward) {
                 $points_to_return = $reward->points_required * $redemption->quantity;
-                $this->cPRepo->refund($redemption->consumer_id, $reward->seller_id, $points_to_return, 'redeem');
+                $this->cPRepo->refund($redemption->consumer_id, $reward->seller_id, $points_to_return, 'spend');
 
                 // Also return the quantity to the reward stock
                 $reward->update([

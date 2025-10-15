@@ -54,6 +54,8 @@
                   }
                 @endphp
 
+                {{-- DEBUG: Status={{ $redemption->status }} | Class={{ $statusClass }} | Text={{ $statusText }} --}}
+
                 <div class="position-absolute top-0 end-0 z-3">
                   <div class="bg-{{ $statusClass }} text-white px-3 py-1 rounded-bottom-start-3 fw-semibold small">
                     {{ $statusText }}
