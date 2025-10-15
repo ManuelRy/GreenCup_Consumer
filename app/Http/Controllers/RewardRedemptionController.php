@@ -235,4 +235,133 @@ class RewardRedemptionController extends Controller
         // TODO: Implement logic to check reward availability
         return response()->json(['available' => true]);
     }
+
+    /**
+     * Handle reward redemption rejection by seller/admin
+     * This would typically be called by a webhook or API from the seller/admin system
+     */
+    public function handleRejection(Request $request)
+    {
+        $request->validate([
+            'redemption_id' => 'required|integer',
+            'reason' => 'string|nullable'
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $redemption = \App\Models\RedeemHistory::find($request->redemption_id);
+            if (!$redemption) {
+                throw new \Exception('Invalid redemption ID');
+            }
+
+            if ($redemption->status !== 'pending') {
+                throw new \Exception('Redemption is not in pending status');
+            }
+
+            // Update redemption status to rejected
+            $redemption->update([
+                'status' => 'rejected',
+                'rejected_at' => now(),
+                'rejection_reason' => $request->reason ?? 'Redemption rejected by seller'
+            ]);
+
+            // Return points to consumer
+            $reward = $redemption->reward;
+            if ($reward) {
+                $points_to_return = $reward->points_required * $redemption->quantity;
+                $this->cPRepo->refund($redemption->consumer_id, $reward->seller_id, $points_to_return, 'redeem');
+
+                // Also return the quantity to the reward stock
+                $reward->update([
+                    'quantity_redeemed' => $reward->quantity_redeemed - $redemption->quantity
+                ]);
+            }
+
+            // Log the rejection for admin purposes
+            Log::info('Reward redemption rejected', [
+                'redemption_id' => $redemption->id,
+                'consumer_id' => $redemption->consumer_id,
+                'reward_id' => $redemption->reward_id,
+                'quantity' => $redemption->quantity,
+                'points_returned' => $points_to_return ?? 0,
+                'reason' => $request->reason
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Redemption rejected and points returned to consumer',
+                'points_returned' => $points_to_return ?? 0,
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error handling redemption rejection: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * Handle reward redemption approval by seller/admin
+     * This confirms the redemption is valid and the consumer can use the reward
+     */
+    public function handleApproval(Request $request)
+    {
+        $request->validate([
+            'redemption_id' => 'required|integer',
+            'message' => 'string|nullable'
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $redemption = \App\Models\RedeemHistory::find($request->redemption_id);
+            if (!$redemption) {
+                throw new \Exception('Invalid redemption ID');
+            }
+
+            if ($redemption->status !== 'pending') {
+                throw new \Exception('Redemption is not in pending status');
+            }
+
+            // Update redemption status to approved
+            $redemption->update([
+                'status' => 'approved',
+                'approved_at' => now(),
+                'is_redeemed' => true
+            ]);
+
+            // Log the approval for admin purposes
+            Log::info('Reward redemption approved', [
+                'redemption_id' => $redemption->id,
+                'consumer_id' => $redemption->consumer_id,
+                'reward_id' => $redemption->reward_id,
+                'quantity' => $redemption->quantity,
+                'message' => $request->message
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Redemption approved successfully',
+                'redemption_id' => $redemption->id,
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error handling redemption approval: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 400);
+        }
+    }
 }

@@ -38,8 +38,20 @@
             <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-4 reward-card">
               <div class="card h-100 reward-item border-0 shadow-sm">
                 @php
-                  $statusClass = $redemption->is_redeemed ? 'success' : 'warning';
-                  $statusText = $redemption->is_redeemed ? 'REDEEMED' : 'PENDING';
+                  // Determine status based on the status field
+                  if ($redemption->status === 'approved' || $redemption->is_redeemed) {
+                    $statusClass = 'success';
+                    $statusText = 'APPROVED';
+                    $statusIcon = 'check-circle';
+                  } elseif ($redemption->status === 'rejected') {
+                    $statusClass = 'danger';
+                    $statusText = 'REJECTED';
+                    $statusIcon = 'times-circle';
+                  } else {
+                    $statusClass = 'warning';
+                    $statusText = 'PENDING';
+                    $statusIcon = 'clock';
+                  }
                 @endphp
 
                 <div class="position-absolute top-0 end-0 z-3">
@@ -71,7 +83,7 @@
                             <div class="small opacity-75">{{ $redemption->created_at ? $redemption->created_at->format('M d, Y') : '' }}</div>
                           </div>
                           <div class="text-end">
-                            <i class="fas fa-{{ $redemption->is_redeemed ? 'check-circle' : 'clock' }} fa-2x opacity-75"></i>
+                            <i class="fas fa-{{ $statusIcon }} fa-2x opacity-75"></i>
                           </div>
                         </div>
                       </div>
@@ -83,7 +95,7 @@
                           <div class="small opacity-75">{{ $redemption->created_at ? $redemption->created_at->format('M d, Y') : '' }}</div>
                         </div>
                         <div class="text-end">
-                          <i class="fas fa-{{ $redemption->is_redeemed ? 'check-circle' : 'clock' }} fa-lg"></i>
+                          <i class="fas fa-{{ $statusIcon }} fa-lg"></i>
                         </div>
                       </div>
                     </div>
@@ -102,7 +114,7 @@
                           <div class="small opacity-75">{{ $redemption->created_at ? $redemption->created_at->format('M d, Y') : '' }}</div>
                         </div>
                         <div class="text-end">
-                          <i class="fas fa-{{ $redemption->is_redeemed ? 'check-circle' : 'clock' }} fa-2x opacity-75"></i>
+                          <i class="fas fa-{{ $statusIcon }} fa-2x opacity-75"></i>
                         </div>
                       </div>
                     </div>
@@ -111,7 +123,7 @@
 
                 <div class="card-body">
                   <h6 class="card-title fw-bold mb-2 d-flex align-items-center gap-2">
-                    <i class="fas fa-{{ $redemption->is_redeemed ? 'trophy' : 'hourglass-half' }} text-{{ $statusClass }}"></i>
+                    <i class="fas fa-{{ $statusIcon === 'check-circle' ? 'trophy' : ($statusIcon === 'times-circle' ? 'ban' : 'hourglass-half') }} text-{{ $statusClass }}"></i>
                     {{ $redemption->reward->name ?? 'Reward' }}
                   </h6>
                   @if($redemption->reward && $redemption->reward->seller)
@@ -129,10 +141,15 @@
                       {{ $redemption->created_at ? $redemption->created_at->format('M d, Y \a\t g:i A') : 'Date unknown' }}
                     </span>
                   </div>
-                  @if($redemption->is_redeemed)
+                  @if($redemption->status === 'approved' || $redemption->is_redeemed)
                     <div class="alert alert-success border-0 mb-0 py-2 small">
                       <i class="fas fa-check-circle me-2"></i>
-                      <strong>Completed!</strong> This reward has been successfully redeemed.
+                      <strong>Completed!</strong> This reward has been successfully approved.
+                    </div>
+                  @elseif($redemption->status === 'rejected')
+                    <div class="alert alert-danger border-0 mb-0 py-2 small">
+                      <i class="fas fa-times-circle me-2"></i>
+                      <strong>Rejected!</strong> {{ $redemption->rejection_reason ?? 'This reward redemption was rejected by the seller.' }}
                     </div>
                   @else
                     <div class="alert alert-warning border-0 mb-0 py-2 small">
