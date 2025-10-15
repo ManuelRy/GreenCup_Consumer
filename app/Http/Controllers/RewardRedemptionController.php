@@ -41,7 +41,12 @@ class RewardRedemptionController extends Controller
         $allRewards = collect();
 
         foreach ($sellers as $seller) {
-            $validRewards = $seller->rewards->filter->isValid();
+            // Include active rewards that are either valid now OR coming soon (but not expired)
+            $validRewards = $seller->rewards->filter(function($reward) {
+                return $reward->is_active
+                    && !$reward->isExpired()
+                    && $reward->remaining_stock > 0;
+            });
 
             // Apply search filter for both reward name and shop name
             if ($search) {
@@ -139,6 +144,14 @@ class RewardRedemptionController extends Controller
                     'success' => false,
                     'message' => 'Reward is not available or has expired'
                 ], 404);
+            }
+
+            // Check if reward has started
+            if (!$reward->hasStarted()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This reward has not started yet. It will be available ' . $reward->time_until_start
+                ], 400);
             }
 
             // Check if reward can accommodate the requested quantity

@@ -1315,6 +1315,12 @@
       cursor: not-allowed;
     }
 
+    .reward-redeem-btn.coming-soon {
+      background: linear-gradient(135deg, #06b6d4, #0891b2);
+      color: white;
+      cursor: not-allowed;
+    }
+
     .reward-redeem-btn i {
       font-size: clamp(0.875rem, 3.5vw, 1rem);
     }

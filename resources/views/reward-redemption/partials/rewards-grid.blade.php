@@ -129,6 +129,12 @@
                   <span class="d-none d-md-inline">Out of Stock</span>
                   <span class="d-md-none">N/A</span>
                 </button>
+              @elseif ($reward->status == 'coming_soon')
+                <button class="reward-redeem-btn coming-soon" disabled>
+                  <i class="fas fa-hourglass-start"></i>
+                  <span class="d-none d-md-inline">Coming Soon</span>
+                  <span class="d-md-none">Soon</span>
+                </button>
               @elseif ($coins >= $reward->points_required)
                 <button class="reward-redeem-btn available redeem-btn"
                         data-reward='@json($rewardData)'
