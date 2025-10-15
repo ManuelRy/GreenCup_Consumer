@@ -57,6 +57,52 @@
           </div>
         </div>
 
+        <!-- Get Started Encouragement Banner (only for authenticated users with no activity) -->
+        @if($consumer->id !== null && isset($environmentalData['total_units']) && $environmentalData['total_units'] == 0)
+        <div class="row mb-4">
+          <div class="col-12">
+            <div class="card border-0 shadow-lg bg-gradient-primary text-white rounded-4 get-started-banner">
+              <div class="card-body py-5">
+                <div class="row align-items-center">
+                  <div class="col-12 col-md-8 text-center text-md-start mb-4 mb-md-0">
+                    <h3 class="fw-bold mb-3">
+                      <i class="fas fa-rocket me-2"></i>Ready to Start Your Eco-Journey?
+                    </h3>
+                    <p class="mb-0 fs-5 opacity-90">
+                      Take your first step towards a greener future! Visit a participating store, make an eco-friendly purchase, and scan your receipt to earn your first points.
+                    </p>
+                  </div>
+                  <div class="col-12 col-md-4 text-center">
+                    <a href="{{ route('scan.receipt') }}" class="btn btn-light btn-lg mb-2 d-block pulse-button">
+                      <i class="fas fa-qrcode me-2"></i>Scan Your First Receipt
+                    </a>
+                    <a href="{{ route('map') }}" class="btn btn-outline-light d-block">
+                      <i class="fas fa-map-marker-alt me-2"></i>Find Stores Near You
+                    </a>
+                  </div>
+                </div>
+                <div class="mt-4 pt-4 border-top border-light border-opacity-25">
+                  <div class="row text-center">
+                    <div class="col-4">
+                      <div class="fs-2 mb-2">📱</div>
+                      <div class="small fw-semibold">Scan Receipt</div>
+                    </div>
+                    <div class="col-4">
+                      <div class="fs-2 mb-2">💰</div>
+                      <div class="small fw-semibold">Earn Points</div>
+                    </div>
+                    <div class="col-4">
+                      <div class="fs-2 mb-2">🎁</div>
+                      <div class="small fw-semibold">Get Rewards</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        @endif
+
         <!-- Points Section -->
         <div class="row mb-4">
           <div class="col-12">
@@ -605,6 +651,60 @@
     /* Enhanced shadow for primary card */
     .bg-gradient-primary {
         box-shadow: 0 10px 40px rgba(29, 209, 161, 0.3) !important;
+    }
+
+    /* Get Started Banner Styles */
+    .get-started-banner {
+      animation: slideInUp 0.8s ease-out;
+      background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 50%, #10b981 100%) !important;
+    }
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Pulse animation for the main CTA button */
+    .pulse-button {
+      animation: pulse 2s infinite;
+      box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+    }
+
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+        transform: scale(1);
+      }
+      50% {
+        box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+        transform: scale(1.02);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+        transform: scale(1);
+      }
+    }
+
+    .pulse-button:hover {
+      animation: none;
+      transform: scale(1.05) !important;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    /* Mobile responsiveness for get started banner */
+    @media (max-width: 768px) {
+      .get-started-banner h3 {
+        font-size: 1.5rem;
+      }
+      .get-started-banner p {
+        font-size: 1rem !important;
+      }
     }
   </style>
 
