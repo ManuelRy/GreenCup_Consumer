@@ -9,6 +9,7 @@ class RedeemHistory extends Model
     protected $fillable = [
         'consumer_id',
         'reward_id',
+        'quantity',
         'is_redeemed',
         'status',
         'approved_at',

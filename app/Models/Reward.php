@@ -54,7 +54,7 @@ class Reward extends Model
 
     public function isValid(): bool
     {
-        $now = Carbon::now();
+        $now = Carbon::now('Asia/Phnom_Penh');
 
         $hasStock = $this->quantity > $this->quantity_redeemed;
         $withinDateRange = $now->between($this->valid_from, $this->valid_until);
@@ -65,12 +65,12 @@ class Reward extends Model
 
     public function isExpired(): bool
     {
-        return Carbon::now()->isAfter($this->valid_until);
+        return Carbon::now('Asia/Phnom_Penh')->isAfter($this->valid_until);
     }
 
     public function hasStarted(): bool
     {
-        return Carbon::now()->isAfter($this->valid_from);
+        return Carbon::now('Asia/Phnom_Penh')->isAfter($this->valid_from);
     }
 
     public function isExpiringSoon(): bool
@@ -78,7 +78,7 @@ class Reward extends Model
         if ($this->isExpired()) {
             return false;
         }
-        $now = Carbon::now();
+        $now = Carbon::now('Asia/Phnom_Penh');
         $hoursUntilExpiry = $now->diffInHours($this->valid_until, false);
         return $hoursUntilExpiry <= 48 && $hoursUntilExpiry > 0;
     }
@@ -155,7 +155,7 @@ class Reward extends Model
 
     public function getExpiryDetailsAttribute(): array
     {
-        $now = Carbon::now();
+        $now = Carbon::now('Asia/Phnom_Penh');
 
         if ($this->isExpired()) {
             return [

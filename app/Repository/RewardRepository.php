@@ -30,17 +30,13 @@ class RewardRepository
 
   public function createHistory($consumer_id, $reward_id, $quantity = 1)
   {
-    // For now, create one history record per item redeemed
-    // TODO: Add quantity column to redeem_histories table in backend migration
-    $histories = [];
-    for ($i = 0; $i < $quantity; $i++) {
-      $histories[] = RedeemHistory::create([
-        'consumer_id' => $consumer_id,
-        'reward_id' => $reward_id,
-        'is_redeemed' => false,
-        'status' => 'pending',
-      ]);
-    }
-    return collect($histories);
+    // Create a single history record with the specified quantity
+    return RedeemHistory::create([
+      'consumer_id' => $consumer_id,
+      'reward_id' => $reward_id,
+      'quantity' => $quantity,
+      'is_redeemed' => false,
+      'status' => 'pending',
+    ]);
   }
 }
