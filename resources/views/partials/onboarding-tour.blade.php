@@ -419,7 +419,7 @@
         console.log('Has seen tour:', hasSeenTour);
 
         @auth('consumer')
-            const isNewUser = {{ auth('consumer')->user()->created_at > now()->subMinutes(5) ? 'true' : 'false' }};
+            const isNewUser = {{ auth('consumer')->user()->created_at > now()->subHours(24) ? 'true' : 'false' }};
         @else
             const isNewUser = true; // Show for all guests
         @endauth
