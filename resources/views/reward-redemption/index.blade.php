@@ -55,20 +55,6 @@
                     <input type="text" class="form-control" id="searchInput" placeholder="Find rewards or shops...">
                   </div>
 
-                  <!-- Category Filter -->
-                  <div class="col-12 col-md-6 col-lg-3">
-                    <label class="form-label fw-semibold text-dark">
-                      <i class="fas fa-filter me-2"></i>Category
-                    </label>
-                    <select class="form-select" id="categoryFilter">
-                      <option value="">All Categories</option>
-                      <option value="food">Food & Beverages</option>
-                      <option value="discount">Discounts</option>
-                      <option value="merchandise">Merchandise</option>
-                      <option value="experience">Experiences</option>
-                    </select>
-                  </div>
-
                   <!-- Points Range Filter -->
                   <div class="col-12 col-md-6 col-lg-3">
                     <label class="form-label fw-semibold text-dark">
