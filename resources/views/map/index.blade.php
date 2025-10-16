@@ -71,20 +71,24 @@
       <!-- Map Legend -->
       <div class="map-legend">
         <div class="legend-item">
-          <div class="legend-marker platinum"></div>
+          <span class="legend-emoji">👑</span>
           <span>Platinum</span>
         </div>
         <div class="legend-item">
-          <div class="legend-marker gold"></div>
+          <span class="legend-emoji">🥇</span>
           <span>Gold</span>
         </div>
         <div class="legend-item">
-          <div class="legend-marker silver"></div>
+          <span class="legend-emoji">🥈</span>
           <span>Silver</span>
         </div>
         <div class="legend-item">
-          <div class="legend-marker bronze"></div>
+          <span class="legend-emoji">🥉</span>
           <span>Bronze</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-emoji">⭐</span>
+          <span>Standard</span>
         </div>
         <div class="legend-item">
           <div class="legend-marker user"></div>
@@ -716,6 +720,15 @@
       display: flex;
       align-items: center;
       justify-content: center;
+    }
+
+    .legend-emoji {
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
     }
 
     .sort-legend {
