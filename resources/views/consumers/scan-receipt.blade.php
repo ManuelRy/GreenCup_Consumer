@@ -215,31 +215,91 @@
 <!-- Success Animation -->
 <div id="success-overlay" class="success-screen hidden">
     <div class="success-content">
+        <!-- Animated Cup Icon with Points -->
         <div class="success-animation">
-            <div class="checkmark">
-                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                    <path d="m9 12 2 2 4-4"/>
+            <div class="cup-icon">
+                <svg width="80" height="80" viewBox="0 0 64 64" fill="none">
+                    <!-- Cup body with green gradient -->
+                    <path d="M16 20 L48 20 L44 48 C44 52 40 56 36 56 L28 56 C24 56 20 52 20 48 Z"
+                          fill="url(#cupGradient)"
+                          stroke="white"
+                          stroke-width="2"/>
+                    <!-- Cup handle -->
+                    <path d="M48 24 C54 24 56 28 56 32 C56 36 54 40 48 40"
+                          fill="none"
+                          stroke="white"
+                          stroke-width="2"
+                          stroke-linecap="round"/>
+                    <!-- Steam/success indicators -->
+                    <path class="steam steam-1" d="M24 16 Q24 12 26 10" stroke="white" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.8"/>
+                    <path class="steam steam-2" d="M32 14 Q32 10 34 8" stroke="white" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.8"/>
+                    <path class="steam steam-3" d="M40 16 Q40 12 42 10" stroke="white" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.8"/>
+                    <defs>
+                        <linearGradient id="cupGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#1dd1a1;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#10ac84;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
                 </svg>
+                <!-- Checkmark overlay -->
+                <div class="checkmark-overlay">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <path d="m9 12 2 2 4-4"/>
+                    </svg>
+                </div>
             </div>
             <div class="ripple-ring"></div>
             <div class="ripple-ring delay-1"></div>
             <div class="ripple-ring delay-2"></div>
         </div>
-        <h2>Success!</h2>
-        <p>You earned <strong id="points-amount">0</strong> points</p>
-        <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 24px;">
-            <button class="btn primary large" onclick="location.reload()" style="flex: 1; min-width: 140px;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
-                    <path d="M3 7v6h6M21 17v-6h-6M3 13a9 9 0 0 1 15-6.7L21 11M3 13l3 5 3-5"/>
+
+        <!-- Success Message -->
+        <h2>Points Earned!</h2>
+        <div class="points-display">
+            <span class="points-badge">
+                <span class="plus-sign">+</span>
+                <span id="points-amount">0</span>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="coin-icon">
+                    <circle cx="12" cy="12" r="10" fill="url(#coinGradient)"/>
+                    <text x="12" y="16" text-anchor="middle" fill="white" font-size="12" font-weight="bold">P</text>
+                    <defs>
+                        <linearGradient id="coinGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
                 </svg>
-                Scan Again
+            </span>
+        </div>
+        <p class="success-message">Keep scanning to earn more rewards!</p>
+
+        <!-- Action Buttons -->
+        <div class="success-actions">
+            <button class="action-btn primary" onclick="location.reload()">
+                <div class="btn-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <path d="M21 15l-5-5L5 21"/>
+                    </svg>
+                </div>
+                <div class="btn-text">
+                    <span class="btn-label">Scan Another</span>
+                    <span class="btn-sublabel">Scan QR code</span>
+                </div>
             </button>
-            <button class="btn secondary large" onclick="window.location.href='{{ route('dashboard') }}'" style="flex: 1; min-width: 140px; background: #6b7280; border-color: #6b7280;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
-                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                    <polyline points="9 22 9 12 15 12 15 22"/>
-                </svg>
-                Dashboard
+
+            <button class="action-btn secondary" onclick="window.location.href='{{ route('dashboard') }}'">
+                <div class="btn-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                        <polyline points="9,22 9,12 15,12 15,22"/>
+                    </svg>
+                </div>
+                <div class="btn-text">
+                    <span class="btn-label">Go to Dashboard</span>
+                    <span class="btn-sublabel">View your points</span>
+                </div>
             </button>
         </div>
     </div>
@@ -1232,21 +1292,286 @@ body {
     }
 }
 
+/* Cup Icon Animation */
+.cup-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate3d(-50%, -50%, 0);
+    z-index: 3;
+    animation: cupBounce 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    will-change: transform;
+}
+
+@keyframes cupBounce {
+    0% {
+        transform: translate3d(-50%, -50%, 0) scale(0) rotate(-45deg);
+        opacity: 0;
+    }
+    50% {
+        transform: translate3d(-50%, -50%, 0) scale(1.1) rotate(5deg);
+    }
+    100% {
+        transform: translate3d(-50%, -50%, 0) scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+/* Steam Animation */
+.steam {
+    animation: steamRise 1.5s ease-in-out infinite;
+}
+
+.steam-1 {
+    animation-delay: 0s;
+}
+
+.steam-2 {
+    animation-delay: 0.3s;
+}
+
+.steam-3 {
+    animation-delay: 0.6s;
+}
+
+@keyframes steamRise {
+    0% {
+        opacity: 0.8;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
+/* Checkmark Overlay */
+.checkmark-overlay {
+    position: absolute;
+    bottom: -10px;
+    right: -10px;
+    width: 40px;
+    height: 40px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    animation: checkmarkPop 0.5s ease-out 0.4s backwards;
+}
+
+@keyframes checkmarkPop {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Success Content */
 .success-content h2 {
     font-size: 32px;
     font-weight: 700;
     margin-bottom: var(--space-4);
+    animation: fadeInUp 0.5s ease-out 0.6s backwards;
 }
 
-.success-content p {
-    font-size: 18px;
-    margin-bottom: var(--space-8);
-    opacity: 0.95;
+/* Points Display */
+.points-display {
+    margin-bottom: var(--space-4);
+    animation: fadeInUp 0.5s ease-out 0.7s backwards;
 }
 
-.success-content strong {
-    font-size: 24px;
+.points-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    background: white;
+    padding: var(--space-3) var(--space-6);
+    border-radius: var(--radius-xl);
+    font-size: 36px;
     font-weight: 800;
+    color: var(--primary);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.points-badge::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+.plus-sign {
+    color: #22c55e;
+    font-weight: 900;
+}
+
+.coin-icon {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    animation: coinSpin 2s ease-in-out infinite;
+}
+
+@keyframes coinSpin {
+    0%, 100% {
+        transform: rotateY(0deg);
+    }
+    50% {
+        transform: rotateY(180deg);
+    }
+}
+
+.success-message {
+    font-size: 16px;
+    margin-bottom: var(--space-8);
+    opacity: 0.9;
+    animation: fadeInUp 0.5s ease-out 0.8s backwards;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Action Buttons */
+.success-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 0 var(--space-4);
+    animation: fadeInUp 0.5s ease-out 0.9s backwards;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-5);
+    border: none;
+    border-radius: var(--radius-xl);
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: left;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.action-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.action-btn:hover::before {
+    opacity: 1;
+}
+
+.action-btn:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.action-btn:active {
+    transform: translateY(-2px);
+}
+
+.action-btn.primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+}
+
+.action-btn.primary .btn-icon {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.action-btn.secondary {
+    background: white;
+    color: var(--gray-800);
+    border: 2px solid var(--gray-200);
+}
+
+.action-btn.secondary .btn-icon {
+    background: var(--gray-100);
+    color: var(--primary);
+}
+
+.btn-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.action-btn:hover .btn-icon {
+    transform: scale(1.1);
+}
+
+.btn-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+}
+
+.btn-label {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.btn-sublabel {
+    font-size: 14px;
+    opacity: 0.8;
+    font-weight: 500;
+}
+
+.action-btn.secondary .btn-label {
+    color: var(--gray-800);
+}
+
+.action-btn.secondary .btn-sublabel {
+    color: var(--gray-600);
 }
 
 /* Toast */
@@ -1413,12 +1738,65 @@ body {
         font-size: 24px;
     }
 
-    .success-content p {
+    .success-animation {
+        width: 100px;
+        height: 100px;
+    }
+
+    .cup-icon svg {
+        width: 64px;
+        height: 64px;
+    }
+
+    .checkmark-overlay {
+        width: 32px;
+        height: 32px;
+        bottom: -8px;
+        right: -8px;
+    }
+
+    .checkmark-overlay svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .points-badge {
+        font-size: 28px;
+        padding: var(--space-2) var(--space-4);
+        gap: var(--space-1);
+    }
+
+    .coin-icon {
+        width: 20px;
+        height: 20px;
+    }
+
+    .success-message {
+        font-size: 14px;
+        margin-bottom: var(--space-6);
+    }
+
+    .action-btn {
+        padding: var(--space-4);
+        gap: var(--space-3);
+    }
+
+    .btn-icon {
+        width: 48px;
+        height: 48px;
+    }
+
+    .btn-icon svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .btn-label {
         font-size: 16px;
     }
 
-    .success-content strong {
-        font-size: 20px;
+    .btn-sublabel {
+        font-size: 13px;
     }
 }
 

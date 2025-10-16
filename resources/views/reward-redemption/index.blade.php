@@ -137,6 +137,58 @@
     </div>
   </div>
 
+  <!-- Insufficient Points Modal -->
+  <div class="modal fade" id="insufficientPointsModal" tabindex="-1" aria-labelledby="insufficientPointsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg">
+        <div class="modal-body p-0">
+          <div class="text-center p-5">
+            <div class="insufficient-points-icon mb-4">
+              <div class="icon-circle">
+                <i class="fas fa-coins"></i>
+              </div>
+              <div class="icon-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+              </div>
+            </div>
+            <h3 class="fw-bold text-dark mb-3">Insufficient Points</h3>
+            <p class="text-muted mb-4" id="insufficient-points-message">
+              You don't have enough points to redeem this reward.
+            </p>
+            <div class="points-comparison mb-4">
+              <div class="row g-3">
+                <div class="col-6">
+                  <div class="points-box your-points">
+                    <div class="label">Your Points</div>
+                    <div class="value" id="your-points-value">0</div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="points-box required-points">
+                    <div class="label">Required</div>
+                    <div class="value" id="required-points-value">0</div>
+                  </div>
+                </div>
+              </div>
+              <div class="points-shortage mt-3">
+                <i class="fas fa-arrow-right me-2"></i>
+                <span>You need <strong id="shortage-amount">0</strong> more points</span>
+              </div>
+            </div>
+            <div class="d-grid gap-2">
+              <button type="button" class="btn btn-primary btn-lg" onclick="goToScanPage()">
+                <i class="fas fa-qrcode me-2"></i>Scan to Earn Points
+              </button>
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                Browse Other Rewards
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <style>
     /* Custom CSS consistent with dashboard theme */
     :root {
@@ -695,12 +747,17 @@
             })
           })
           .then(response => {
+            // Store the response for later use
+            const responsePromise = response.json();
+
             if (!response.ok) {
-              if (response.status === 404) throw new Error('Not found');
-              if (response.status === 422) throw new Error('Invalid Request');
-              throw new Error(`HTTP_${response.status}`);
+              // Return both status and parsed data
+              return responsePromise.then(data => {
+                throw { status: response.status, data: data };
+              });
             }
-            return response.json();
+
+            return responsePromise;
           })
           .then(data => {
             if (data.success) {
@@ -715,22 +772,76 @@
               // Redirect to My Rewards page
               window.location.href = '{{ route("reward.my") }}';
             } else {
-              let msg = data.message || 'Unknown error while redeeming reward.';
-              alert(msg);
+              // This shouldn't happen if the response is ok, but handle it anyway
+              handleRedemptionError(data.message, null, null, null);
             }
           })
           .catch(error => {
-            console.error(error);
-            let msg = 'Something went wrong. Try again later.';
-            if (error.message === 'NOT_FOUND') msg = 'Reward not found.';
-            else if (error.message === 'INVALID_REQUEST') msg = 'Invalid redemption request.';
-            else if (error.message.startsWith('HTTP_')) msg = 'Server error. Try again.';
-            alert(msg);
+            console.error('Redemption error:', error);
+
+            // Check if it's an insufficient points error
+            if (error.status === 400 && error.data && error.data.message) {
+              const message = error.data.message;
+
+              // Parse the message to extract points
+              if (message.includes('Insufficient points')) {
+                const needMatch = message.match(/You need ([\d,]+) points/);
+                const haveMatch = message.match(/only have ([\d,]+)/);
+
+                if (needMatch && haveMatch) {
+                  const requiredPoints = parseInt(needMatch[1].replace(/,/g, ''));
+                  const yourPoints = parseInt(haveMatch[1].replace(/,/g, ''));
+
+                  // Close the redeem modal
+                  bootstrap.Modal.getInstance(document.getElementById('mockRedeemModal')).hide();
+
+                  // Show insufficient points modal
+                  showInsufficientPointsModal(yourPoints, requiredPoints, message);
+                  return;
+                }
+              }
+
+              // If not insufficient points, show generic error
+              handleRedemptionError(message, error.status, null, null);
+            } else if (error.status === 404) {
+              handleRedemptionError('Reward not found.', 404, null, null);
+            } else if (error.status === 422) {
+              handleRedemptionError('Invalid redemption request.', 422, null, null);
+            } else if (error.status) {
+              handleRedemptionError(`Server error (${error.status}). Please try again.`, error.status, null, null);
+            } else {
+              handleRedemptionError('Something went wrong. Please try again later.', null, null, null);
+            }
           })
           .finally(() => {
             btn.disabled = false;
-            bootstrap.Modal.getInstance(document.getElementById('mockRedeemModal')).hide();
           });
+      };
+
+      // Function to handle redemption errors
+      function handleRedemptionError(message, status, yourPoints, requiredPoints) {
+        bootstrap.Modal.getInstance(document.getElementById('mockRedeemModal')).hide();
+        alert(message);
+      }
+
+      // Function to show insufficient points modal
+      function showInsufficientPointsModal(yourPoints, requiredPoints, message) {
+        const shortage = requiredPoints - yourPoints;
+
+        // Update modal content
+        document.getElementById('insufficient-points-message').textContent = message;
+        document.getElementById('your-points-value').textContent = yourPoints.toLocaleString();
+        document.getElementById('required-points-value').textContent = requiredPoints.toLocaleString();
+        document.getElementById('shortage-amount').textContent = shortage.toLocaleString();
+
+        // Show the modal
+        const insufficientModal = new bootstrap.Modal(document.getElementById('insufficientPointsModal'));
+        insufficientModal.show();
+      }
+
+      // Function to navigate to scan page
+      window.goToScanPage = function() {
+        window.location.href = '{{ route("scan.receipt") }}';
       };
 
       // Filter functionality with AJAX
@@ -1460,6 +1571,192 @@
     .reward-redeem-btn:focus {
       outline: 2px solid #1dd1a1;
       outline-offset: 2px;
+    }
+
+    /* Insufficient Points Modal */
+    .insufficient-points-icon {
+      position: relative;
+      display: inline-block;
+      margin: 0 auto;
+    }
+
+    .icon-circle {
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      animation: pulse-gentle 2s ease-in-out infinite;
+    }
+
+    .icon-circle i {
+      font-size: 48px;
+      color: #f59e0b;
+    }
+
+    .icon-warning {
+      position: absolute;
+      bottom: -5px;
+      right: -5px;
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #fee2e2, #fecaca);
+      border: 3px solid white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: bounce 1s ease-in-out infinite;
+    }
+
+    .icon-warning i {
+      font-size: 18px;
+      color: #dc2626;
+    }
+
+    @keyframes pulse-gentle {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+    }
+
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-5px);
+      }
+    }
+
+    .points-comparison {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .points-box {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+    }
+
+    .points-box:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    .points-box .label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #64748b;
+    }
+
+    .points-box .value {
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .points-box.your-points .value {
+      color: #ef4444;
+    }
+
+    .points-box.required-points .value {
+      color: #1dd1a1;
+    }
+
+    .points-shortage {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1));
+      border-radius: 8px;
+      padding: 12px 16px;
+      color: #dc2626;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .points-shortage strong {
+      color: #991b1b;
+      font-size: 18px;
+    }
+
+    #insufficientPointsModal .modal-content {
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    #insufficientPointsModal .btn-primary {
+      background: linear-gradient(135deg, #1dd1a1, #10ac84);
+      border: none;
+      padding: 14px 24px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    #insufficientPointsModal .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(29, 209, 161, 0.3);
+    }
+
+    #insufficientPointsModal .btn-outline-secondary {
+      border: 2px solid #e2e8f0;
+      color: #64748b;
+      font-weight: 600;
+      padding: 12px 24px;
+    }
+
+    #insufficientPointsModal .btn-outline-secondary:hover {
+      background: #f8f9fa;
+      border-color: #cbd5e1;
+      color: #475569;
+    }
+
+    /* Mobile responsiveness for insufficient points modal */
+    @media (max-width: 576px) {
+      .icon-circle {
+        width: 80px;
+        height: 80px;
+      }
+
+      .icon-circle i {
+        font-size: 36px;
+      }
+
+      .icon-warning {
+        width: 32px;
+        height: 32px;
+      }
+
+      .icon-warning i {
+        font-size: 14px;
+      }
+
+      .points-box .value {
+        font-size: 24px;
+      }
+
+      .points-shortage {
+        font-size: 14px;
+      }
+
+      .points-shortage strong {
+        font-size: 16px;
+      }
+
+      #insufficientPointsModal .modal-body {
+        padding: 2rem 1.5rem !important;
+      }
     }
   </style>
 @endsection
