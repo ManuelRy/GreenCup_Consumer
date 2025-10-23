@@ -142,7 +142,6 @@
                           </div>
                           <div class="flex-grow-1">
                             <h6 class="fw-semibold text-dark mb-0">{{$wallet->seller->business_name}}</h6>
-                            <small class="text-muted">Premium Member</small>
                           </div>
                           <span class="badge bg-light text-success small">Active</span>
                         </div>
