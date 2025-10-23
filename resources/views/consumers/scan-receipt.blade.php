@@ -1962,21 +1962,27 @@ function focusManualInput() {
 }
 
 function showModal() {
+    console.log('9. showModal() called');
     pauseScanner();
     const modal = document.getElementById('receipt-modal');
+    console.log('10. Modal element:', modal);
+    console.log('11. Modal hidden class before:', modal.classList.contains('hidden'));
 
     // Fix for iOS Safari: Prevent background scroll
     const scrollY = window.scrollY;
+    console.log('12. Current scroll position:', scrollY);
     document.body.style.position = 'fixed';
     document.body.style.top = `-${scrollY}px`;
     document.body.style.width = '100%';
     document.body.style.overflow = 'hidden';
 
     modal.classList.remove('hidden');
+    console.log('13. Modal hidden class after:', modal.classList.contains('hidden'));
 
     // Force iOS to recognize the modal is visible
     setTimeout(() => {
         modal.style.display = 'flex';
+        console.log('14. Modal display set to flex');
     }, 10);
 }
 
@@ -2030,6 +2036,7 @@ function showSuccess(points) {
 }
 
 function showError(message) {
+    console.log('ERROR:', message);
     const toast = document.getElementById('error-toast');
     const messageEl = document.getElementById('error-message');
     messageEl.innerHTML = message.replace(/\n/g, '<br>');
@@ -2069,19 +2076,34 @@ function isValidReceiptCode(code) {
 }
 
 function onScanSuccess(decodedText, decodedResult) {
+    console.log('=== QR SCAN DEBUG ===');
+    console.log('1. Scanned text:', decodedText);
+    console.log('2. isProcessing:', isProcessing);
+
     if (isProcessing) return;
     pauseScanner();
+
     let receiptCode = extractReceiptCode(decodedText);
+    console.log('3. Extracted code:', receiptCode);
+    console.log('4. Is valid code:', isValidReceiptCode(receiptCode));
+
     checkReceipt(receiptCode);
 }
 
 function checkReceipt(code) {
+    console.log('5. checkReceipt called with:', code);
+    console.log('6. isProcessing before check:', isProcessing);
+
     if (isProcessing) return;
+
     if (!isValidReceiptCode(code)) {
+        console.log('7. VALIDATION FAILED - Showing error and resuming scanner');
         showError(`Invalid QR code: "${code}". Use a store's official QR code.`);
         resumeScanner();
         return;
     }
+
+    console.log('8. Validation passed - showing modal');
     isProcessing = true;
     currentReceiptCode = code;
     pauseScanner();
