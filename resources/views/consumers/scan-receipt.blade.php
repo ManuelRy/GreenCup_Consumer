@@ -538,11 +538,6 @@ body {
     object-fit: cover !important;
 }
 
-#qr-reader__dashboard_section_swaplink,
-#qr-reader__dashboard_section_csr {
-    display: none !important;
-}
-
 /* Scanner Frame */
 .scanner-frame {
     position: absolute;
@@ -1816,12 +1811,17 @@ body {
 }
 </style>
 
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script>
-// PRESERVE ALL ORIGINAL JAVASCRIPT LOGIC EXACTLY
+// iOS-compatible QR scanner implementation
 let scanner = null;
 let isProcessing = false;
 let currentReceiptCode = null;
+let videoStream = null;
+let animationFrameId = null;
+let canvasElement = null;
+let canvasContext = null;
+let videoElement = null;
 
 function showCameraStatus(message, icon = '📷', showRetry = false, showManual = false) {
     const statusEl = document.getElementById('camera-status');
@@ -1872,17 +1872,39 @@ async function initializeCamera() {
         return;
     }
     showCameraStatus('Starting camera...', '📷');
+
     try {
-        // iOS-friendly constraints - simpler is better for iOS
-        const stream = await navigator.mediaDevices.getUserMedia({
+        // Stop any existing stream
+        if (videoStream) {
+            videoStream.getTracks().forEach(track => track.stop());
+        }
+
+        // iOS-optimized constraints
+        videoStream = await navigator.mediaDevices.getUserMedia({
             video: {
-                facingMode: "environment",  // Remove 'ideal' wrapper
-                // Remove resolution constraints for iOS compatibility
+                facingMode: { exact: "environment" }
             }
         });
-        stream.getTracks().forEach(track => track.stop());
+
+        console.log('Camera stream obtained, starting scanner...');
         startScanner();
     } catch (err) {
+        console.error('Camera access error:', err);
+
+        // If exact environment fails, try without exact (fallback)
+        if (err.name === "OverconstrainedError" || err.message?.includes("constraint")) {
+            try {
+                console.log('Trying fallback camera constraints...');
+                videoStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "environment" }
+                });
+                startScanner();
+                return;
+            } catch (fallbackErr) {
+                console.error('Fallback also failed:', fallbackErr);
+            }
+        }
+
         if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
             showCameraStatus(
                 'Camera permission denied.<br>Tap the camera icon in your browser\'s address bar and select "Allow", then refresh.<br>Or use manual input.',
@@ -1913,64 +1935,112 @@ async function initializeCamera() {
 }
 
 function startScanner() {
-    if (scanner) {
-        try { scanner.clear(); } catch (e) {}
-        scanner = null;
-    }
     const readerElement = document.getElementById('qr-reader');
     readerElement.innerHTML = "";
-    scanner = new Html5Qrcode("qr-reader");
 
-    // iOS-optimized configuration
-    const config = {
-        fps: 10,  // Lower FPS for better iOS performance
-        qrbox: function(viewfinderWidth, viewfinderHeight) {
-            // Responsive qrbox for iOS
-            let minEdgePercentage = 0.6;  // 60% of the smaller edge
-            let minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
-            let qrboxSize = Math.floor(minEdgeSize * minEdgePercentage);
-            return {
-                width: qrboxSize,
-                height: qrboxSize
-            };
-        },
-        aspectRatio: 1.0,  // Square aspect ratio
-        disableFlip: false,  // Allow horizontal flip for better detection
-        videoConstraints: {
-            facingMode: "environment"
-        }
+    // Create video element
+    videoElement = document.createElement('video');
+    videoElement.setAttribute('playsinline', 'true'); // Critical for iOS
+    videoElement.setAttribute('autoplay', 'true');
+    videoElement.setAttribute('muted', 'true');
+    videoElement.style.width = '100%';
+    videoElement.style.height = '100%';
+    videoElement.style.objectFit = 'cover';
+
+    // Create canvas for processing (hidden)
+    canvasElement = document.createElement('canvas');
+    canvasElement.style.display = 'none';
+    canvasContext = canvasElement.getContext('2d');
+
+    readerElement.appendChild(videoElement);
+    readerElement.appendChild(canvasElement);
+
+    // Attach stream to video
+    videoElement.srcObject = videoStream;
+
+    videoElement.onloadedmetadata = () => {
+        console.log('Video metadata loaded');
+        videoElement.play().then(() => {
+            console.log('Video playing, starting QR detection');
+            hideCameraStatus();
+            requestAnimationFrame(tick);
+        }).catch(err => {
+            console.error('Video play error:', err);
+            showCameraStatus(
+                'Failed to play video.<br>Error: ' + err.message,
+                '❌', true, true
+            );
+        });
     };
+}
 
-    scanner.start(
-        { facingMode: "environment" },
-        config,
-        (decodedText, decodedResult) => { if (!isProcessing) onScanSuccess(decodedText, decodedResult); },
-        () => {}
-    ).then(hideCameraStatus)
-    .catch((err) => {
-        console.error('Scanner start error:', err);
-        showCameraStatus(
-            'Camera failed to start.<br>Error: ' + (err.message || err),
-            '❌', true, true
-        );
+function tick() {
+    if (!videoElement || videoElement.readyState !== videoElement.HAVE_ENOUGH_DATA) {
+        animationFrameId = requestAnimationFrame(tick);
+        return;
+    }
+
+    // Set canvas size to match video
+    canvasElement.height = videoElement.videoHeight;
+    canvasElement.width = videoElement.videoWidth;
+
+    // Draw current video frame to canvas
+    canvasContext.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+
+    // Get image data from canvas
+    const imageData = canvasContext.getImageData(0, 0, canvasElement.width, canvasElement.height);
+
+    // Scan for QR code
+    const code = jsQR(imageData.data, imageData.width, imageData.height, {
+        inversionAttempts: "dontInvert",
     });
+
+    if (code && !isProcessing) {
+        console.log('QR Code detected:', code.data);
+        onScanSuccess(code.data, code);
+        return; // Stop scanning
+    }
+
+    // Continue scanning
+    animationFrameId = requestAnimationFrame(tick);
 }
 
 function resumeScanner() {
-    if (scanner && !isProcessing) {
-        try { scanner.resume(); }
-        catch { setTimeout(() => { initializeCamera(); }, 500); }
+    if (!isProcessing && videoElement) {
+        console.log('Resuming scanner');
+        animationFrameId = requestAnimationFrame(tick);
+    } else if (!videoElement) {
+        console.log('No video element, reinitializing camera');
+        setTimeout(() => { initializeCamera(); }, 500);
     }
 }
+
 function pauseScanner() {
-    if (scanner) {
-        try { scanner.pause(true); }
-        catch {}
+    console.log('Pausing scanner');
+    if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
     }
 }
 
 function retryCamera() {
-    if (scanner) { try { scanner.clear(); } catch (e) {} scanner = null; }
+    console.log('Retrying camera');
+    // Stop existing stream
+    if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+        videoStream = null;
+    }
+    // Cancel animation frame
+    if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+    }
+    // Clear video element
+    if (videoElement) {
+        videoElement.srcObject = null;
+        videoElement = null;
+    }
+
     showCameraStatus('Retrying camera...', '🔄');
     setTimeout(() => { initializeCamera(); }, 600);
 }
@@ -2335,7 +2405,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Cleanup
 window.addEventListener('beforeunload', function() {
-    if (scanner) { try { scanner.clear(); } catch (error) {} }
+    if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+    }
+    if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+    }
 });
 </script>
 
