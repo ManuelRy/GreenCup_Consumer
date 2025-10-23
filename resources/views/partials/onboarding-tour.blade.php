@@ -591,16 +591,26 @@
         const hasSeenTour = localStorage.getItem('greencup_tour_completed');
         console.log('Has seen tour:', hasSeenTour);
 
+        // Check if session flag is set (from registration/login)
+        const showOnboardingFlag = {{ session('show_onboarding') ? 'true' : 'false' }};
+        console.log('Show onboarding flag:', showOnboardingFlag);
+
         @auth('consumer')
-            const isNewUser = {{ auth('consumer')->user()->created_at > now()->subHours(24) ? 'true' : 'false' }};
+            const isNewUser = {{ auth('consumer')->user()->created_at->diffInHours(now()) < 24 ? 'true' : 'false' }};
         @else
             const isNewUser = true; // Show for all guests
         @endauth
 
         console.log('Is new user:', isNewUser);
 
-        if (!hasSeenTour && isNewUser) {
+        // Show tour if: flag is set OR (user is new AND hasn't seen tour)
+        if (showOnboardingFlag || (!hasSeenTour && isNewUser)) {
             console.log('Showing welcome modal in 1 second...');
+            // Clear localStorage to force show tour for new users
+            if (showOnboardingFlag) {
+                localStorage.removeItem('greencup_tour_completed');
+                localStorage.removeItem('greencup_tour_completed_at');
+            }
             setTimeout(() => {
                 showWelcomeModal();
             }, 1000);

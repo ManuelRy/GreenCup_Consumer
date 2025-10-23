@@ -41,7 +41,8 @@ class RegisterController extends Controller
 
         return redirect()->route('login')->with([
             'registration_success' => 'Welcome to GreenCup! Please sign in with your new account.',
-            'registration_email' => $consumer->email
+            'registration_email' => $consumer->email,
+            'show_onboarding' => true // Flag to trigger onboarding tour
         ]);
     }
 }

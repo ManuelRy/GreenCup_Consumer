@@ -261,6 +261,7 @@ class DashboardController extends Controller
 
         $motivationalMessage = "Welcome to GreenCup! Join us to start your eco-journey! 🌱";
 
+        // For guests, always show onboarding on first visit (will be stored in localStorage)
         return view('dashboard', compact(
             'consumer',
             'currentTotal',
@@ -269,6 +270,6 @@ class DashboardController extends Controller
             'recentActivity',
             'environmentalData',
             'motivationalMessage'
-        ));
+        ))->with('show_onboarding', false); // Let JavaScript handle guest tour based on localStorage
     }
 }
