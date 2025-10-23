@@ -32,6 +32,161 @@
         </div>
     </div>
 
+    <!-- 4R Strategy Educational Modal -->
+    <div class="modal fade" id="fourRModal" tabindex="-1" aria-labelledby="fourRModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+                <div class="modal-header" style="background: linear-gradient(135deg, #1dd1a1 0%, #10ac84 100%); border: none;">
+                    <h3 class="modal-title text-white fw-bold" id="fourRModalLabel">
+                        ♻️ Cambodia's 4R Environmental Strategy
+                    </h3>
+                    <button type="button" class="btn-close btn-close-white" onclick="close4RModal()" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4" style="max-height: 70vh; overflow-y: auto;">
+                    <div class="row g-4">
+                        <!-- Introduction -->
+                        <div class="col-12">
+                            <div class="alert alert-info border-0" style="background-color: #e8f8f5;">
+                                <p class="mb-0">
+                                    <strong>GreenCup proudly supports Cambodia's Ministry of Environment 4R Strategy</strong> -
+                                    a comprehensive approach to sustainable waste management and environmental conservation.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- The 4Rs -->
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 shadow-sm" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">
+                                <div class="card-body text-white p-4">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="rounded-circle bg-white text-danger d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 2rem;">
+                                            🚫
+                                        </div>
+                                        <h4 class="fw-bold mb-0 ms-3">1. REFUSE</h4>
+                                    </div>
+                                    <p class="mb-2"><strong>Say NO to single-use plastics</strong></p>
+                                    <ul class="mb-0">
+                                        <li>Decline plastic bags, straws, and disposable cups</li>
+                                        <li>Choose reusable alternatives at every opportunity</li>
+                                        <li>Support businesses that eliminate single-use items</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 shadow-sm" style="background: linear-gradient(135deg, #f9ca24 0%, #f0932b 100%);">
+                                <div class="card-body text-white p-4">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="rounded-circle bg-white text-warning d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 2rem;">
+                                            📉
+                                        </div>
+                                        <h4 class="fw-bold mb-0 ms-3">2. REDUCE</h4>
+                                    </div>
+                                    <p class="mb-2"><strong>Minimize waste generation</strong></p>
+                                    <ul class="mb-0">
+                                        <li>Buy only what you need</li>
+                                        <li>Choose products with minimal packaging</li>
+                                        <li>Reduce consumption and waste at the source</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 shadow-sm" style="background: linear-gradient(135deg, #1dd1a1 0%, #10ac84 100%);">
+                                <div class="card-body text-white p-4">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="rounded-circle bg-white text-success d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 2rem;">
+                                            ♻️
+                                        </div>
+                                        <h4 class="fw-bold mb-0 ms-3">3. REUSE</h4>
+                                    </div>
+                                    <p class="mb-2"><strong>Use items multiple times</strong></p>
+                                    <ul class="mb-0">
+                                        <li>Bring your own reusable cups, bottles, and containers</li>
+                                        <li>Repair and repurpose items instead of throwing away</li>
+                                        <li>GreenCup rewards you for every reusable cup use!</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 shadow-sm" style="background: linear-gradient(135deg, #5f27cd 0%, #341f97 100%);">
+                                <div class="card-body text-white p-4">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="rounded-circle bg-white text-primary d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 2rem;">
+                                            🔄
+                                        </div>
+                                        <h4 class="fw-bold mb-0 ms-3">4. RECYCLE</h4>
+                                    </div>
+                                    <p class="mb-2"><strong>Process waste into new materials</strong></p>
+                                    <ul class="mb-0">
+                                        <li>Separate recyclable materials properly</li>
+                                        <li>Support recycling programs in your community</li>
+                                        <li>Choose recyclable and recycled products</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Impact Section -->
+                        <div class="col-12">
+                            <div class="card border-0" style="background: linear-gradient(135deg, #e8f8f5 0%, #d4edda 100%);">
+                                <div class="card-body p-4">
+                                    <h5 class="fw-bold mb-3 text-success">
+                                        <i class="bi bi-graph-up-arrow me-2"></i>Your Impact with Reusable Cups
+                                    </h5>
+                                    <div class="row text-center g-3">
+                                        <div class="col-md-3 col-6">
+                                            <div class="p-3 bg-white rounded-3 shadow-sm">
+                                                <div class="fs-2 mb-2">🌳</div>
+                                                <div class="fw-bold text-success">Saves Trees</div>
+                                                <small class="text-muted">Less paper cups needed</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 col-6">
+                                            <div class="p-3 bg-white rounded-3 shadow-sm">
+                                                <div class="fs-2 mb-2">💧</div>
+                                                <div class="fw-bold text-primary">Conserves Water</div>
+                                                <small class="text-muted">~1L per cup saved</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 col-6">
+                                            <div class="p-3 bg-white rounded-3 shadow-sm">
+                                                <div class="fs-2 mb-2">⚡</div>
+                                                <div class="fw-bold text-warning">Reduces Energy</div>
+                                                <small class="text-muted">Manufacturing savings</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 col-6">
+                                            <div class="p-3 bg-white rounded-3 shadow-sm">
+                                                <div class="fs-2 mb-2">🌍</div>
+                                                <div class="fw-bold text-info">Cuts CO₂</div>
+                                                <small class="text-muted">~0.25kg per cup</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Call to Action -->
+                        <div class="col-12 text-center">
+                            <p class="lead mb-3">
+                                <strong>Every reusable cup counts!</strong> Join thousands of Cambodians making a positive environmental impact.
+                            </p>
+                            <button class="btn btn-success btn-lg fw-semibold" style="border-radius: 50px; padding: 12px 40px; background: linear-gradient(135deg, #1dd1a1, #10ac84); border: none;" onclick="close4RModalAndContinueTour()">
+                                <i class="bi bi-check-circle me-2"></i>Got it! Let's Continue
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Tour Overlay -->
     <div id="tourOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 10050; pointer-events: none; transition: all 0.3s ease;"></div>
 
@@ -42,7 +197,7 @@
     <div id="tourTooltip" style="display: none; position: fixed; z-index: 10052; background: white; border-radius: 16px; padding: 24px; max-width: 400px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: auto;">
         <div class="d-flex justify-content-between align-items-start mb-3">
             <div class="tour-step-badge" style="background: linear-gradient(135deg, #1dd1a1, #10ac84); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">
-                Step <span id="currentStep">1</span> of <span id="totalSteps">5</span>
+                Step <span id="currentStep">1</span> of <span id="totalSteps">7</span>
             </div>
             <button class="btn-close" onclick="skipTour()" aria-label="Close"></button>
         </div>
@@ -59,6 +214,8 @@
                     <div class="progress-dot" data-step="3"></div>
                     <div class="progress-dot" data-step="4"></div>
                     <div class="progress-dot" data-step="5"></div>
+                    <div class="progress-dot" data-step="6"></div>
+                    <div class="progress-dot" data-step="7"></div>
                 </div>
             </div>
             <button class="btn btn-success" onclick="nextStep()" id="nextBtn" style="border-radius: 50px; background: linear-gradient(135deg, #1dd1a1, #10ac84); border: none;">
@@ -317,6 +474,14 @@
     @auth('consumer')
         tourSteps = [
             {
+                target: 'body',
+                mobileTarget: 'body',
+                title: '♻️ Cambodia\'s 4R Strategy',
+                description: 'GreenCup aligns with Cambodia\'s Ministry of Environment 4R strategy: Refuse single-use plastics, Reduce waste, Reuse cups & containers, Recycle responsibly. Every reusable cup makes a difference!',
+                position: 'center',
+                isEducational: true
+            },
+            {
                 target: '.nav-link[href*="dashboard"]',
                 mobileTarget: '#mobileNav .nav-link[href*="dashboard"]',
                 title: '📊 Dashboard',
@@ -361,6 +526,14 @@
         ];
     @else
         tourSteps = [
+            {
+                target: 'body',
+                mobileTarget: 'body',
+                title: '♻️ Cambodia\'s 4R Strategy',
+                description: 'GreenCup aligns with Cambodia\'s Ministry of Environment 4R strategy: Refuse single-use plastics, Reduce waste, Reuse cups & containers, Recycle responsibly. Every reusable cup makes a difference!',
+                position: 'center',
+                isEducational: true
+            },
             {
                 target: '.nav-link[href*="dashboard"]',
                 mobileTarget: '#guestNav .nav-link[href*="dashboard"]',
@@ -464,6 +637,34 @@
         if (welcomeModal) {
             console.log('Hiding welcome modal...');
             welcomeModal.hide();
+        }
+
+        // Show 4R Educational Modal first
+        setTimeout(() => {
+            console.log('Showing 4R educational modal...');
+            const fourRModalElement = document.getElementById('fourRModal');
+            const fourRModal = new bootstrap.Modal(fourRModalElement);
+            fourRModal.show();
+        }, 500);
+    }
+
+    function close4RModal() {
+        const fourRModalElement = document.getElementById('fourRModal');
+        const fourRModal = bootstrap.Modal.getInstance(fourRModalElement);
+        if (fourRModal) {
+            fourRModal.hide();
+        }
+        // Only skip tour if we're in tour mode
+        if (tourActive || currentStepIndex === 0) {
+            skipTour();
+        }
+    }
+
+    function close4RModalAndContinueTour() {
+        const fourRModalElement = document.getElementById('fourRModal');
+        const fourRModal = bootstrap.Modal.getInstance(fourRModalElement);
+        if (fourRModal) {
+            fourRModal.hide();
         }
 
         setTimeout(() => {
@@ -586,15 +787,23 @@
         // Position spotlight
         const rect = targetElement.getBoundingClientRect();
         const spotlight = document.getElementById('tourSpotlight');
-        spotlight.style.display = 'block';
+
+        // Hide spotlight for educational/center-positioned steps
+        if (step.isEducational || step.position === 'center') {
+            spotlight.style.display = 'none';
+        } else {
+            spotlight.style.display = 'block';
+        }
 
         // Remove previous highlight styling
         document.querySelectorAll('.tour-highlighted').forEach(el => {
             el.classList.remove('tour-highlighted');
         });
 
-        // Add dark, anti-aliased text styling to focused element
-        targetElement.classList.add('tour-highlighted');
+        // Add dark, anti-aliased text styling to focused element (skip for educational steps)
+        if (!step.isEducational) {
+            targetElement.classList.add('tour-highlighted');
+        }
 
         // For mobile sidebar, use parent li element if target is inside offcanvas
         let elementToHighlight = targetElement;
@@ -645,6 +854,10 @@
             tooltip.style.transform = 'none';
 
             switch(step.position) {
+                case 'center':
+                    tooltipTop = (viewportHeight / 2) - (tooltipRect.height / 2);
+                    tooltipLeft = (viewportWidth / 2) - (tooltipRect.width / 2);
+                    break;
                 case 'bottom':
                     tooltipTop = rect.bottom + 20;
                     tooltipLeft = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
@@ -854,5 +1067,18 @@
         document.getElementById('tourOverlay').style.display = 'block';
         document.getElementById('totalSteps').textContent = tourSteps.length;
         showStep(currentStepIndex);
+    };
+
+    // Show 4R Education modal independently
+    window.show4REducation = function() {
+        console.log('Showing 4R educational modal...');
+        const fourRModalElement = document.getElementById('fourRModal');
+        if (fourRModalElement) {
+            const fourRModal = new bootstrap.Modal(fourRModalElement, {
+                backdrop: 'static',
+                keyboard: true
+            });
+            fourRModal.show();
+        }
     };
 </script>

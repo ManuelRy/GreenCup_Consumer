@@ -139,6 +139,11 @@
                                 </a>
                             </li>
                             <li>
+                                <a class="dropdown-item" href="javascript:void(0)" onclick="show4REducation()">
+                                    <i class="bi bi-recycle me-2"></i>Learn 4R Strategy
+                                </a>
+                            </li>
+                            <li>
                                 <hr class="dropdown-divider">
                             </li>
                             <li>
