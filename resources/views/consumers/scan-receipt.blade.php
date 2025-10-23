@@ -910,6 +910,9 @@ body {
     justify-content: center;
     padding: var(--space-4);
     z-index: 1000;
+    /* iOS Safari fixes */
+    -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
 }
 
 @supports ((-webkit-backdrop-filter: blur(4px)) or (backdrop-filter: blur(4px))) {
@@ -1947,6 +1950,12 @@ function retryCamera() {
 }
 
 function focusManualInput() {
+    // Don't auto-scroll if modal is open or processing
+    const modalVisible = !document.getElementById('receipt-modal').classList.contains('hidden');
+    if (modalVisible || isProcessing) {
+        return;
+    }
+
     hideCameraStatus();
     document.querySelector('.input-section').scrollIntoView({ behavior: 'smooth' });
     setTimeout(() => { document.getElementById('receipt-code').focus(); }, 500);
@@ -1954,13 +1963,37 @@ function focusManualInput() {
 
 function showModal() {
     pauseScanner();
-    document.getElementById('receipt-modal').classList.remove('hidden');
+    const modal = document.getElementById('receipt-modal');
+
+    // Fix for iOS Safari: Prevent background scroll
+    const scrollY = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
     document.body.style.overflow = 'hidden';
+
+    modal.classList.remove('hidden');
+
+    // Force iOS to recognize the modal is visible
+    setTimeout(() => {
+        modal.style.display = 'flex';
+    }, 10);
 }
 
 function closeModal() {
-    document.getElementById('receipt-modal').classList.add('hidden');
-    document.body.style.overflow = 'auto';
+    const modal = document.getElementById('receipt-modal');
+    modal.classList.add('hidden');
+
+    // Fix for iOS Safari: Restore scroll position
+    const scrollY = document.body.style.top;
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
+    document.body.style.overflow = '';
+    if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+    }
+
     document.getElementById('receipt-code').value = '';
     resumeScanner();
 }
@@ -1984,8 +2017,16 @@ function setLoadingState(button, loading) {
 
 function showSuccess(points) {
     document.getElementById('points-amount').textContent = points;
-    document.getElementById('success-overlay').classList.remove('hidden');
+    const successOverlay = document.getElementById('success-overlay');
+
+    // Fix for iOS Safari: Prevent background scroll
+    const scrollY = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
     document.body.style.overflow = 'hidden';
+
+    successOverlay.classList.remove('hidden');
 }
 
 function showError(message) {
@@ -2216,9 +2257,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Modal controls
     document.querySelector('.close-btn').addEventListener('click', closeModal);
-    document.getElementById('receipt-modal').addEventListener('click', function(e) {
+    const receiptModal = document.getElementById('receipt-modal');
+    receiptModal.addEventListener('click', function(e) {
         if (e.target === this) closeModal();
     });
+
+    // iOS Safari fix: Prevent touch events from passing through modal
+    receiptModal.addEventListener('touchmove', function(e) {
+        if (e.target === this) {
+            e.preventDefault();
+        }
+    }, { passive: false });
 
     // Keyboard shortcuts
     document.addEventListener('keydown', function(e) {
