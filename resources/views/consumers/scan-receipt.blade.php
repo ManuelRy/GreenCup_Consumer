@@ -1816,7 +1816,7 @@ body {
 }
 </style>
 
-<script src="https://unpkg.com/html5-qrcode"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script>
 // PRESERVE ALL ORIGINAL JAVASCRIPT LOGIC EXACTLY
 let scanner = null;
@@ -1873,8 +1873,12 @@ async function initializeCamera() {
     }
     showCameraStatus('Starting camera...', '📷');
     try {
+        // iOS-friendly constraints - simpler is better for iOS
         const stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } }
+            video: {
+                facingMode: "environment",  // Remove 'ideal' wrapper
+                // Remove resolution constraints for iOS compatibility
+            }
         });
         stream.getTracks().forEach(track => track.stop());
         startScanner();
@@ -1916,13 +1920,35 @@ function startScanner() {
     const readerElement = document.getElementById('qr-reader');
     readerElement.innerHTML = "";
     scanner = new Html5Qrcode("qr-reader");
+
+    // iOS-optimized configuration
+    const config = {
+        fps: 10,  // Lower FPS for better iOS performance
+        qrbox: function(viewfinderWidth, viewfinderHeight) {
+            // Responsive qrbox for iOS
+            let minEdgePercentage = 0.6;  // 60% of the smaller edge
+            let minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
+            let qrboxSize = Math.floor(minEdgeSize * minEdgePercentage);
+            return {
+                width: qrboxSize,
+                height: qrboxSize
+            };
+        },
+        aspectRatio: 1.0,  // Square aspect ratio
+        disableFlip: false,  // Allow horizontal flip for better detection
+        videoConstraints: {
+            facingMode: "environment"
+        }
+    };
+
     scanner.start(
         { facingMode: "environment" },
-        { fps: 12, qrbox: { width: 200, height: 200 } },
+        config,
         (decodedText, decodedResult) => { if (!isProcessing) onScanSuccess(decodedText, decodedResult); },
         () => {}
     ).then(hideCameraStatus)
     .catch((err) => {
+        console.error('Scanner start error:', err);
         showCameraStatus(
             'Camera failed to start.<br>Error: ' + (err.message || err),
             '❌', true, true
