@@ -10,7 +10,10 @@ class ConsumerPointRepository
 {
   public function listByConsumerId($id): Collection
   {
-    return ConsumerPoint::where('consumer_id', $id)->with(['seller'])->get();
+    return ConsumerPoint::where('consumer_id', $id)
+      ->where('coins', '>=', 1)
+      ->with(['seller'])
+      ->get();
   }
 
   public function getTotalByConsumerId($id)
