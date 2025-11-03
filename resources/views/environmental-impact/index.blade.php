@@ -64,23 +64,17 @@
                     <div class="ripple"></div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Environmental Benefits -->
-    <div class="benefits-section">
-        <h2 class="section-title">🌟 Your Environmental Benefits</h2>
-        <div class="benefits-grid">
-            @php
-                $co2_kg = ($total_cups * 20) / 1000; // Convert grams to kg
-            @endphp
-
-            <div class="benefit-card">
-                <div class="benefit-icon">🗑️</div>
-                <div class="benefit-content">
-                    <div class="benefit-number">{{ number_format($total_cups * 8) }}<span class="small-unit">g</span></div>
-                    <div class="benefit-label">Waste Prevented</div>
-                    <div class="benefit-description">Landfill waste avoided</div>
+            <!-- Waste Prevented -->
+            <div class="stat-card waste-card">
+                <div class="stat-icon">🗑️</div>
+                <div class="stat-content">
+                    <div class="stat-number">{{ number_format($total_cups * 8) }}<span class="unit">g</span></div>
+                    <div class="stat-label">Waste Prevented</div>
+                    <div class="stat-description">Landfill waste avoided</div>
+                </div>
+                <div class="stat-decoration">
+                    <div class="ripple"></div>
                 </div>
             </div>
         </div>
