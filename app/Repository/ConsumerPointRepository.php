@@ -18,14 +18,23 @@ class ConsumerPointRepository
 
   public function getTotalByConsumerId($id)
   {
-    $totals = ConsumerPoint::where('consumer_id', $id)
-      ->selectRaw('SUM(earned) as earned, SUM(coins) as coins, SUM(spent) as spent')
-      ->first();
+    // Calculate earned from point_transactions (more accurate)
+    $earned = \App\Models\PointTransaction::where('consumer_id', $id)
+      ->where('type', 'earn')
+      ->sum('points') ?? 0;
+
+    // Calculate spent from point_transactions (more accurate)
+    $spent = \App\Models\PointTransaction::where('consumer_id', $id)
+      ->where('type', 'spend')
+      ->sum('points') ?? 0;
+
+    // Calculate current coins (earned - spent)
+    $coins = $earned - $spent;
 
     return [
-      'earned' => (int) $totals->earned,
-      'coins'  => (int) $totals->coins,
-      'spent'  => (int) $totals->spent,
+      'earned' => (int) $earned,
+      'coins'  => (int) $coins,
+      'spent'  => (int) $spent,
     ];
   }
   public function getByConsumerAndSeller($consumer_id, $seller_id): ?Model

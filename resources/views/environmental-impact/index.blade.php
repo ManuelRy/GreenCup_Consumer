@@ -39,12 +39,12 @@
                 </div>
             </div>
 
-            <!-- Stores Visited -->
+            <!-- Purchases from Stores -->
             <div class="stat-card stores-card">
                 <div class="stat-icon">🏪</div>
                 <div class="stat-content">
                     <div class="stat-number">{{ number_format($store_visited) }}</div>
-                    <div class="stat-label">{{ $store_visited == 1 ? 'Store' : 'Stores' }} Visited</div>
+                    <div class="stat-label">{{ $store_visited == 1 ? 'Purchase from Store' : 'Purchases from Stores' }}</div>
                     <div class="stat-description">Partner locations supported</div>
                 </div>
                 <div class="stat-decoration">
