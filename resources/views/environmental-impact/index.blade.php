@@ -73,36 +73,7 @@
         <div class="benefits-grid">
             @php
                 $co2_kg = ($total_cups * 20) / 1000; // Convert grams to kg
-                $trees_equivalent = $total_cups * 0.002; // Roughly 1 cup = 0.002 trees worth of impact
-                $water_saved = $total_cups * 12; // ml of water saved per cup
             @endphp
-
-            <div class="benefit-card">
-                <div class="benefit-icon">🌳</div>
-                <div class="benefit-content">
-                    <div class="benefit-number">{{ number_format($trees_equivalent, 2) }}</div>
-                    <div class="benefit-label">Tree Impact Equivalent</div>
-                    <div class="benefit-description">Small trees' worth of CO₂ absorption</div>
-                </div>
-            </div>
-
-            <div class="benefit-card">
-                <div class="benefit-icon">💧</div>
-                <div class="benefit-content">
-                    <div class="benefit-number">{{ number_format($water_saved) }}<span class="small-unit">ml</span></div>
-                    <div class="benefit-label">Water Conservation</div>
-                    <div class="benefit-description">Water saved from manufacturing process</div>
-                </div>
-            </div>
-
-            <div class="benefit-card">
-                <div class="benefit-icon">⚡</div>
-                <div class="benefit-content">
-                    <div class="benefit-number">{{ number_format($total_cups * 15) }}<span class="small-unit">kJ</span></div>
-                    <div class="benefit-label">Energy Saved</div>
-                    <div class="benefit-description">Manufacturing energy reduction</div>
-                </div>
-            </div>
 
             <div class="benefit-card">
                 <div class="benefit-icon">🗑️</div>
@@ -114,63 +85,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Achievements -->
-    @if($total_cups > 0)
-    <div class="achievements-section">
-        <h2 class="section-title">🏆 Your Green Achievements</h2>
-        <div class="achievements-grid">
-            @if($total_cups >= 1)
-            <div class="achievement-badge earned">
-                <div class="badge-icon">🌱</div>
-                <div class="badge-title">Eco Beginner</div>
-                <div class="badge-description">First cup saved!</div>
-            </div>
-            @endif
-
-            @if($total_cups >= 10)
-            <div class="achievement-badge earned">
-                <div class="badge-icon">🌿</div>
-                <div class="badge-title">Green Warrior</div>
-                <div class="badge-description">10+ cups saved</div>
-            </div>
-            @endif
-
-            @if($total_cups >= 50)
-            <div class="achievement-badge earned">
-                <div class="badge-icon">🌳</div>
-                <div class="badge-title">Planet Protector</div>
-                <div class="badge-description">50+ cups saved</div>
-            </div>
-            @endif
-
-            @if($total_cups >= 100)
-            <div class="achievement-badge earned">
-                <div class="badge-icon">🌍</div>
-                <div class="badge-title">Earth Champion</div>
-                <div class="badge-description">100+ cups saved</div>
-            </div>
-            @endif
-
-            @if($store_visited >= 5)
-            <div class="achievement-badge earned">
-                <div class="badge-icon">🏪</div>
-                <div class="badge-title">Explorer</div>
-                <div class="badge-description">5+ stores visited</div>
-            </div>
-            @endif
-
-            <!-- Next achievement preview -->
-            @if($total_cups < 100)
-            <div class="achievement-badge locked">
-                <div class="badge-icon">🏆</div>
-                <div class="badge-title">Next Goal</div>
-                <div class="badge-description">{{ 100 - $total_cups }} more cups to Earth Champion!</div>
-            </div>
-            @endif
-        </div>
-    </div>
-    @endif
 
     <!-- Quick Actions Section -->
     <div class="quick-actions-section">

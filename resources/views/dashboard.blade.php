@@ -34,23 +34,6 @@
                       <i class="fas fa-sign-in-alt me-2"></i>Login
                     </a>
                   </div>
-                @else
-                  <div class="progress-badges d-flex justify-content-center gap-3 flex-wrap">
-                    @if(isset($environmentalData['total_units']))
-                      @if($environmentalData['total_units'] >= 1)
-                        <span class="badge bg-white text-success px-3 py-2">🌱 Eco Beginner</span>
-                      @endif
-                      @if($environmentalData['total_units'] >= 10)
-                        <span class="badge bg-white text-success px-3 py-2">🌿 Green Warrior</span>
-                      @endif
-                      @if($environmentalData['total_units'] >= 50)
-                        <span class="badge bg-white text-success px-3 py-2">🌳 Planet Protector</span>
-                      @endif
-                      @if($environmentalData['total_units'] >= 100)
-                        <span class="badge bg-white text-success px-3 py-2">🌍 Earth Champion</span>
-                      @endif
-                    @endif
-                  </div>
                 @endif
               </div>
             </div>
@@ -473,18 +456,6 @@
       0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
       40% { transform: translateY(-10px); }
       60% { transform: translateY(-5px); }
-    }
-
-    .progress-badges .badge {
-      font-size: 0.9rem;
-      font-weight: 600;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      transition: transform 0.3s ease;
-    }
-
-    .progress-badges .badge:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 15px rgba(0,0,0,0.15);
     }
 
     .btn-primary {
