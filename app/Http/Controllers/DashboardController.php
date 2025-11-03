@@ -187,11 +187,11 @@ class DashboardController extends Controller
      */
     private function getEnvironmentalImpactData($consumerId)
     {
-        // Get total units scanned (cups saved)
-        $totalUnits = DB::table('point_transactions')
-            ->where('consumer_id', $consumerId)
-            ->where('type', 'earn')
-            ->sum('units_scanned') ?? 0;
+        // Get total cups saved (sum of all quantities from pending_transactions)
+        // This correctly accounts for multiple cups per transaction
+        $totalUnits = DB::table('pending_transactions')
+            ->where('claimed_by_consumer_id', $consumerId)
+            ->sum('total_quantity') ?? 0;
 
         // Calculate environmental impact using environmental-impact page formulas
         $co2_grams = $totalUnits * 20; // grams of CO2 saved
