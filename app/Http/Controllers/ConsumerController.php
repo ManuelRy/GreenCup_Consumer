@@ -94,11 +94,16 @@ class ConsumerController extends Controller
                     }
                 }
             } elseif ($transaction->description) {
-                // Extract item name from description like "Purchased: Coffee, Muffin from Store"
-                if (preg_match('/Purchased: (.+?) from/', $transaction->description, $matches)) {
+                // Handle different transaction types
+                if (preg_match('/Redeemed: (.+)/', $transaction->description, $matches)) {
+                    // Reward redemption: "Redeemed: Reward Name" -> Just show "Reward Name"
+                    $itemName = $matches[1];
+                } elseif (preg_match('/Purchased: (.+?) from/', $transaction->description, $matches)) {
+                    // Receipt purchase: "Purchased: Coffee, Muffin from Store"
                     $itemName = $matches[1];
                 } else {
-                    $itemName = 'Receipt Purchase';
+                    // Default to the full description
+                    $itemName = $transaction->description;
                 }
             }
 
