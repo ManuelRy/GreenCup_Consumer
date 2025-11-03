@@ -19,7 +19,7 @@
                 <h4 class="fw-bold mb-2">{{ $motivationalMessage }}</h4>
                 <p class="mb-3 opacity-90">
                   @if(isset($environmentalData['total_units']) && $environmentalData['total_units'] > 0)
-                    You've used your eco-cup {{ number_format($environmentalData['total_units']) }} times, saving {{ number_format($environmentalData['co2_saved'], 2) }}kg CO₂ and {{ number_format($environmentalData['water_saved'], 2) }}L of water!
+                    You've saved {{ number_format($environmentalData['total_units']) }} cups, preventing {{ number_format($environmentalData['co2_saved_grams']) }}g CO₂ and {{ number_format($environmentalData['waste_prevented_grams']) }}g waste!
                   @else
                     Start your eco-journey today and make a positive impact on our planet!
                   @endif
@@ -120,6 +120,62 @@
             </div>
           </div>
         </div>
+
+        <!-- Environmental Impact Section (inspired by environmental-impact page) -->
+        @if($consumer->id !== null && isset($environmentalData['total_units']) && $environmentalData['total_units'] > 0)
+        <div class="row mb-4">
+          <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4">
+              <div class="card-header bg-white border-0 pt-4">
+                <h5 class="fw-bold text-dark mb-0">
+                  <i class="fas fa-leaf text-success me-2"></i>
+                  🌱 Your Environmental Impact
+                </h5>
+                <p class="text-muted small mb-0 mt-1">Real-time impact of your eco-friendly choices</p>
+              </div>
+              <div class="card-body">
+                <div class="row g-3">
+                  <!-- Cups Saved -->
+                  <div class="col-6 col-md-4">
+                    <div class="p-3 bg-light rounded-3 text-center h-100">
+                      <div class="fs-3 mb-2">♻️</div>
+                      <div class="h4 fw-bold text-success mb-1">{{ number_format($environmentalData['total_units']) }}</div>
+                      <small class="text-muted fw-semibold">Cups Saved</small>
+                    </div>
+                  </div>
+
+                  <!-- CO2 Saved -->
+                  <div class="col-6 col-md-4">
+                    <div class="p-3 bg-light rounded-3 text-center h-100">
+                      <div class="fs-3 mb-2">🌱</div>
+                      <div class="h4 fw-bold text-success mb-1">{{ number_format($environmentalData['co2_saved_grams']) }}<small class="fs-6">g</small></div>
+                      <small class="text-muted fw-semibold">CO₂ Saved</small>
+                      <div class="text-muted" style="font-size: 0.7rem;">({{ number_format($environmentalData['co2_saved'], 2) }}kg)</div>
+                    </div>
+                  </div>
+
+                  <!-- Waste Prevented -->
+                  <div class="col-6 col-md-4">
+                    <div class="p-3 bg-light rounded-3 text-center h-100">
+                      <div class="fs-3 mb-2">🗑️</div>
+                      <div class="h4 fw-bold text-danger mb-1">{{ number_format($environmentalData['waste_prevented_grams']) }}<small class="fs-6">g</small></div>
+                      <small class="text-muted fw-semibold">Waste Prevented</small>
+                      <div class="text-muted" style="font-size: 0.7rem;">({{ number_format($environmentalData['waste_prevented'], 2) }}kg)</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- View Full Impact Button -->
+                <div class="text-center mt-3">
+                  <a href="{{ route('environmental-impact.index') }}" class="btn btn-success btn-sm">
+                    <i class="fas fa-chart-line me-2"></i>View Full Impact Report
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        @endif
 
         <!-- Analytics & Stats Row -->
         <div class="row mb-4">

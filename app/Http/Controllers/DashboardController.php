@@ -183,22 +183,36 @@ class DashboardController extends Controller
 
     /**
      * Get environmental impact data for the consumer
+     * Using same calculations as environmental-impact page
      */
     private function getEnvironmentalImpactData($consumerId)
     {
-        // Get total units scanned
+        // Get total units scanned (cups saved)
         $totalUnits = DB::table('point_transactions')
             ->where('consumer_id', $consumerId)
             ->where('type', 'earn')
             ->sum('units_scanned') ?? 0;
 
-        // Calculate environmental impact
-        // Assumptions: 1 reusable cup = ~0.25kg CO2 saved, ~1L water saved, ~0.01kg waste reduced
+        // Calculate environmental impact using environmental-impact page formulas
+        $co2_grams = $totalUnits * 20; // grams of CO2 saved
+        $co2_kg = $co2_grams / 1000; // Convert to kg
+        $trees_equivalent = $totalUnits * 0.002; // Small trees' worth of CO₂ absorption
+        $water_saved_ml = $totalUnits * 12; // ml of water saved
+        $water_saved_liters = $water_saved_ml / 1000; // Convert to liters
+        $energy_saved_kj = $totalUnits * 15; // kJ of energy saved
+        $waste_prevented_grams = $totalUnits * 8; // grams of waste prevented
+        $waste_prevented_kg = $waste_prevented_grams / 1000; // Convert to kg
+
         return [
-            'total_units' => $totalUnits,
-            'co2_saved' => round($totalUnits * 0.25, 2), // kg
-            'water_saved' => round($totalUnits * 1, 2), // liters
-            'waste_reduced' => round($totalUnits * 0.01, 2), // kg
+            'total_units' => $totalUnits, // Total cups saved
+            'co2_saved_grams' => round($co2_grams, 2), // CO2 in grams
+            'co2_saved' => round($co2_kg, 2), // CO2 in kg
+            'trees_equivalent' => round($trees_equivalent, 3), // Tree impact equivalent
+            'water_saved_ml' => round($water_saved_ml, 2), // Water in ml
+            'water_saved' => round($water_saved_liters, 2), // Water in liters
+            'energy_saved' => round($energy_saved_kj, 2), // Energy in kJ
+            'waste_prevented_grams' => round($waste_prevented_grams, 2), // Waste in grams
+            'waste_prevented' => round($waste_prevented_kg, 2), // Waste in kg
         ];
     }
 
@@ -254,9 +268,14 @@ class DashboardController extends Controller
         // Guest environmental data with example/demo values
         $environmentalData = [
             'total_units' => 0,
+            'co2_saved_grams' => 0,
             'co2_saved' => 0,
+            'trees_equivalent' => 0,
+            'water_saved_ml' => 0,
             'water_saved' => 0,
-            'waste_reduced' => 0,
+            'energy_saved' => 0,
+            'waste_prevented_grams' => 0,
+            'waste_prevented' => 0,
         ];
 
         $motivationalMessage = "Welcome to GreenCup! Join us to start your eco-journey! 🌱";

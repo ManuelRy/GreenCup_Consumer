@@ -1,5 +1,5 @@
 {{-- Guest Mode Banner - Informational banner encouraging users to sign up --}}
-<div class="alert alert-info alert-dismissible fade show border-0 shadow-sm mb-4" role="alert" style="background: linear-gradient(135deg, #1dd1a1 0%, #10ac84 100%); color: white; border-radius: 16px;">
+<div class="alert alert-info alert-dismissible fade show border-0 mb-4" role="alert" style="background: linear-gradient(135deg, #1dd1a1 0%, #10ac84 100%); color: white; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(16, 172, 132, 0.3);">
     <div class="d-flex align-items-center">
         <div class="flex-shrink-0 me-3">
             <i class="bi bi-info-circle-fill" style="font-size: 2rem;"></i>

@@ -369,15 +369,15 @@
       top: var(--navbar-height);
       left: 0;
       right: 0;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.98));
+      background: rgba(255, 255, 255, 0.98);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       padding: 12px 20px;
       display: flex;
       gap: 12px;
       z-index: 1001;
-      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-      border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      border-bottom: none;
       min-height: 60px;
       box-sizing: border-box;
     }
@@ -461,7 +461,7 @@
       top: calc(var(--navbar-height) + 72px);
       left: 0;
       right: 0;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.98));
+      background: rgba(255, 255, 255, 0.98);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       padding: 12px 20px;
@@ -469,8 +469,8 @@
       justify-content: space-between;
       align-items: center;
       z-index: 1001;
-      border-bottom: 1px solid rgba(226, 232, 240, 0.5);
-      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+      border-bottom: none;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
       min-height: 60px;
       box-sizing: border-box;
       overflow: visible;
@@ -2256,11 +2256,6 @@
     }
 
     function initializeEventListeners() {
-      // View toggle buttons
-      document.querySelectorAll('.view-option').forEach(btn => {
-        btn.addEventListener('click', () => switchView(btn.dataset.view));
-      });
-
       // Header toggle button
       document.getElementById('viewToggle').addEventListener('click', () => {
         const newView = app.currentView === 'map' ? 'list' : 'map';
@@ -2604,10 +2599,6 @@
     function switchView(view) {
       app.currentView = view;
 
-      document.querySelectorAll('.view-option').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.view === view);
-      });
-
       const toggleIcon = document.getElementById('toggleIcon');
       const toggleText = document.getElementById('toggleText');
 
@@ -2653,8 +2644,13 @@
     }
 
     function addMarkersToMap() {
-      // Remove existing markers cleanly
+      // Remove existing markers cleanly with proper event listener cleanup
       app.markers.forEach(marker => {
+        const element = marker.getElement();
+        if (element && element._clickHandler) {
+          element.removeEventListener('click', element._clickHandler);
+          delete element._clickHandler;
+        }
         marker.remove();
       });
       app.markers = [];
@@ -2743,13 +2739,15 @@
             .setLngLat([store.longitude, store.latitude])
             .addTo(app.map);
 
-          // Add click handler
-          markerElement.addEventListener('click', (e) => {
+          // Add click handler with reference for cleanup
+          const clickHandler = (e) => {
             e.stopPropagation();
             showStoreDetail({
               ...store
             });
-          });
+          };
+          markerElement._clickHandler = clickHandler;
+          markerElement.addEventListener('click', clickHandler);
 
           app.markers.push(marker);
 
@@ -2765,6 +2763,13 @@
       const storeList = document.getElementById('storeList');
       const noStoresMessage = document.getElementById('noStoresMessage');
 
+      // Clear existing store items with proper cleanup
+      Array.from(storeList.children).forEach(item => {
+        if (item._clickHandler) {
+          item.removeEventListener('click', item._clickHandler);
+          delete item._clickHandler;
+        }
+      });
       storeList.innerHTML = '';
 
       if (app.filteredStores.length === 0) {
@@ -2826,9 +2831,12 @@
                     ${store.searchQuery ? '<div class="store-matched-items" data-store-id="' + store.id + '"></div>' : ''}
                 `;
 
-        storeItem.addEventListener('click', () => {
+        // Add click handler with reference for cleanup
+        const clickHandler = () => {
           showStoreDetail(store);
-        });
+        };
+        storeItem._clickHandler = clickHandler;
+        storeItem.addEventListener('click', clickHandler);
 
         storeList.appendChild(storeItem);
 
@@ -3411,7 +3419,13 @@
       const galleryContainer = document.getElementById('galleryContainer');
       const seeMoreBtn = document.getElementById('seeMoreBtn');
 
-      // Clear existing photos
+      // Clear existing photos with proper cleanup
+      Array.from(galleryContainer.children).forEach(item => {
+        if (item._clickHandler) {
+          item.removeEventListener('click', item._clickHandler);
+          delete item._clickHandler;
+        }
+      });
       galleryContainer.innerHTML = '';
 
       if (!photos || photos.length === 0) {
@@ -3454,11 +3468,13 @@
           galleryItem.style.display = 'none';
         };
 
-        // Add click handler to open full image
-        galleryItem.addEventListener('click', (e) => {
+        // Add click handler to open full image with reference for cleanup
+        const clickHandler = (e) => {
           e.stopPropagation();
           openPhotoModal(photo);
-        });
+        };
+        galleryItem._clickHandler = clickHandler;
+        galleryItem.addEventListener('click', clickHandler);
 
         galleryItem.appendChild(img);
 
@@ -3642,10 +3658,14 @@
 
       modal.appendChild(container);
 
-      // Close on click
-      modal.addEventListener('click', () => {
-        document.body.removeChild(modal);
-      });
+      // Close on click - with proper cleanup
+      const closeModal = () => {
+        modal.removeEventListener('click', closeModal);
+        if (modal.parentNode) {
+          document.body.removeChild(modal);
+        }
+      };
+      modal.addEventListener('click', closeModal);
 
       document.body.appendChild(modal);
     }
