@@ -1,0 +1,154 @@
+/**
+ * Transaction History Page - Styles
+ * Custom CSS for enhanced styling and performance
+ */
+
+:root {
+    --bs-primary: #1dd1a1;
+    --bs-primary-rgb: 29, 209, 161;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #1dd1a1, #10ac84) !important;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #1dd1a1, #10ac84);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(29, 209, 161, 0.3);
+    background: linear-gradient(135deg, #10ac84, #0e8e71);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-outline-secondary {
+    transition: all 0.3s ease;
+}
+
+.btn-outline-secondary:hover {
+    transform: translateY(-1px);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #1dd1a1;
+    box-shadow: 0 0 0 0.2rem rgba(29, 209, 161, 0.25);
+}
+
+.card {
+    border-radius: 1rem !important;
+}
+
+.transaction-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px solid var(--bs-border-color) !important;
+}
+
+.transaction-card:hover {
+    border-color: #1dd1a1 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.transaction-card:active {
+    transform: translateY(0);
+}
+
+/* Loading states */
+.btn:disabled {
+    opacity: 0.6;
+    transform: none !important;
+}
+
+/* Custom scrollbar for modal */
+.modal-body {
+    scrollbar-width: thin;
+    scrollbar-color: #1dd1a1 #f1f3f4;
+}
+
+.modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: #f1f3f4;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: #1dd1a1;
+    border-radius: 3px;
+}
+
+/* Mobile optimizations */
+@media (max-width: 576px) {
+    .container-fluid {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+
+    .transaction-card .card-body {
+        padding: 1rem !important;
+    }
+
+    .modal-dialog {
+        margin: 0.75rem;
+    }
+}
+
+/* Animation for smooth interactions */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card {
+    animation: slideUp 0.4s ease-out;
+}
+
+/* Better focus indicators for accessibility */
+.btn:focus,
+.form-control:focus,
+.form-select:focus {
+    outline: 2px solid #1dd1a1;
+    outline-offset: 2px;
+}
+
+/* Enhanced hover states */
+@media (hover: hover) {
+    .form-control:hover,
+    .form-select:hover {
+        border-color: #1dd1a1;
+    }
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+/* Success/Error text colors */
+.text-success {
+    color: #27ae60 !important;
+}
+
+.text-danger {
+    color: #e74c3c !important;
+}
+
+/* Font monospace for codes */
+.font-monospace {
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+}

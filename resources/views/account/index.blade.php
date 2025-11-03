@@ -481,14 +481,22 @@
                       </div>
                       <div class="text-end d-flex align-items-center">
                         <div class="me-2">
-                          <div class="fw-bold {{ ($transaction->type ?? 'earn') === 'earn' ? 'text-success' : 'text-danger' }}">
-                            @if (($transaction->type ?? 'earn') === 'earn')
-                              +{{ number_format($transaction->points ?? 0) }}
-                            @else
-                              -{{ number_format($transaction->points ?? 0) }}
-                            @endif
-                          </div>
-                          <small class="text-muted">PTS</small>
+                          @php
+                            $transType = $transaction->type ?? 'earn';
+                            // Don't show points for approved/rejected status notifications
+                            $hidePoints = in_array($transType, ['approved', 'rejected']);
+                          @endphp
+
+                          @if(!$hidePoints)
+                            <div class="fw-bold {{ $transType === 'earn' ? 'text-success' : 'text-danger' }}">
+                              @if ($transType === 'earn')
+                                +{{ number_format($transaction->points ?? 0) }}
+                              @else
+                                -{{ number_format($transaction->points ?? 0) }}
+                              @endif
+                            </div>
+                            <small class="text-muted">PTS</small>
+                          @endif
                         </div>
                         <i class="fas fa-chevron-right text-muted"></i>
                       </div>

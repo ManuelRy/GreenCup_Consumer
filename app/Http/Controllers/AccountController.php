@@ -7,6 +7,7 @@ use App\Repository\ConsumerRepository;
 use App\Repository\PointTransactionRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -52,6 +53,15 @@ class AccountController extends Controller
     {
         $consumer = Auth::user();
 
+        // Only load stores when needed for filter dropdown
+        // Use cache for stores list (cache for 1 hour)
+        $stores = Cache::remember('stores_list', 3600, function () {
+            return DB::table('sellers')
+                ->select('id', 'business_name')
+                ->orderBy('business_name')
+                ->get();
+        });
+
         // Build point transactions query
         $pointTransactionsQuery = DB::table('point_transactions as pt')
             ->leftJoin('sellers as s', 's.id', '=', 'pt.seller_id')
@@ -91,7 +101,7 @@ class AccountController extends Controller
             's.business_name as store_name',
             's.address as store_location',
             's.phone as store_phone',
-            DB::raw("'point_transaction' as transaction_type"),
+            DB::raw("CASE WHEN pt.description LIKE 'Redeemed:%' THEN 'reward_redemption' ELSE 'point_transaction' END as transaction_type"),
             DB::raw('NULL as reward_name'),
             DB::raw('NULL as reward_status'),
             DB::raw('NULL as status_date')
@@ -154,9 +164,6 @@ class AccountController extends Controller
             ->unionAll($rewardRedemptionsQuery)
             ->orderBy('transaction_date', 'desc')
             ->paginate(10);
-
-        // Get all stores for filter dropdown
-        $stores = DB::table('sellers')->select('id', 'business_name')->get();
 
         return view('account.transactions', compact('consumer', 'transactions', 'stores'));
     }
@@ -241,11 +248,16 @@ class AccountController extends Controller
                     }
                 }
             } elseif ($transaction->description) {
-                // Extract item name from description like "Purchased: Coffee, Muffin from Store"
-                if (preg_match('/Purchased: (.+?) from/', $transaction->description, $matches)) {
+                // Extract item name from description
+                if (preg_match('/Redeemed: (.+)/', $transaction->description, $matches)) {
+                    // Reward redemption
+                    $itemName = 'Reward: ' . $matches[1];
+                } elseif (preg_match('/Purchased: (.+?) from/', $transaction->description, $matches)) {
+                    // Receipt purchase
                     $itemName = $matches[1];
                 } else {
-                    $itemName = 'Receipt Purchase';
+                    // Use description as-is
+                    $itemName = $transaction->description;
                 }
             }
 

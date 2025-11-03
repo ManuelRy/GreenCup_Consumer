@@ -1,5 +1,11 @@
 @extends('master')
 
+@push('styles')
+    @vite(['resources/css/transactions.css'])
+    <!-- Font Awesome (if not already included) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+@endpush
+
 @section('content')
 <div class="container-fluid min-vh-100 py-3">
     <div class="row justify-content-center">
@@ -163,25 +169,31 @@
                                                             @endif
                                                         </div>
                                                     @endif
-
-                                                    @if(config('app.debug'))
-                                                        <small class="text-muted d-block mt-1" style="font-size: 0.7em;">
-                                                            Debug: description: "{{ $transaction->description ?? 'NULL' }}", type: "{{ $transaction->type ?? 'NULL' }}"
-                                                        </small>
-                                                    @endif
                                                 </div>
 
                                                 <!-- Points Display -->
                                                 <div class="text-end flex-shrink-0 d-flex align-items-center">
                                                     <div class="me-2">
-                                                        <div class="fw-bold {{ ($transaction->type ?? 'earn') === 'earn' ? 'text-success' : 'text-danger' }}">
-                                                            @if(($transaction->type ?? 'earn') === 'earn')
-                                                                +{{ number_format($transaction->points ?? 0) }}
-                                                            @else
-                                                                -{{ number_format($transaction->points ?? 0) }}
-                                                            @endif
-                                                        </div>
-                                                        <small class="text-muted">PTS</small>
+                                                        @php
+                                                            $transType = $transaction->type ?? 'earn';
+                                                            $transactionType = $transaction->transaction_type ?? '';
+                                                            $rewardStatus = $transaction->reward_status ?? '';
+
+                                                            // Don't show points for approved reward redemptions or status notifications
+                                                            $hidePoints = in_array($transType, ['approved', 'rejected']) ||
+                                                                         ($transactionType === 'reward_redemption' && $rewardStatus === 'approved');
+                                                        @endphp
+
+                                                        @if(!$hidePoints)
+                                                            <div class="fw-bold {{ $transType === 'earn' ? 'text-success' : 'text-danger' }}">
+                                                                @if($transType === 'earn')
+                                                                    +{{ number_format($transaction->points ?? 0) }}
+                                                                @else
+                                                                    -{{ number_format($transaction->points ?? 0) }}
+                                                                @endif
+                                                            </div>
+                                                            <small class="text-muted">PTS</small>
+                                                        @endif
                                                     </div>
                                                     <i class="fas fa-chevron-right text-muted"></i>
                                                 </div>
@@ -552,4 +564,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+@push('scripts')
+    @vite(['resources/js/transactions.js'])
+@endpush
 @endsection
