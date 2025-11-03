@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Repository\SellerRepository;
 use App\Repository\FileRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -437,22 +438,27 @@ class StoreController extends Controller
     public function getPhotoStats()
     {
         try {
-            $stats = [
-                'total_sellers' => DB::table('sellers')->where('is_active', true)->count(),
-                'sellers_with_main_photo' => DB::table('sellers')->where('is_active', true)->whereNotNull('photo_url')->count(),
-                'total_seller_photos' => 0,
-                'sellers_with_gallery_photos' => 0,
-                'total_posts' => 0
-            ];
+            // Cache photo stats for 10 minutes (600 seconds)
+            $stats = Cache::remember('photo_stats', 600, function () {
+                $stats = [
+                    'total_sellers' => DB::table('sellers')->where('is_active', true)->count(),
+                    'sellers_with_main_photo' => DB::table('sellers')->where('is_active', true)->whereNotNull('photo_url')->count(),
+                    'total_seller_photos' => 0,
+                    'sellers_with_gallery_photos' => 0,
+                    'total_posts' => 0
+                ];
 
-            if (DB::getSchemaBuilder()->hasTable('seller_photos')) {
-                $stats['total_seller_photos'] = DB::table('seller_photos')->count();
-                $stats['sellers_with_gallery_photos'] = DB::table('seller_photos')->distinct('seller_id')->count('seller_id');
-                $stats['total_posts'] = DB::table('seller_photos as sp')
-                    ->join('sellers as s', 's.id', '=', 'sp.seller_id')
-                    ->where('s.is_active', true)
-                    ->count();
-            }
+                if (DB::getSchemaBuilder()->hasTable('seller_photos')) {
+                    $stats['total_seller_photos'] = DB::table('seller_photos')->count();
+                    $stats['sellers_with_gallery_photos'] = DB::table('seller_photos')->distinct('seller_id')->count('seller_id');
+                    $stats['total_posts'] = DB::table('seller_photos as sp')
+                        ->join('sellers as s', 's.id', '=', 'sp.seller_id')
+                        ->where('s.is_active', true)
+                        ->count();
+                }
+
+                return $stats;
+            });
 
             return response()->json(['success' => true, 'stats' => $stats]);
         } catch (\Exception $e) {

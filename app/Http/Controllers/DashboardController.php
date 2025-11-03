@@ -7,6 +7,7 @@ use App\Repository\PointTransactionRepository;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -95,28 +96,30 @@ class DashboardController extends Controller
 
     private function getRecentActivityForDashboard($consumerId, $limit = 5)
     {
-        $transactions = DB::table('point_transactions as pt')
-            ->leftJoin('sellers as s', 's.id', '=', 'pt.seller_id')
-            ->leftJoin('pending_transactions as pend', 'pend.receipt_code', '=', 'pt.receipt_code')
-            ->where('pt.consumer_id', $consumerId)
-            ->select([
-                'pt.id',
-                'pt.points',
-                'pt.type',
-                'pt.description',
-                'pt.units_scanned',
-                'pt.scanned_at',
-                'pt.receipt_code',
-                's.business_name as store_name',
-                'pend.items as receipt_items'
-            ])
-            ->orderBy('pt.scanned_at', 'desc')
-            ->limit($limit)
-            ->get();
+        // Cache recent activity for 5 minutes (300 seconds) per user
+        return Cache::remember("dashboard_activity_{$consumerId}", 300, function () use ($consumerId, $limit) {
+            $transactions = DB::table('point_transactions as pt')
+                ->leftJoin('sellers as s', 's.id', '=', 'pt.seller_id')
+                ->leftJoin('pending_transactions as pend', 'pend.receipt_code', '=', 'pt.receipt_code')
+                ->where('pt.consumer_id', $consumerId)
+                ->select([
+                    'pt.id',
+                    'pt.points',
+                    'pt.type',
+                    'pt.description',
+                    'pt.units_scanned',
+                    'pt.scanned_at',
+                    'pt.receipt_code',
+                    's.business_name as store_name',
+                    'pend.items as receipt_items'
+                ])
+                ->orderBy('pt.scanned_at', 'desc')
+                ->limit($limit)
+                ->get();
 
-        return $transactions->map(function ($transaction) {
-            // Parse receipt items to get activity name
-            $activityName = 'Unknown Activity';
+            return $transactions->map(function ($transaction) {
+                // Parse receipt items to get activity name
+                $activityName = 'Unknown Activity';
             $icon = '🔄';
 
             if ($transaction->receipt_items) {
@@ -160,6 +163,7 @@ class DashboardController extends Controller
                 'receipt_code' => $transaction->receipt_code,
                 'description' => $transaction->description
             ];
+            });
         });
     }
     /**
