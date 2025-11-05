@@ -32,7 +32,17 @@ class PendingTransactionRepository
   public function isExpire(Model $pending): bool
   {
     if ($pending->status  == "expired") return true;
-    return $pending->expires_at ? Carbon::parse($pending->expires_at)->isPast() : false;
+
+    // Check if the receipt has passed its expiration time
+    if ($pending->expires_at && Carbon::parse($pending->expires_at)->isPast()) {
+      // Automatically update status to expired if it's still pending
+      if ($pending->status === 'pending') {
+        $pending->update(['status' => 'expired']);
+      }
+      return true;
+    }
+
+    return false;
   }
   public function totalQuantityByConsumer($consumer_id): int
   {

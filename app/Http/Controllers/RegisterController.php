@@ -24,7 +24,17 @@ class RegisterController extends Controller
             'last_name'     => 'required|string|max:255',
             'email'         => 'required|email|unique:consumers,email',
             'phone_number'  => 'nullable|string|max:20',
-            'password'      => 'required|string|min:8|confirmed',
+            'password'      => [
+                'required',
+                'string',
+                'min:8',
+                'confirmed',
+                'regex:/^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>]).*$/'
+            ],
+        ], [
+            'password.regex' => 'Password must contain at least 1 uppercase letter and 1 special character (!@#$%^&*(),.?":{}|<>)',
+            'password.min' => 'Password must be at least 8 characters',
+            'password.confirmed' => 'Password confirmation does not match',
         ]);
 
         // Combine first_name and last_name into full_name

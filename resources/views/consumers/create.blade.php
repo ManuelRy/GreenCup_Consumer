@@ -446,11 +446,29 @@
             class="form-control @error('password') is-invalid @enderror"
             placeholder="Create a strong password"
             required
+            minlength="8"
           >
           <button type="button" class="password-toggle" onclick="togglePassword('password', 'toggleIcon1')">
             <i class="bi bi-eye" id="toggleIcon1"></i>
           </button>
         </div>
+
+        <!-- Password Requirements -->
+        <div id="passwordRequirements" style="margin-top: 10px; font-size: 13px;">
+          <div id="lengthCheck" class="password-req" style="display: flex; align-items: center; gap: 6px; color: #9ca3af; margin-bottom: 4px;">
+            <i class="bi bi-circle"></i>
+            <span>At least 8 characters</span>
+          </div>
+          <div id="uppercaseCheck" class="password-req" style="display: flex; align-items: center; gap: 6px; color: #9ca3af; margin-bottom: 4px;">
+            <i class="bi bi-circle"></i>
+            <span>At least 1 uppercase letter (A-Z)</span>
+          </div>
+          <div id="specialCheck" class="password-req" style="display: flex; align-items: center; gap: 6px; color: #9ca3af; margin-bottom: 4px;">
+            <i class="bi bi-circle"></i>
+            <span>At least 1 special character (!@#$%^&*...)</span>
+          </div>
+        </div>
+
         @error('password')
         <div class="invalid-feedback">
           <i class="bi bi-exclamation-circle"></i> {{ $message }}
@@ -522,7 +540,85 @@
       }
     }
 
-    document.getElementById('registerForm').addEventListener('submit', function() {
+    // Real-time password validation
+    const passwordInput = document.getElementById('password');
+    const lengthCheck = document.getElementById('lengthCheck');
+    const uppercaseCheck = document.getElementById('uppercaseCheck');
+    const specialCheck = document.getElementById('specialCheck');
+
+    function validatePassword() {
+      const password = passwordInput.value;
+
+      // Check length (at least 8 characters)
+      const hasLength = password.length >= 8;
+      updateRequirement(lengthCheck, hasLength);
+
+      // Check uppercase letter
+      const hasUppercase = /[A-Z]/.test(password);
+      updateRequirement(uppercaseCheck, hasUppercase);
+
+      // Check special character
+      const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+      updateRequirement(specialCheck, hasSpecial);
+
+      // Update input border color
+      if (hasLength && hasUppercase && hasSpecial) {
+        passwordInput.style.borderColor = '#10b981';
+        passwordInput.style.background = '#f0fdf4';
+      } else if (password.length > 0) {
+        passwordInput.style.borderColor = '#ef4444';
+        passwordInput.style.background = '#fef2f2';
+      } else {
+        passwordInput.style.borderColor = '#e5e7eb';
+        passwordInput.style.background = '#f9fafb';
+      }
+    }
+
+    function updateRequirement(element, isValid) {
+      const icon = element.querySelector('i');
+      const span = element.querySelector('span');
+
+      if (isValid) {
+        icon.className = 'bi bi-check-circle-fill';
+        element.style.color = '#10b981';
+        span.style.fontWeight = '600';
+      } else {
+        icon.className = 'bi bi-circle';
+        element.style.color = '#9ca3af';
+        span.style.fontWeight = '400';
+      }
+    }
+
+    passwordInput.addEventListener('input', validatePassword);
+    passwordInput.addEventListener('focus', function() {
+      document.getElementById('passwordRequirements').style.display = 'block';
+    });
+
+    // Form submission with validation
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+      const password = passwordInput.value;
+      const hasLength = password.length >= 8;
+      const hasUppercase = /[A-Z]/.test(password);
+      const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+      if (!hasLength || !hasUppercase || !hasSpecial) {
+        e.preventDefault();
+        passwordInput.focus();
+        passwordInput.style.borderColor = '#ef4444';
+        passwordInput.style.background = '#fef2f2';
+
+        // Show error message
+        let errorMsg = passwordInput.parentElement.parentElement.querySelector('.client-error');
+        if (!errorMsg) {
+          errorMsg = document.createElement('div');
+          errorMsg.className = 'invalid-feedback client-error';
+          errorMsg.style.display = 'block';
+          errorMsg.innerHTML = '<i class="bi bi-exclamation-circle"></i> Please meet all password requirements';
+          passwordInput.parentElement.parentElement.appendChild(errorMsg);
+        }
+        return false;
+      }
+
       const btn = document.getElementById('submitBtn');
       const btnText = document.getElementById('btnText');
       const btnIcon = document.getElementById('btnIcon');
