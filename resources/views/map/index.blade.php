@@ -2,12 +2,7 @@
 
 @section('content')
   <div class="fullscreen-map-container">
-    <!-- Guest Banner -->
-    @if(!auth('consumer')->check())
-      <div style="position: absolute; top: 70px; left: 50%; transform: translateX(-50%); z-index: 1000; width: 90%; max-width: 800px;">
-        @include('partials.guest-banner')
-      </div>
-    @endif
+    <!-- Guest Banner removed from map page to avoid blocking map view -->
 
     <!-- Search Bar (Fixed at top) -->
     <div class="search-section-fixed">

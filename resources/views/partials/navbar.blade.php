@@ -325,7 +325,7 @@
 
                 <!-- Right Navigation -->
                 <div class="navbar-nav d-flex align-items-center">
-                    <a class="nav-link" href="javascript:void(0)" onclick="restartTour()" title="Take a Tour">
+                    <a class="nav-link" href="javascript:void(0)" onclick="if(typeof restartGuestTour === 'function') restartGuestTour()" title="Take a Tour">
                         <i class="bi bi-question-circle fs-5"></i>
                     </a>
                     <a class="nav-link btn btn-outline-success me-2" href="{{ route('login') }}">
@@ -342,6 +342,7 @@
         <div class="offcanvas offcanvas-end d-lg-none" tabindex="-1" id="guestNav" aria-labelledby="guestNavLabel">
             <div class="offcanvas-header">
                 <h5 class="offcanvas-title" id="guestNavLabel">Menu</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
             </div>
             <div class="offcanvas-body">
                 <div class="navbar-nav">
@@ -362,7 +363,7 @@
                         <i class="bi bi-graph-up me-1"></i>Impact
                     </a>
                     <hr class="my-3">
-                    <a class="nav-link" href="javascript:void(0)" onclick="restartTour(); document.querySelector('[data-bs-dismiss=offcanvas]').click();">
+                    <a class="nav-link" href="javascript:void(0)" onclick="if(typeof restartGuestTour === 'function') { restartGuestTour(); document.querySelector('[data-bs-dismiss=offcanvas]').click(); }">
                         <i class="bi bi-question-circle me-1"></i>Take a Tour
                     </a>
                     <hr class="my-3">
@@ -604,17 +605,47 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize Bootstrap after a short delay
     setTimeout(initializeBootstrap, 50);
 
-    // Handle mobile navigation links
-    const mobileNavLinks = document.querySelectorAll('#mobileNav .nav-link[href]:not([href="#"])');
+    // Handle mobile navigation links (authenticated users)
+    const mobileNavLinks = document.querySelectorAll('#mobileNav .nav-link[href]:not([href="#"]):not([href^="javascript:"])');
     mobileNavLinks.forEach(function(link) {
         link.addEventListener('click', function(e) {
             console.log('Mobile nav link clicked:', this.textContent.trim());
 
             // Add a small delay before navigation to ensure offcanvas closes
             const href = this.getAttribute('href');
-            if (href && href !== '#') {
+            if (href && href !== '#' && href !== 'javascript:void(0)') {
                 // Close the offcanvas
                 const offcanvasElement = document.getElementById('mobileNav');
+                if (offcanvasElement) {
+                    const offcanvasInstance = bootstrap.Offcanvas.getInstance(offcanvasElement);
+                    if (offcanvasInstance) {
+                        offcanvasInstance.hide();
+                    }
+                }
+
+                // Navigate after a short delay
+                setTimeout(function() {
+                    window.location.href = href;
+                }, 150);
+
+                // Prevent default to handle navigation manually
+                e.preventDefault();
+                return false;
+            }
+        });
+    });
+
+    // Handle guest navigation links
+    const guestNavLinks = document.querySelectorAll('#guestNav .nav-link[href]:not([href="#"]):not([href^="javascript:"])');
+    guestNavLinks.forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            console.log('Guest nav link clicked:', this.textContent.trim());
+
+            // Add a small delay before navigation to ensure offcanvas closes
+            const href = this.getAttribute('href');
+            if (href && href !== '#' && href !== 'javascript:void(0)') {
+                // Close the offcanvas
+                const offcanvasElement = document.getElementById('guestNav');
                 if (offcanvasElement) {
                     const offcanvasInstance = bootstrap.Offcanvas.getInstance(offcanvasElement);
                     if (offcanvasInstance) {
