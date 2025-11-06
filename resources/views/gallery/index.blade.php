@@ -547,7 +547,14 @@ async function loadStorePosts(storeId, page = 1) {
       }));
       if (page === 1) app.posts = posts; else app.posts.push(...posts);
       app.hasMorePosts = data.hasMore || false;
-      renderPosts();
+
+      // Check if there are no photos
+      if (posts.length === 0 && page === 1) {
+        document.getElementById('postsGrid').innerHTML = '<div class="text-center p-5 text-muted"><i class="bi bi-images display-4 mb-3 d-block"></i><p>No photos posted at this store yet</p></div>';
+      } else {
+        renderPosts();
+      }
+
       updatePostsCount();
       document.getElementById('loadMoreSection').classList.toggle('d-none', !app.hasMorePosts);
     }
