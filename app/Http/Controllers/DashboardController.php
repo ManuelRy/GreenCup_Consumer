@@ -198,9 +198,9 @@ class DashboardController extends Controller
             ->sum('total_quantity') ?? 0;
 
         // Calculate environmental impact using environmental-impact page formulas
-        $co2_grams = $totalUnits * 20; // grams of CO2 saved
+        $co2_grams = $totalUnits * 21; // grams of CO2 saved
         $co2_kg = $co2_grams / 1000; // Convert to kg
-        $waste_prevented_grams = $totalUnits * 8; // grams of waste prevented
+        $waste_prevented_grams = $totalUnits * 3; // grams of waste prevented
         $waste_prevented_kg = $waste_prevented_grams / 1000; // Convert to kg
 
         return [

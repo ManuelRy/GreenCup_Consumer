@@ -56,7 +56,7 @@
             <div class="stat-card co2-card">
                 <div class="stat-icon">🌱</div>
                 <div class="stat-content">
-                    <div class="stat-number">{{ number_format($total_cups * 20) }}<span class="unit">g</span></div>
+                    <div class="stat-number">{{ number_format($total_cups * 21) }}<span class="unit">g</span></div>
                     <div class="stat-label">CO₂ Saved</div>
                     <div class="stat-description">Carbon footprint reduction</div>
                 </div>
@@ -69,7 +69,7 @@
             <div class="stat-card waste-card">
                 <div class="stat-icon">🗑️</div>
                 <div class="stat-content">
-                    <div class="stat-number">{{ number_format($total_cups * 8) }}<span class="unit">g</span></div>
+                    <div class="stat-number">{{ number_format($total_cups * 3) }}<span class="unit">g</span></div>
                     <div class="stat-label">Waste Prevented</div>
                     <div class="stat-description">Landfill waste avoided</div>
                 </div>
