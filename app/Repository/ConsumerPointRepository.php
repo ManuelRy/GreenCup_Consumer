@@ -18,48 +18,27 @@ class ConsumerPointRepository
 
   public function getTotalByConsumerId($id)
   {
-    // Calculate earned from point_transactions
-    // Includes: 'earn' transactions
-    $earned = \App\Models\PointTransaction::where('consumer_id', $id)
-      ->where('type', 'earn')
-      ->sum('points') ?? 0;
+    // Get totals directly from consumer_points table (source of truth)
+    // This includes all refunds and redemptions that are tracked in earned/spent/coins fields
+    $totals = ConsumerPoint::where('consumer_id', $id)
+      ->selectRaw('SUM(earned) as earned, SUM(coins) as coins, SUM(spent) as spent')
+      ->first();
 
-    // Calculate spent from point_transactions
-    // Includes: 'spend' transactions (redemptions)
-    $spent = \App\Models\PointTransaction::where('consumer_id', $id)
-      ->where('type', 'spend')
-      ->sum('points') ?? 0;
+    $earned = (int) ($totals->earned ?? 0);
+    $coins = (int) ($totals->coins ?? 0);
+    $spent = (int) ($totals->spent ?? 0);
 
-    // Calculate rejected (subtract from earned)
-    // When a receipt is rejected, we lose those earned points
-    $rejected = \App\Models\PointTransaction::where('consumer_id', $id)
-      ->where('type', 'rejected')
-      ->sum('points') ?? 0;
-
-    // Calculate refunds (add back to available)
-    // When a redemption is refunded, we get those spent points back
-    $refunded = \App\Models\PointTransaction::where('consumer_id', $id)
-      ->where('type', 'refund')
-      ->sum('points') ?? 0;
-
-    // Calculate current coins correctly:
-    // Start with earned, subtract rejected (net earned)
-    // Subtract spent, add back refunds (net spent)
-    $netEarned = $earned - $rejected;
-    $netSpent = $spent - $refunded;
-    $coins = $netEarned - $netSpent;
-    
     // CRITICAL FIX: Ensure coins never display as negative
     // If somehow negative, cap at 0 and log the issue
     if ($coins < 0) {
-      \Log::warning("Consumer ID {$id} has negative points: Earned={$earned}, Rejected={$rejected}, Spent={$spent}, Refunded={$refunded}, Calculated={$coins}");
+      \Log::warning("Consumer ID {$id} has negative points: Earned={$earned}, Spent={$spent}, Coins={$coins}");
       $coins = 0;
     }
 
     return [
-      'earned' => (int) $netEarned,  // Total earned minus rejections
-      'coins'  => max(0, (int) $coins), // Ensure never negative
-      'spent'  => (int) $netSpent,   // Total spent minus refunds
+      'earned' => $earned,
+      'coins'  => max(0, $coins),
+      'spent'  => $spent,
     ];
   }
   public function getByConsumerAndSeller($consumer_id, $seller_id): ?Model

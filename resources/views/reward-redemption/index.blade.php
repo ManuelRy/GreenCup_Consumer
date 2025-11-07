@@ -575,10 +575,27 @@
               ${imageHtml}
               <h4 class="fw-bold text-primary mb-2">🎁 ${selectedReward.name}</h4>
               <p class="text-muted mb-3">From <strong>${selectedShop}</strong></p>
+              <div class="bg-info bg-opacity-10 text-info rounded-3 p-2 mb-3">
+                <div class="small text-center">
+                  <i class="fas fa-box me-1"></i>
+                  <span id="modal-available-qty">${selectedReward.available_qty}</span> remaining in stock
+                  ${selectedReward.available_qty <= 5 ? ' <span class="text-warning">• Limited Stock!</span>' : ''}
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="redemption-quantity" class="form-label fw-bold">
+                  <i class="fas fa-hashtag me-1"></i>Quantity
+                </label>
+                <input type="number" class="form-control" id="redemption-quantity"
+                       min="1" max="${selectedReward.available_qty}" value="1"
+                       placeholder="Enter quantity">
+                <div class="form-text">Available: ${selectedReward.available_qty}</div>
+                <div id="quantity-error" class="text-danger small mt-1" style="display: none;"></div>
+              </div>
               <div class="bg-success bg-opacity-10 text-success rounded-3 p-3 mb-3">
                 <div class="d-flex align-items-center justify-content-center gap-2">
                   <i class="fas fa-coins"></i>
-                  <span class="fw-bold fs-5">${selectedReward.points_required.toLocaleString()} Points</span>
+                  <span class="fw-bold fs-5" id="total-points-display">${selectedReward.points_required.toLocaleString()} Points</span>
                 </div>
                 <div class="small mt-1">Will be deducted from your wallet</div>
               </div>
@@ -597,6 +614,36 @@
             const modal = new bootstrap.Modal(modalElement);
             modal.show();
             console.log('Modal should be visible now');
+
+            // Add event listener for quantity input
+            setTimeout(() => {
+              const quantityInput = document.getElementById('redemption-quantity');
+              const totalPointsDisplay = document.getElementById('total-points-display');
+              const quantityError = document.getElementById('quantity-error');
+
+              if (quantityInput && totalPointsDisplay) {
+                quantityInput.addEventListener('input', function() {
+                  const quantity = parseInt(this.value) || 0;
+                  const availableQty = parseInt(selectedReward.available_qty);
+                  const pointsRequired = selectedReward.points_required;
+
+                  // Validate quantity
+                  if (quantity < 1) {
+                    quantityError.textContent = 'Quantity must be at least 1';
+                    quantityError.style.display = 'block';
+                  } else if (quantity > availableQty) {
+                    quantityError.textContent = `Only ${availableQty} available`;
+                    quantityError.style.display = 'block';
+                  } else {
+                    quantityError.style.display = 'none';
+                  }
+
+                  // Update total points
+                  const totalPoints = pointsRequired * quantity;
+                  totalPointsDisplay.textContent = `${totalPoints.toLocaleString()} Points`;
+                });
+              }
+            }, 100);
           } else {
             console.error('Modal element not found!');
           }
@@ -733,6 +780,29 @@
           alert('No reward selected.');
           return;
         }
+
+        // Get quantity from input
+        const quantityInput = document.getElementById('redemption-quantity');
+        const quantity = parseInt(quantityInput ? quantityInput.value : 1) || 1;
+        const quantityError = document.getElementById('quantity-error');
+
+        // Validate quantity before sending
+        if (quantity < 1) {
+          if (quantityError) {
+            quantityError.textContent = 'Quantity must be at least 1';
+            quantityError.style.display = 'block';
+          }
+          return;
+        }
+
+        if (quantity > selectedReward.available_qty) {
+          if (quantityError) {
+            quantityError.textContent = `Only ${selectedReward.available_qty} available`;
+            quantityError.style.display = 'block';
+          }
+          return;
+        }
+
         const btn = this;
         btn.disabled = true;
 
@@ -743,7 +813,7 @@
               'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
             },
             body: JSON.stringify({
-              quantity: 1
+              quantity: quantity
             })
           })
           .then(response => {

@@ -8,7 +8,9 @@ class ConsumerPoint extends Model
 {
     protected $fillable = [
         'consumer_id',
+        'earned',
         'coins',
+        'spent',
         'seller_id'
     ];
 

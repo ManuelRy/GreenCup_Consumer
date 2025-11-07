@@ -20,11 +20,11 @@ class RewardRepository
     return RedeemHistory::with(['reward.seller'])->where('consumer_id', $consumer_id)->get();
   }
 
-  public function redeem( $reward_id, $qantity): bool
+  public function redeem($reward_id, $quantity): bool
   {
     $reward = $this->get($reward_id);
     return $reward ? $reward->update([
-      'quantity_redeemed' => $reward->quantity_redeemed + $qantity
+      'quantity_redeemed' => $reward->quantity_redeemed + $quantity
     ]) : false;
   }
 
