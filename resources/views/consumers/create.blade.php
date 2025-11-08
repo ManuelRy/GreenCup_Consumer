@@ -594,6 +594,36 @@
       document.getElementById('passwordRequirements').style.display = 'block';
     });
 
+    // Reset button state on page load (fixes back button issue)
+    function resetRegisterButton() {
+      const btn = document.getElementById('submitBtn');
+      const btnText = document.getElementById('btnText');
+      const btnIcon = document.getElementById('btnIcon');
+
+      if (btnText) btnText.textContent = 'Create Account';
+      if (btnIcon && btnIcon.parentNode) {
+        const newIcon = document.createElement('i');
+        newIcon.className = 'bi bi-arrow-right';
+        newIcon.id = 'btnIcon';
+        btnIcon.parentNode.replaceChild(newIcon, btnIcon);
+      }
+      if (btn) {
+        btn.style.opacity = '1';
+        btn.style.pointerEvents = '';
+        btn.disabled = false;
+      }
+    }
+
+    // Reset on ALL page loads (including back button navigation)
+    window.addEventListener('pageshow', function(event) {
+      resetRegisterButton();
+    });
+
+    // Also reset on DOMContentLoaded as backup
+    document.addEventListener('DOMContentLoaded', function() {
+      resetRegisterButton();
+    });
+
     // Form submission with validation
     document.getElementById('registerForm').addEventListener('submit', function(e) {
       const password = passwordInput.value;
@@ -627,6 +657,7 @@
       btnIcon.outerHTML = '<div class="spinner"></div>';
       btn.style.opacity = '0.7';
       btn.style.pointerEvents = 'none';
+      btn.disabled = true;
     });
 
     // Auto-dismiss alerts

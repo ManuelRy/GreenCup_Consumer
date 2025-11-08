@@ -561,9 +561,10 @@
       animation: fadeInUp 1s ease-out;
     }
 
-    /* Card animations */
+    /* Card animations - disabled for smoother page load */
     .card {
-        animation: slideUp 0.6s ease-out;
+        /* animation: slideUp 0.6s ease-out; */
+        opacity: 1;
     }    @keyframes slideUp {
       from {
         opacity: 0;
@@ -770,28 +771,28 @@
         });
       });
 
-      // Intersection Observer for animations
-      const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -100px 0px'
-      };
+      // Intersection Observer for animations - DISABLED to prevent jarring page load
+      // const observerOptions = {
+      //   threshold: 0.1,
+      //   rootMargin: '0px 0px -100px 0px'
+      // };
 
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.style.opacity = '1';
-            entry.target.style.transform = 'translateY(0)';
-          }
-        });
-      }, observerOptions);
+      // const observer = new IntersectionObserver((entries) => {
+      //   entries.forEach(entry => {
+      //     if (entry.isIntersecting) {
+      //       entry.target.style.opacity = '1';
+      //       entry.target.style.transform = 'translateY(0)';
+      //     }
+      //   });
+      // }, observerOptions);
 
       // Observe all cards for scroll animations
-      document.querySelectorAll('.card').forEach(card => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(30px)';
-        card.style.transition = 'all 0.6s ease';
-        observer.observe(card);
-      });
+      // document.querySelectorAll('.card').forEach(card => {
+      //   card.style.opacity = '0';
+      //   card.style.transform = 'translateY(30px)';
+      //   card.style.transition = 'all 0.6s ease';
+      //   observer.observe(card);
+      // });
     });
 
     // Touch feedback for mobile devices

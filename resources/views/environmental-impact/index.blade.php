@@ -188,13 +188,14 @@
 .floating-element {
     position: absolute;
     font-size: 2rem;
-    animation: float 3s ease-in-out infinite;
-    opacity: 0.3;
+    animation: float 3s ease-in-out infinite, fadeInFloat 1s ease-out;
+    opacity: 0;
+    animation-fill-mode: forwards;
 }
 
-.leaf1 { top: 20%; left: 10%; animation-delay: 0s; }
-.leaf2 { top: 60%; right: 15%; animation-delay: 1s; }
-.earth { bottom: 20%; left: 20%; animation-delay: 2s; }
+.leaf1 { top: 20%; left: 10%; animation-delay: 1s, 1s; }
+.leaf2 { top: 60%; right: 15%; animation-delay: 2s, 2s; }
+.earth { bottom: 20%; left: 20%; animation-delay: 3s, 3s; }
 
 /* Impact Stats */
 .impact-stats {
@@ -564,6 +565,17 @@
 @keyframes float {
     0%, 100% { transform: translateY(0px); }
     50% { transform: translateY(-20px); }
+}
+
+@keyframes fadeInFloat {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    100% {
+        opacity: 0.3;
+        transform: translateY(0);
+    }
 }
 
 @keyframes ripple {

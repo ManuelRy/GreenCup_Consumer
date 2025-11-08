@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>Login - GreenCup</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -385,8 +388,9 @@
     @endif
 
     <!-- Login Form -->
-    <form id="loginForm" action="{{ route('login.store') }}" method="POST" novalidate>
+    <form id="loginForm" action="{{ route('login.store') }}" method="POST" novalidate autocomplete="off">
       @csrf
+      <input type="hidden" id="formSubmitted" value="no">
 
       <!-- Email -->
       <div class="form-group">
@@ -490,15 +494,83 @@
       }
     }
 
-    document.getElementById('loginForm').addEventListener('submit', function() {
+    // Check if form was submitted (works with bfcache)
+    const formSubmitted = document.getElementById('formSubmitted');
+
+    function resetButtonState() {
       const btn = document.getElementById('submitBtn');
       const btnText = document.getElementById('btnText');
       const btnIcon = document.getElementById('btnIcon');
 
-      btnText.textContent = 'Signing In...';
-      btnIcon.outerHTML = '<div class="spinner"></div>';
-      btn.style.opacity = '0.7';
-      btn.style.pointerEvents = 'none';
+      // Reset button
+      if (btn) {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.pointerEvents = '';
+      }
+
+      // Reset text
+      if (btnText) {
+        btnText.textContent = 'Sign In';
+      }
+
+      // Reset icon - check if it's a spinner first
+      if (btnIcon) {
+        if (btnIcon.classList.contains('spinner')) {
+          // Replace spinner with arrow icon
+          const newIcon = document.createElement('i');
+          newIcon.className = 'bi bi-arrow-right';
+          newIcon.id = 'btnIcon';
+          btnIcon.replaceWith(newIcon);
+        }
+      } else {
+        // Icon might have been replaced with spinner div
+        const spinnerDiv = btn.querySelector('.spinner');
+        if (spinnerDiv) {
+          const newIcon = document.createElement('i');
+          newIcon.className = 'bi bi-arrow-right';
+          newIcon.id = 'btnIcon';
+          spinnerDiv.replaceWith(newIcon);
+        }
+      }
+
+      // Reset form submitted flag
+      if (formSubmitted) {
+        formSubmitted.value = 'no';
+      }
+    }
+
+    // ALWAYS reset on page show (most reliable for bfcache)
+    window.addEventListener('pageshow', function(event) {
+      // Check if user came back from authenticated page (back button pressed after login)
+      if (event.persisted && formSubmitted && formSubmitted.value === 'yes') {
+        // User pressed back button after successful login - logout and redirect
+        window.location.href = '{{ route("logout.get") }}';
+        return;
+      }
+
+      // Otherwise just reset button state
+      setTimeout(resetButtonState, 10);
+    });
+
+    // Form submission handler
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      // Mark form as submitted
+      if (formSubmitted) {
+        formSubmitted.value = 'yes';
+      }
+
+      const btn = document.getElementById('submitBtn');
+      const btnText = document.getElementById('btnText');
+      const btnIcon = document.getElementById('btnIcon');
+
+      if (btnText) btnText.textContent = 'Signing In...';
+      if (btnIcon) btnIcon.outerHTML = '<div class="spinner"></div>';
+      if (btn) {
+        btn.style.opacity = '0.7';
+        btn.style.pointerEvents = 'none';
+        btn.disabled = true;
+      }
     });
 
     // Auto-dismiss alerts
