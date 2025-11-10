@@ -32,8 +32,8 @@
 
             <!-- Mobile Right: points + toggler -->
             <div class="d-lg-none d-flex align-items-center gap-2">
-                <span class="points-badge">
-                    <i class="bi bi-star-fill me-1"></i>{{ $points }} <span class="d-none d-sm-inline">pts</span>
+                <span class="points-badge" id="mobile-points-display">
+                    <i class="bi bi-star-fill me-1"></i><span id="mobile-points-value">{{ $points }}</span> <span class="d-none d-sm-inline">pts</span>
                 </span>
                 <!-- Toggler points to #mobileNav (offcanvas) -->
                 <button class="navbar-toggler rounded-3 p-2" type="button" data-bs-toggle="offcanvas"
@@ -96,8 +96,8 @@
                 <!-- Right Navigation -->
                 <ul class="navbar-nav">
                     <li class="nav-item d-none d-lg-flex align-items-center me-3">
-                        <span class="points-badge">
-                            <i class="bi bi-star-fill me-1"></i>{{ $points }} pts
+                        <span class="points-badge" id="desktop-points-display">
+                            <i class="bi bi-star-fill me-1"></i><span id="desktop-points-value">{{ $points }}</span> pts
                         </span>
                     </li>
 
@@ -170,8 +170,8 @@
             </div>
             <div class="offcanvas-body d-flex flex-column">
                 <div class="mb-3">
-                    <span class="points-badge w-100 justify-content-center">
-                        <i class="bi bi-star-fill me-1"></i>{{ $points }} pts
+                    <span class="points-badge w-100 justify-content-center" id="offcanvas-points-display">
+                        <i class="bi bi-star-fill me-1"></i><span id="offcanvas-points-value">{{ $points }}</span> pts
                     </span>
                 </div>
 
@@ -379,22 +379,8 @@
     </nav>
 @endauth
 
-{{-- Minimal styles for your rounded green theme --}}
+{{-- Minimal styles for navbar components --}}
 <style>
-    .points-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: .25rem;
-        padding: .25rem .5rem;
-        border-radius: 999px;
-        background: #e9f7ef;
-        color: #198754;
-        font-weight: 600;
-        font-size: .9rem;
-        border: 1px solid rgba(25, 135, 84, .15);
-        line-height: 1;
-    }
-
     .user-avatar {
         width: 36px;
         height: 36px;

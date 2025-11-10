@@ -2,24 +2,6 @@
 
 @section('content')
 <div class="scan-app">
-    <!-- Header -->
-    <div class="app-header">
-        <div class="header-container">
-            <a href="{{ route('dashboard') }}" class="back-btn">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M19 12H5M12 19l-7-7 7-7"/>
-                </svg>
-            </a>
-            <div class="header-info">
-                <h1>Scan Receipt</h1>
-                <p>Scan QR code to earn points</p>
-            </div>
-            <div class="points-chip">
-                <span id="current-points">{{ Auth::guard('consumer')->user()->getAvailablePoints() ?? 0 }}</span>
-            </div>
-        </div>
-    </div>
-
     <!-- Main Content -->
     <div class="app-content">
         <!-- Scanner Card -->
@@ -34,7 +16,7 @@
                         </svg>
                     </div>
                     <div>
-                        <h2>QR Scanner</h2>
+                        <h2>Scan Receipt</h2>
                         <p>Position QR code in the center</p>
                     </div>
                 </div>
@@ -256,7 +238,7 @@
         <!-- Success Message -->
         <h2>Points Earned!</h2>
         <div class="points-display">
-            <span class="points-badge">
+            <span class="success-points-badge">
                 <span class="plus-sign">+</span>
                 <span id="points-amount">0</span>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="coin-icon">
@@ -399,72 +381,6 @@ body {
     flex-direction: column;
     width: 100%;
     overflow-x: hidden;
-}
-
-/* Header */
-.app-header {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-    color: var(--white);
-    padding: var(--space-6) var(--space-4);
-    position: relative;
-    width: 100%;
-    z-index: 100;
-    box-shadow: var(--shadow-md);
-}
-
-.header-container {
-    max-width: 480px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    gap: var(--space-4);
-}
-
-.back-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: var(--radius-lg);
-    color: var(--white);
-    text-decoration: none;
-    transition: all 0.2s ease;
-    backdrop-filter: blur(10px);
-}
-
-.back-btn:hover {
-    background: rgba(255, 255, 255, 0.25);
-    transform: translateX(-2px);
-    color: var(--white);
-}
-
-.header-info {
-    flex: 1;
-    text-align: center;
-}
-
-.header-info h1 {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 2px;
-}
-
-.header-info p {
-    font-size: 14px;
-    opacity: 0.9;
-}
-
-.points-chip {
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: var(--radius-xl);
-    padding: var(--space-2) var(--space-4);
-    font-size: 16px;
-    font-weight: 700;
-    backdrop-filter: blur(10px);
-    min-width: 60px;
-    text-align: center;
 }
 
 /* Content */
@@ -1388,7 +1304,7 @@ body {
     animation: fadeInUp 0.5s ease-out 0.7s backwards;
 }
 
-.points-badge {
+.success-points-badge {
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
@@ -1403,7 +1319,7 @@ body {
     overflow: hidden;
 }
 
-.points-badge::before {
+.success-points-badge::before {
     content: '';
     position: absolute;
     top: 0;
@@ -1711,23 +1627,6 @@ body {
 }
 
 @media (max-width: 480px) {
-    .app-header {
-        padding: var(--space-4);
-    }
-
-    .header-info h1 {
-        font-size: 16px;
-    }
-
-    .header-info p {
-        font-size: 13px;
-    }
-
-    .points-chip {
-        font-size: 14px;
-        min-width: 50px;
-    }
-
     .success-content {
         padding: var(--space-6) var(--space-4);
     }
@@ -1758,7 +1657,7 @@ body {
         height: 20px;
     }
 
-    .points-badge {
+    .success-points-badge {
         font-size: 28px;
         padding: var(--space-2) var(--space-4);
         gap: var(--space-1);
@@ -2147,9 +2046,28 @@ function showError(message) {
 }
 
 function updatePointsDisplay(newBalance) {
-    const pointsEl = document.getElementById('current-points');
-    if (pointsEl && newBalance !== undefined) {
-        pointsEl.textContent = newBalance;
+    // Use global navbar points update function if available
+    if (typeof window.updateNavbarPoints === 'function') {
+        window.updateNavbarPoints(newBalance);
+    } else {
+        // Fallback: Update all navbar points displays directly
+        const desktopPoints = document.getElementById('desktop-points-value');
+        const mobilePoints = document.getElementById('mobile-points-value');
+        const offcanvasPoints = document.getElementById('offcanvas-points-value');
+
+        if (newBalance !== undefined) {
+            const formattedPoints = Number(newBalance).toLocaleString();
+
+            if (desktopPoints) {
+                desktopPoints.textContent = formattedPoints;
+            }
+            if (mobilePoints) {
+                mobilePoints.textContent = formattedPoints;
+            }
+            if (offcanvasPoints) {
+                offcanvasPoints.textContent = formattedPoints;
+            }
+        }
     }
 }
 

@@ -1871,23 +1871,6 @@
       margin-bottom: 20px;
     }
 
-    .points-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: linear-gradient(135deg, #2E8B57, #228B22);
-      color: white;
-      padding: 10px 20px;
-      border-radius: 20px;
-      font-size: 16px;
-      font-weight: 600;
-      box-shadow: 0 4px 12px rgba(46, 139, 87, 0.3);
-    }
-
-    .points-badge i {
-      font-size: 18px;
-    }
-
     .item-modal-description {
       color: #64748b;
       font-size: 14px;

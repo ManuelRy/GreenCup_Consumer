@@ -128,13 +128,16 @@
         }
 
         .points-badge {
-            background: linear-gradient(135deg, #28a745, #20c997);
-            color: white;
-            padding: 0.25rem 0.7rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+            background: linear-gradient(135deg, #28a745, #20c997) !important;
+            color: white !important;
+            padding: 0.25rem 0.7rem !important;
+            border-radius: 20px !important;
+            font-size: 0.8rem !important;
+            font-weight: 600 !important;
+            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3) !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            border: none !important;
         }
 
         .dropdown-menu {
@@ -195,8 +198,8 @@
             }
 
             .points-badge {
-                margin-bottom: 0.25rem;
-                display: inline-block;
+                margin-bottom: 0.25rem !important;
+                display: inline-flex !important;
             }
 
             .user-info {
@@ -222,8 +225,8 @@
             }
 
             .points-badge {
-                font-size: 0.75rem;
-                padding: 0.2rem 0.5rem;
+                font-size: 0.75rem !important;
+                padding: 0.2rem 0.5rem !important;
             }
 
             .user-avatar {
@@ -269,5 +272,33 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="{{ asset('dashboard.js') }}"></script>
+
+    <!-- Global Points Update Function -->
+    <script>
+        // Global function to update points display across all navbar instances
+        window.updateNavbarPoints = function(newBalance) {
+            if (newBalance === undefined || newBalance === null) return;
+
+            const formattedPoints = Number(newBalance).toLocaleString();
+
+            // Update desktop navbar points
+            const desktopPoints = document.getElementById('desktop-points-value');
+            if (desktopPoints) {
+                desktopPoints.textContent = formattedPoints;
+            }
+
+            // Update mobile navbar points
+            const mobilePoints = document.getElementById('mobile-points-value');
+            if (mobilePoints) {
+                mobilePoints.textContent = formattedPoints;
+            }
+
+            // Update offcanvas menu points
+            const offcanvasPoints = document.getElementById('offcanvas-points-value');
+            if (offcanvasPoints) {
+                offcanvasPoints.textContent = formattedPoints;
+            }
+        };
+    </script>
 </body>
 </html>
