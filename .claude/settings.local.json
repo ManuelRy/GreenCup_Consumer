@@ -15,7 +15,8 @@
       "Bash(curl -s \"http://127.0.0.1:8001/api/stores/3\")",
       "Bash(curl -s \"http://127.0.0.1:8001/api/store/3/details\")",
       "Bash(curl -X POST http://127.0.0.1:8001/api/reward-redemption/reject -H \"Content-Type: application/json\" -d \"{\"\"redemption_id\"\": 3, \"\"reason\"\": \"\"Test rejection via API\"\"}\")",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []
