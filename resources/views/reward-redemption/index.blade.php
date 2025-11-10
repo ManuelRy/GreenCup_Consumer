@@ -211,8 +211,7 @@
     }
 
     .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(29, 209, 161, 0.3);
+      box-shadow: 0 4px 12px rgba(29, 209, 161, 0.25);
       background: linear-gradient(135deg, #10ac84, #0e8e71);
     }
 
@@ -225,17 +224,15 @@
     .btn-outline-primary:hover {
       background: #1dd1a1;
       border-color: #1dd1a1;
-      transform: translateY(-1px);
     }
 
     /* Reward Cards */
     .reward-item {
-      transition: all 0.3s ease;
+      transition: all 0.2s ease;
     }
 
     .reward-item:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
     /* Default reward card styling */
@@ -255,17 +252,15 @@
 
     /* Card animations */
     .card {
-      animation: slideUp 0.6s ease-out;
+      animation: fadeIn 0.3s ease-out;
     }
 
-    @keyframes slideUp {
+    @keyframes fadeIn {
       from {
         opacity: 0;
-        transform: translateY(30px);
       }
       to {
         opacity: 1;
-        transform: translateY(0);
       }
     }
 
@@ -274,13 +269,13 @@
     .form-select {
       border-radius: 0.5rem;
       border: 2px solid #e9ecef;
-      transition: all 0.3s ease;
+      transition: all 0.2s ease;
     }
 
     .form-control:focus,
     .form-select:focus {
       border-color: #1dd1a1;
-      box-shadow: 0 0 0 0.2rem rgba(29, 209, 161, 0.25);
+      box-shadow: 0 0 0 0.15rem rgba(29, 209, 161, 0.15);
     }
 
     /* Badge enhancements */
@@ -340,15 +335,7 @@
       outline-offset: 2px;
     }
 
-    /* Staggered animation for reward cards */
-    .reward-card:nth-child(1) { animation-delay: 0.1s; }
-    .reward-card:nth-child(2) { animation-delay: 0.2s; }
-    .reward-card:nth-child(3) { animation-delay: 0.3s; }
-    .reward-card:nth-child(4) { animation-delay: 0.4s; }
-    .reward-card:nth-child(5) { animation-delay: 0.5s; }
-    .reward-card:nth-child(6) { animation-delay: 0.6s; }
-    .reward-card:nth-child(7) { animation-delay: 0.7s; }
-    .reward-card:nth-child(8) { animation-delay: 0.8s; }
+    /* Staggered animation for reward cards - simplified */
 
     /* Loading states */
     .btn:disabled {
@@ -365,71 +352,36 @@
     /* Shop section styling */
     .shop-section {
       opacity: 1;
-      transition: all 0.3s ease;
+      transition: opacity 0.2s ease;
     }
 
     .shop-section.filtering {
-      opacity: 0.7;
+      opacity: 0.8;
     }
 
-    /* Enhanced reward card hover effects */
-    .reward-card {
-      transform-origin: center;
-    }
-
+    /* Enhanced reward card hover effects - simplified */
     .reward-card .card {
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.2s ease;
       border: 2px solid transparent;
     }
 
     .reward-card .card:hover {
-      border-color: rgba(29, 209, 161, 0.3);
-      transform: translateY(-8px) scale(1.02);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-    }
-
-    .reward-preview-card:hover {
-      border-color: rgba(29, 209, 161, 0.5) !important;
-      transform: translateY(-10px) scale(1.03) !important;
-      box-shadow: 0 25px 50px rgba(29, 209, 161, 0.2) !important;
-    }
-
-    .reward-preview-card:hover::after {
-      content: "👁️ Click to Preview";
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(29, 209, 161, 0.9);
-      color: white;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 14px;
-      font-weight: 600;
-      z-index: 10;
-      pointer-events: none;
-      opacity: 0;
-      animation: fadeInPreview 0.3s ease forwards;
-    }
-
-    @keyframes fadeInPreview {
-      to {
-        opacity: 1;
-      }
+      border-color: rgba(29, 209, 161, 0.2);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
     }
 
     /* Improved filter section */
     .form-control:focus,
     .form-select:focus {
       border-color: #1dd1a1;
-      box-shadow: 0 0 0 0.2rem rgba(29, 209, 161, 0.25);
+      box-shadow: 0 0 0 0.15rem rgba(29, 209, 161, 0.15);
       outline: none;
     }
 
     /* Better mobile responsiveness */
     @media (max-width: 768px) {
       .reward-card .card:hover {
-        transform: translateY(-4px) scale(1.01);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       }
 
       .shop-section h4 {
@@ -1055,48 +1007,8 @@
       pointsFilter.addEventListener('change', applyFilters);
       sortFilter.addEventListener('change', applyFilters);
 
-      // Animation functions
-      function animateCards() {
-        const rewardCards = document.querySelectorAll('.reward-card');
-        rewardCards.forEach((card, index) => {
-          card.style.opacity = '0';
-          card.style.transform = 'translateY(30px)';
-          card.style.transition = `all 0.6s ease ${index * 0.1}s`;
-
-          setTimeout(() => {
-            card.style.opacity = '1';
-            card.style.transform = 'translateY(0)';
-          }, index * 100);
-        });
-      }
-
-      // Initial animation
-      setTimeout(() => {
-        animateCards();
-      }, 100);
-
-      // Animate cards on scroll
-      const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-      };
-
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.style.opacity = '1';
-            entry.target.style.transform = 'translateY(0)';
-          }
-        });
-      }, observerOptions);
-
-      // Observe initially loaded cards
-      document.querySelectorAll('.reward-card').forEach((card, index) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(30px)';
-        card.style.transition = `all 0.6s ease ${index * 0.1}s`;
-        observer.observe(card);
-      });
+      // Simplified animation - cards fade in naturally with CSS
+      // No complex scroll or stagger animations needed
 
       // Function to scroll to and highlight a specific reward
       function scrollToAndHighlightReward(rewardId) {
@@ -1167,20 +1079,20 @@
       border-radius: 16px;
       overflow: hidden;
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.2s ease;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
       border: 2px solid transparent;
       position: relative;
     }
 
     .modern-reward-card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 12px 32px rgba(29, 209, 161, 0.25);
-      border-color: rgba(29, 209, 161, 0.3);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(29, 209, 161, 0.15);
+      border-color: rgba(29, 209, 161, 0.2);
     }
 
     .modern-reward-card:active {
-      transform: translateY(-4px);
+      transform: translateY(-2px);
     }
 
     /* Image Wrapper */
@@ -1199,11 +1111,11 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: transform 0.4s ease;
+      transition: transform 0.3s ease;
     }
 
     .modern-reward-card:hover .reward-card-img {
-      transform: scale(1.1);
+      transform: scale(1.05);
     }
 
     .reward-card-no-image {
@@ -1234,7 +1146,6 @@
       font-size: 14px;
       z-index: 2;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-      animation: bounceIn 0.6s ease;
     }
 
     .reward-status-badge.available {
@@ -1265,19 +1176,6 @@
     .reward-status-badge.expiring-soon {
       background: linear-gradient(135deg, #f59e0b, #d97706);
       color: white;
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes bounceIn {
-      0% {
-        transform: scale(0);
-      }
-      50% {
-        transform: scale(1.2);
-      }
-      100% {
-        transform: scale(1);
-      }
     }
 
     /* Hover Overlay */
@@ -1287,12 +1185,12 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(29, 209, 161, 0.95);
+      background: rgba(29, 209, 161, 0.9);
       display: flex;
       align-items: center;
       justify-content: center;
       opacity: 0;
-      transition: opacity 0.3s ease;
+      transition: opacity 0.2s ease;
       z-index: 1;
     }
 
@@ -1303,12 +1201,6 @@
     .reward-hover-content {
       color: white;
       text-align: center;
-      transform: translateY(20px);
-      transition: transform 0.3s ease;
-    }
-
-    .modern-reward-card:hover .reward-hover-content {
-      transform: translateY(0);
     }
 
     .reward-hover-content i {
@@ -1394,13 +1286,11 @@
     .reward-card-expiry.soon {
       background: rgba(245, 158, 11, 0.15);
       color: #d97706;
-      animation: pulse 2s infinite;
     }
 
     .reward-card-expiry.urgent {
       background: rgba(239, 68, 68, 0.15);
       color: #dc2626;
-      animation: pulse 1.5s infinite;
     }
 
     .reward-card-expiry.expired {
@@ -1427,16 +1317,6 @@
     .stock-warning {
       margin-left: auto;
       font-size: clamp(0.875rem, 3.5vw, 1rem);
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% {
-        opacity: 1;
-      }
-      50% {
-        opacity: 0.5;
-      }
     }
 
     /* Redeem Button */
@@ -1451,7 +1331,7 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
-      transition: all 0.3s ease;
+      transition: all 0.2s ease;
       text-transform: uppercase;
       letter-spacing: 0.5px;
       cursor: pointer;
@@ -1460,17 +1340,16 @@
     .reward-redeem-btn.available {
       background: linear-gradient(135deg, #22c55e, #16a34a);
       color: white;
-      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+      box-shadow: 0 2px 8px rgba(34, 197, 94, 0.25);
     }
 
     .reward-redeem-btn.available:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(34, 197, 94, 0.4);
+      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.35);
       background: linear-gradient(135deg, #16a34a, #15803d);
     }
 
     .reward-redeem-btn.available:active {
-      transform: translateY(0);
+      transform: scale(0.98);
     }
 
     .reward-redeem-btn.locked {
@@ -1520,7 +1399,7 @@
       }
 
       .modern-reward-card:hover {
-        transform: translateY(-4px);
+        transform: translateY(-2px);
       }
 
       .reward-card-content {
@@ -1602,28 +1481,17 @@
       }
     }
 
-    /* Loading and Animation States */
+    /* Loading and Animation States - simplified */
     .reward-card {
-      animation: fadeInUp 0.6s ease backwards;
+      animation: fadeInSimple 0.3s ease;
     }
 
-    .reward-card:nth-child(1) { animation-delay: 0.05s; }
-    .reward-card:nth-child(2) { animation-delay: 0.1s; }
-    .reward-card:nth-child(3) { animation-delay: 0.15s; }
-    .reward-card:nth-child(4) { animation-delay: 0.2s; }
-    .reward-card:nth-child(5) { animation-delay: 0.25s; }
-    .reward-card:nth-child(6) { animation-delay: 0.3s; }
-    .reward-card:nth-child(7) { animation-delay: 0.35s; }
-    .reward-card:nth-child(8) { animation-delay: 0.4s; }
-
-    @keyframes fadeInUp {
+    @keyframes fadeInSimple {
       from {
         opacity: 0;
-        transform: translateY(30px);
       }
       to {
         opacity: 1;
-        transform: translateY(0);
       }
     }
 
@@ -1659,7 +1527,6 @@
       align-items: center;
       justify-content: center;
       position: relative;
-      animation: pulse-gentle 2s ease-in-out infinite;
     }
 
     .icon-circle i {
@@ -1679,7 +1546,6 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      animation: bounce 1s ease-in-out infinite;
     }
 
     .icon-warning i {
@@ -1687,23 +1553,6 @@
       color: #dc2626;
     }
 
-    @keyframes pulse-gentle {
-      0%, 100% {
-        transform: scale(1);
-      }
-      50% {
-        transform: scale(1.05);
-      }
-    }
-
-    @keyframes bounce {
-      0%, 100% {
-        transform: translateY(0);
-      }
-      50% {
-        transform: translateY(-5px);
-      }
-    }
 
     .points-comparison {
       background: #f8f9fa;
@@ -1716,12 +1565,6 @@
       border-radius: 12px;
       padding: 16px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-      transition: all 0.3s ease;
-    }
-
-    .points-box:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
     }
 
     .points-box .label {
@@ -1771,12 +1614,11 @@
       border: none;
       padding: 14px 24px;
       font-weight: 600;
-      transition: all 0.3s ease;
+      transition: all 0.2s ease;
     }
 
     #insufficientPointsModal .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(29, 209, 161, 0.3);
+      box-shadow: 0 4px 12px rgba(29, 209, 161, 0.25);
     }
 
     #insufficientPointsModal .btn-outline-secondary {
