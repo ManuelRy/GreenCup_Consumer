@@ -9,7 +9,7 @@
                         <div class="mb-3">
                             <i class="bi bi-cup-hot" style="font-size: 4rem; color: white;"></i>
                         </div>
-                        <h2 class="text-white fw-bold mb-2">Welcome to GreenCup! 🌱</h2>
+                        <h2 class="text-white fw-bold mb-2">Welcome to Green Cups! 🌱</h2>
                         <p class="text-white mb-4">
                             @auth('consumer')
                                 Hi {{ auth('consumer')->user()->full_name ?? 'there' }}! Ready for a quick tour?
@@ -43,7 +43,7 @@
                     <!-- Introduction -->
                     <div class="alert alert-success border-0 mb-3" style="background-color: #e8f8f5;">
                         <p class="small mb-0">
-                            <strong>GreenCup supports Cambodia's Ministry of Environment 4R Strategy</strong> -
+                            <strong>Green Cups supports Cambodia's Ministry of Environment 4R Strategy</strong> -
                             a comprehensive approach to sustainable waste management.
                         </p>
                     </div>
@@ -102,34 +102,29 @@
                     <!-- Impact Icons -->
                     <div class="card border-0 mb-3" style="background: linear-gradient(135deg, #e8f8f5 0%, #d4edda 100%);">
                         <div class="card-body p-3">
-                            <h6 class="fw-bold mb-2 text-success">
+                            <h6 class="fw-bold mb-3 text-success">
                                 <i class="bi bi-graph-up-arrow me-1"></i>Your Impact with Reusable Cups
                             </h6>
-                            <div class="row text-center g-2">
-                                <div class="col-3">
-                                    <div class="p-2 bg-white rounded shadow-sm">
-                                        <div class="fs-4">🌳</div>
-                                        <small class="fw-bold d-block">Trees</small>
+                            <div class="row text-center g-3 mb-3">
+                                <div class="col-6">
+                                    <div class="p-3 bg-white rounded shadow-sm">
+                                        <div class="fs-1 mb-2">�</div>
+                                        <small class="fw-bold d-block mb-1">CO₂ Saved</small>
+                                        <small class="text-muted d-block" style="font-size: 0.75rem;">Each cup saves 21g of CO₂ emissions</small>
                                     </div>
                                 </div>
-                                <div class="col-3">
-                                    <div class="p-2 bg-white rounded shadow-sm">
-                                        <div class="fs-4">💧</div>
-                                        <small class="fw-bold d-block">Water</small>
+                                <div class="col-6">
+                                    <div class="p-3 bg-white rounded shadow-sm">
+                                        <div class="fs-1 mb-2">🗑️</div>
+                                        <small class="fw-bold d-block mb-1">Waste Prevented</small>
+                                        <small class="text-muted d-block" style="font-size: 0.75rem;">Each cup prevents 3g of waste</small>
                                     </div>
                                 </div>
-                                <div class="col-3">
-                                    <div class="p-2 bg-white rounded shadow-sm">
-                                        <div class="fs-4">⚡</div>
-                                        <small class="fw-bold d-block">Energy</small>
-                                    </div>
-                                </div>
-                                <div class="col-3">
-                                    <div class="p-2 bg-white rounded shadow-sm">
-                                        <div class="fs-4">🌍</div>
-                                        <small class="fw-bold d-block">CO₂</small>
-                                    </div>
-                                </div>
+                            </div>
+                            <div class="alert alert-info border-0 mb-0" style="background-color: rgba(23, 162, 184, 0.1); font-size: 0.85rem;">
+                                <strong>💡 How we calculate:</strong><br>
+                                <small class="d-block mt-1">• <strong>CO₂ Saved:</strong> Number of cups × 21g (carbon emissions from producing & disposing one disposable cup)</small>
+                                <small class="d-block">• <strong>Waste Prevented:</strong> Number of cups × 3g (average weight of one disposable cup)</small>
                             </div>
                         </div>
                     </div>
@@ -334,7 +329,7 @@
                 target: '#navbarNav .nav-link[href*="dashboard"]',
                 mobileTarget: '#guestNav .nav-link[href*="dashboard"]',
                 title: '📊 Dashboard',
-                description: 'See how GreenCup rewards eco-friendly choices!'
+                description: 'See how Green Cups rewards eco-friendly choices!'
             },
             {
                 target: '#navbarNav .nav-link[href*="gallery"]',
