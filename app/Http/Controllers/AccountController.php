@@ -198,8 +198,8 @@ class AccountController extends Controller
                     'regex:/^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>]).*$/'
                 ],
             ], [
-                'password.regex' => 'Password must contain at least 1 uppercase letter and 1 special character (!@#$%^&*(),.?":{}|<>)',
-                'password.min' => 'Password must be at least 8 characters',
+                'password.regex' => 'Password is not strong enough. It must contain at least 1 uppercase letter and 1 special character (!@#$%^&*(),.?":{}|<>)',
+                'password.min' => 'Password is not strong enough. It must be at least 8 characters',
                 'password.confirmed' => 'Password confirmation does not match',
             ]);
 
