@@ -190,7 +190,17 @@ class AccountController extends Controller
             $id = Auth::id();
             $request->validate([
                 'current_password' => 'required|current_password:consumer',
-                'password' => ['required', 'confirmed', Password::defaults()],
+                'password' => [
+                    'required',
+                    'string',
+                    'min:8',
+                    'confirmed',
+                    'regex:/^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>]).*$/'
+                ],
+            ], [
+                'password.regex' => 'Password must contain at least 1 uppercase letter and 1 special character (!@#$%^&*(),.?":{}|<>)',
+                'password.min' => 'Password must be at least 8 characters',
+                'password.confirmed' => 'Password confirmation does not match',
             ]);
 
             $this->cRepo->update($id, ['password' => Hash::make($request->password)]);
