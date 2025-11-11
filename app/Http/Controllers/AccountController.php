@@ -186,23 +186,23 @@ class AccountController extends Controller
     }
     public function updatePassword(Request $request)
     {
-        try {
-            $id = Auth::id();
-            $request->validate([
-                'current_password' => 'required|current_password:consumer',
-                'password' => [
-                    'required',
-                    'string',
-                    'min:8',
-                    'confirmed',
-                    'regex:/^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>]).*$/'
-                ],
-            ], [
-                'password.regex' => 'Password is not strong enough. It must contain at least 1 uppercase letter and 1 special character (!@#$%^&*(),.?":{}|<>)',
-                'password.min' => 'Password is not strong enough. It must be at least 8 characters',
-                'password.confirmed' => 'Password confirmation does not match',
-            ]);
+        $id = Auth::id();
+        $request->validate([
+            'current_password' => 'required|current_password:consumer',
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'confirmed',
+                'regex:/^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>]).*$/'
+            ],
+        ], [
+            'password.regex' => 'Password is not strong enough. It must contain at least 1 uppercase letter and 1 special character (!@#$%^&*(),.?":{}|<>)',
+            'password.min' => 'Password is not strong enough. It must be at least 8 characters',
+            'password.confirmed' => 'Password confirmation does not match',
+        ]);
 
+        try {
             $this->cRepo->update($id, ['password' => Hash::make($request->password)]);
             return redirect()->route('account')->with('success', 'Password updated successfully!');
         } catch (\Throwable $e) {
