@@ -123,10 +123,11 @@
       color: #9ca3af;
       font-size: 18px;
       pointer-events: none;
-      z-index: 1;
+      z-index: 10;
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: color 0.3s ease;
     }
 
     .form-control {
@@ -138,6 +139,8 @@
       font-size: 15px;
       transition: all 0.3s ease;
       background: #f9fafb;
+      position: relative;
+      z-index: 1;
     }
 
     .form-control:focus {
@@ -145,6 +148,10 @@
       border-color: #10b981;
       background: #ffffff;
       box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+    }
+    
+    .input-group:focus-within .input-icon {
+      color: #10b981;
     }
 
     .form-control.is-invalid {
