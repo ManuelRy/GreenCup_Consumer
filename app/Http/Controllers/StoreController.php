@@ -509,10 +509,11 @@ class StoreController extends Controller
                 // Use the same points logic as gallery - direct from sellers table
                 $points = $store->total_points ?? 0;
 
-                // For transaction count, still get from point_transactions if needed
-                $transactionCount = DB::table('point_transactions')
+                // Get unique consumer count (distinct consumers who have transacted with this seller)
+                $consumerCount = DB::table('point_transactions')
                     ->where('seller_id', $store->id)
-                    ->count();
+                    ->distinct('consumer_id')
+                    ->count('consumer_id');
 
                 // Generate consistent phone if missing (only for phone)
                 if (empty($store->phone)) {
@@ -545,7 +546,7 @@ class StoreController extends Controller
                     // Points data (same as gallery)
                     'total_points' => $points,
                     'points_reward' => $points,
-                    'transaction_count' => $transactionCount,
+                    'consumer_count' => $consumerCount,
 
                     // Ranking based on points
                     'rank_class' => $rankClass,
@@ -758,10 +759,11 @@ class StoreController extends Controller
         $points = $store->total_points ?? 0;
         $store->points_reward = $points;
 
-        // Get transaction count only if needed
-        $store->transaction_count = DB::table('point_transactions')
+        // Get unique consumer count
+        $store->consumer_count = DB::table('point_transactions')
             ->where('seller_id', $store->id)
-            ->count();
+            ->distinct('consumer_id')
+            ->count('consumer_id');
 
         // Add ranking data based on points (same as gallery)
         $store->rank_class = $this->getRankClass($points);

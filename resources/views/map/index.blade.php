@@ -2324,9 +2324,9 @@
         // Ensure all required properties exist
         store.distance = null;
         store.points_reward = parseFloat(store.points_reward) || parseFloat(store.total_points) || 0;
-        store.transaction_count = parseInt(store.transaction_count) || 0;
+        store.consumer_count = parseInt(store.consumer_count) || 0;
 
-        console.log(`Store ${index}: ${store.name} - Points: ${store.points_reward} - Transactions: ${store.transaction_count} - Rank: ${getRankText(store.points_reward)}`);
+        console.log(`Store ${index}: ${store.name} - Points: ${store.points_reward} - Consumers: ${store.consumer_count} - Rank: ${getRankText(store.points_reward)}`);
       });
 
       app.filteredStores = [...app.stores];
@@ -2798,7 +2798,7 @@
                                     <span>${rankText}</span>
                                 </div>
                                 <span class="store-score">🏆 ${store.points_reward || 0} pts</span>
-                                <span>📊 ${store.transaction_count} visits</span>
+                                <span>📊 ${store.consumer_count || 0} consumers</span>
                             </div>
                         </div>
                         <div class="store-side-info">
@@ -2897,7 +2897,7 @@
           app.filteredStores.forEach(store => {
             store.distance = null;
             store.points_reward = parseFloat(store.points_reward) || parseFloat(store.total_points) || 0;
-            store.transaction_count = parseInt(store.transaction_count) || 0;
+            store.consumer_count = parseInt(store.consumer_count) || 0;
             store.searchQuery = query; // Store search query for matching items display
           });
 
@@ -3087,8 +3087,8 @@
 
             case 'popular':
               app.filteredStores.sort((a, b) => {
-                const countA = parseInt(a.transaction_count) || 0;
-                const countB = parseInt(b.transaction_count) || 0;
+                const countA = parseInt(a.consumer_count) || 0;
+                const countB = parseInt(b.consumer_count) || 0;
                 return countB - countA; // Highest first
               });
               break;
@@ -3360,7 +3360,7 @@
       document.getElementById('storeDistance').textContent = distanceText;
 
       document.getElementById('storePopularity').textContent =
-        `${store.transaction_count || 0} customer visits`;
+        `${store.consumer_count || 0} consumers`;
 
       const rankBadge = document.getElementById('storeRankBadge');
       const rankIconElement = document.getElementById('rankIcon');
