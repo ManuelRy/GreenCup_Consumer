@@ -206,7 +206,7 @@ class AccountController extends Controller
             $this->cRepo->update($id, ['password' => Hash::make($request->password)]);
             return redirect()->route('account')->with('success', 'Password updated successfully!');
         } catch (\Throwable $e) {
-            abort(500, 'Something went wrong');
+            return redirect()->back()->with('error', 'Failed to update password. Please try again.');
         }
     }
 
