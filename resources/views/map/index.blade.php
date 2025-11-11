@@ -171,15 +171,7 @@
             </div>
 
             <div class="info-section">
-              <h4>⏰ Hours & Details</h4>
-              <div class="info-row">
-                <span class="info-icon">⏰</span>
-                <div class="info-content">
-                  <span class="info-label">Hours</span>
-                  <span id="storeHours" class="info-value">-</span>
-                </div>
-              </div>
-
+              <h4>📊 Details</h4>
               <div class="info-row">
                 <span class="info-icon">📊</span>
                 <div class="info-content">
@@ -3344,7 +3336,6 @@
       }
       document.getElementById('storeAddress').textContent = store.address;
       document.getElementById('storePhone').textContent = store.phone;
-      document.getElementById('storeHours').textContent = store.hours || 'Hours not specified';
       document.getElementById('storeDesc').textContent = store.description || 'No description available';
 
       let distanceText = 'Distance unknown';
