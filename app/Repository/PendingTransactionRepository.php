@@ -26,7 +26,7 @@ class PendingTransactionRepository
   }
   public function getByCode($code): ?Model
   {
-    return PendingTransaction::where('receipt_code', $code)->with(['seller', 'consumer'])->first();
+    return PendingTransaction::where('receipt_code', $code)->with(['seller', 'consumer', 'discountReward'])->first();
   }
 
   public function isExpire(Model $pending): bool

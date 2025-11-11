@@ -57,6 +57,17 @@ class ReceiptController extends Controller
                 ]);
             }
 
+            // Check if there's a discount attached
+            $discountInfo = null;
+            if ($pending->discount_reward_id && $pending->discountReward) {
+                $discountInfo = [
+                    'id' => $pending->discountReward->id,
+                    'name' => $pending->discountReward->name,
+                    'discount_percentage' => $pending->discountReward->discount_percentage,
+                    'points_cost' => $pending->discountReward->points_cost,
+                ];
+            }
+
             $receiptData = [
                 'receipt_code' => $pending->receipt_code,
                 'store_name' => $pending->seller->business_name,
@@ -73,7 +84,8 @@ class ReceiptController extends Controller
                     ];
                 },  $pending->items),
                 'created_at' => $pending->created_at,
-                'expires_at' => $pending->expires_at
+                'expires_at' => $pending->expires_at,
+                'discount' => $discountInfo
             ];
 
             return response()->json([
@@ -105,6 +117,17 @@ class ReceiptController extends Controller
                 throw new \Exception('Invalid receipt code');
             }
 
+            // Load the discount relationship explicitly
+            $pending->load('discountReward');
+
+            \Log::info('Receipt claim started', [
+                'receipt_code' => $request->receipt_code,
+                'consumer_id' => $consumer_id,
+                'has_discount' => (bool)$pending->discount_reward_id,
+                'discount_reward_id' => $pending->discount_reward_id,
+                'discount_loaded' => $pending->discountReward ? true : false
+            ]);
+
             if ($pending->status === 'claimed') {
                 throw new \Exception('This receipt has already been claimed');
             }
@@ -114,10 +137,51 @@ class ReceiptController extends Controller
                 throw new \Exception('This receipt has expired');
             }
 
+            // Handle discount reward if attached
+            $discountApplied = false;
+            $discountInfo = null;
+            if ($pending->discount_reward_id && $pending->discountReward) {
+                $discount = $pending->discountReward;
+
+                // Check if consumer has enough points for the discount (check coins, not earned)
+                $consumerPoint = $this->cPRepo->get($consumer_id, $pending->seller_id);
+
+                // Log for debugging
+                \Log::info('Discount check', [
+                    'consumer_id' => $consumer_id,
+                    'seller_id' => $pending->seller_id,
+                    'discount_cost' => $discount->points_cost,
+                    'consumer_coins' => $consumerPoint->coins ?? 0,
+                    'consumer_earned' => $consumerPoint->earned ?? 0,
+                ]);
+
+                if (!$consumerPoint || $consumerPoint->coins < $discount->points_cost) {
+                    throw new \Exception("Insufficient points for discount. You need {$discount->points_cost} points but only have " . ($consumerPoint->coins ?? 0) . " points.");
+                }
+
+                // Deduct points for the discount
+                $this->cPRepo->deduct($consumer_id, $pending->seller_id, $discount->points_cost, "Used discount: {$discount->name} ({$discount->discount_percentage}% off)", $pending->receipt_code);
+
+                $discountApplied = true;
+                $discountInfo = [
+                    'name' => $discount->name,
+                    'percentage' => $discount->discount_percentage,
+                    'points_cost' => $discount->points_cost
+                ];
+
+                \Log::info('Discount applied successfully', [
+                    'points_deducted' => $discount->points_cost,
+                    'discount_name' => $discount->name
+                ]);
+            }
+
             $itemNames = array_column($pending->items, 'name');
             $description = 'Purchased: ' . implode(', ', array_slice($itemNames, 0, 3));
             if (count($itemNames) > 3) {
                 $description .= ' and ' . (count($itemNames) - 3) . ' more items';
+            }
+            if ($discountApplied) {
+                $description .= ' (with ' . $discountInfo['percentage'] . '% discount)';
             }
 
             // update pending transaction
@@ -136,17 +200,22 @@ class ReceiptController extends Controller
             ]);
             DB::commit();
 
-            return response()->json([
+            $response = [
                 'success' => true,
-                'message' => 'Points claimed successfully!',
+                'message' => 'Points claimed successfully!' . ($discountApplied ? ' Discount applied!' : ''),
                 'points_earned' => $pending->total_points,
                 'new_balance' => $consumer_point->earned,
-                // 'transaction_id' => $pointTransactionId,
                 'seller' => [
                     'name' => $pending->seller->business_name,
                     'address' => $pending->seller->address
                 ]
-            ]);
+            ];
+
+            if ($discountApplied) {
+                $response['discount'] = $discountInfo;
+            }
+
+            return response()->json($response);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([

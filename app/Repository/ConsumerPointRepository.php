@@ -56,9 +56,15 @@ class ConsumerPointRepository
     );
   }
 
-  public function get($id)
+  public function get($consumer_id, $seller_id = null)
   {
-    return ConsumerPoint::find($id);
+    // If seller_id is provided, get by consumer and seller
+    if ($seller_id !== null) {
+      return $this->getByConsumerAndSeller($consumer_id, $seller_id);
+    }
+
+    // Otherwise, assume $consumer_id is actually an ID and do a direct lookup
+    return ConsumerPoint::find($consumer_id);
   }
   public function update(int $id, array $data): bool
   {
@@ -118,6 +124,40 @@ class ConsumerPointRepository
       'units_scanned' => 1,
       'type' => 'spend',
       'description' => $description,
+      'scanned_at' => now(),
+    ]);
+
+    return $cp;
+  }
+
+  public function deduct($consumer_id, $seller_id, $points, $description = null, $receipt_code = null)
+  {
+    $cp = $this->getByConsumerAndSeller($consumer_id, $seller_id);
+
+    // CRITICAL FIX: Prevent negative points
+    if ($cp->coins < $points) {
+      throw new \Exception('Insufficient points for discount. Available: ' . $cp->coins . ', Required: ' . $points);
+    }
+
+    $cp->spent += $points;
+    $cp->coins -= $points;
+
+    // Double-check after calculation
+    if ($cp->coins < 0) {
+      throw new \Exception('Point calculation resulted in negative balance. Transaction cancelled.');
+    }
+
+    $cp->save();
+
+    // Create point transaction record for discount usage
+    \App\Models\PointTransaction::create([
+      'consumer_id' => $consumer_id,
+      'seller_id' => $seller_id,
+      'points' => $points,
+      'units_scanned' => 1,
+      'type' => 'discount',
+      'description' => $description ?: 'Discount applied',
+      'receipt_code' => $receipt_code,
       'scanned_at' => now(),
     ]);
 
