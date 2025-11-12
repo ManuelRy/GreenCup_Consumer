@@ -25,6 +25,7 @@ class DiscountReward extends Model
         return $this->belongsTo(Seller::class);
     }
 
+    
     public function pendingTransactions()
     {
         return $this->hasMany(PendingTransaction::class, 'discount_reward_id');
