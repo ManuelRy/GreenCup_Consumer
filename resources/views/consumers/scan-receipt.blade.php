@@ -176,6 +176,30 @@
                 </div>
             </div>
 
+            <!-- Discount Info Card (if applicable) -->
+            <div id="discount-info-card" class="discount-info-card hidden">
+                <div class="discount-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                    </svg>
+                    <span class="discount-title">Discount Applied</span>
+                </div>
+                <div class="discount-details">
+                    <div class="discount-name" id="discount-name"></div>
+                    <div class="discount-stats">
+                        <div class="discount-stat">
+                            <span class="stat-label">Discount</span>
+                            <span class="stat-value" id="discount-percentage">0%</span>
+                        </div>
+                        <div class="discount-stat">
+                            <span class="stat-label">Points Cost</span>
+                            <span class="stat-value danger" id="discount-cost">0 pts</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="total-card">
                 <span>Total Points</span>
                 <span id="total-points" class="total-amount">0</span>
@@ -253,6 +277,21 @@
                 </svg>
             </span>
         </div>
+
+        <!-- Discount Applied Info (if applicable) -->
+        <div id="success-discount-info" class="success-discount-info hidden">
+            <div class="success-discount-badge">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                </svg>
+                <span id="success-discount-text">10% Discount Applied!</span>
+            </div>
+            <div class="success-discount-detail">
+                <span class="detail-label">Points Deducted:</span>
+                <span class="detail-value" id="success-discount-deducted">0 pts</span>
+            </div>
+        </div>
+
         <p class="success-message">Keep scanning to earn more rewards!</p>
 
         <!-- Action Buttons -->
@@ -987,6 +1026,67 @@ body {
     font-size: 16px;
 }
 
+/* Discount Info Card */
+.discount-info-card {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 2px solid #f59e0b;
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    margin-bottom: var(--space-6);
+}
+
+.discount-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+    color: #92400e;
+}
+
+.discount-header svg {
+    color: #f59e0b;
+}
+
+.discount-title {
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.discount-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #78350f;
+    margin-bottom: var(--space-3);
+}
+
+.discount-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+}
+
+.discount-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #92400e;
+    font-weight: 500;
+}
+
+.stat-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: #78350f;
+}
+
+.stat-value.danger {
+    color: #dc2626;
+}
+
 /* Total Card */
 .total-card {
     display: flex;
@@ -1356,6 +1456,51 @@ body {
     50% {
         transform: rotateY(180deg);
     }
+}
+
+/* Success Discount Info */
+.success-discount-info {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border-radius: var(--radius-xl);
+    padding: var(--space-4);
+    margin-bottom: var(--space-6);
+    animation: fadeInUp 0.5s ease-out 0.75s backwards;
+}
+
+.success-discount-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+}
+
+.success-discount-badge svg {
+    color: #fbbf24;
+    fill: #fbbf24;
+}
+
+.success-discount-detail {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-3);
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-lg);
+}
+
+.detail-label {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.detail-value {
+    font-size: 16px;
+    font-weight: 700;
 }
 
 .success-message {
@@ -2016,8 +2161,21 @@ function setLoadingState(button, loading) {
     }
 }
 
-function showSuccess(points) {
+function showSuccess(points, discountInfo = null) {
     document.getElementById('points-amount').textContent = points;
+
+    // Show discount info if applicable
+    const successDiscountInfo = document.getElementById('success-discount-info');
+    if (discountInfo) {
+        document.getElementById('success-discount-text').textContent =
+            `${discountInfo.percentage}% Discount Applied!`;
+        document.getElementById('success-discount-deducted').textContent =
+            `${discountInfo.points_cost} pts`;
+        successDiscountInfo.classList.remove('hidden');
+    } else {
+        successDiscountInfo.classList.add('hidden');
+    }
+
     const successOverlay = document.getElementById('success-overlay');
 
     // Fix for iOS Safari: Prevent background scroll
@@ -2208,6 +2366,17 @@ function displayReceipt(receipt) {
         itemsList.innerHTML = '<div class="receipt-item"><div class="item-details"><div class="item-name">No items found</div></div></div>';
     }
 
+    // Display discount information if available
+    const discountCard = document.getElementById('discount-info-card');
+    if (receipt.discount) {
+        document.getElementById('discount-name').textContent = receipt.discount.name;
+        document.getElementById('discount-percentage').textContent = receipt.discount.discount_percentage + '%';
+        document.getElementById('discount-cost').textContent = receipt.discount.points_cost + ' pts';
+        discountCard.classList.remove('hidden');
+    } else {
+        discountCard.classList.add('hidden');
+    }
+
     document.getElementById('total-points').textContent = receipt.total_points || 0;
     const claimButton = document.getElementById('claim-button');
     const btnContent = claimButton.querySelector('.btn-content');
@@ -2249,7 +2418,7 @@ function claimPoints() {
     .then(data => {
         if (data.success) {
             closeModal();
-            showSuccess(data.points_earned);
+            showSuccess(data.points_earned, data.discount);
             updatePointsDisplay(data.new_balance);
         } else {
             showError(data.message || 'Failed to claim points');

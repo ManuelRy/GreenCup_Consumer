@@ -200,11 +200,20 @@ class ReceiptController extends Controller
             ]);
             DB::commit();
 
+            // Build success message with discount info
+            $message = 'Points claimed successfully!';
+            if ($discountApplied) {
+                $message .= " 🎉 {$discountInfo['percentage']}% discount applied! {$discountInfo['points_cost']} points were deducted from your balance.";
+            }
+
             $response = [
                 'success' => true,
-                'message' => 'Points claimed successfully!' . ($discountApplied ? ' Discount applied!' : ''),
+                'message' => $message,
                 'points_earned' => $pending->total_points,
+                'points_deducted' => $discountApplied ? $discountInfo['points_cost'] : 0,
+                'net_points' => $pending->total_points - ($discountApplied ? $discountInfo['points_cost'] : 0),
                 'new_balance' => $consumer_point->earned,
+                'available_balance' => $consumer_point->coins,
                 'seller' => [
                     'name' => $pending->seller->business_name,
                     'address' => $pending->seller->address
