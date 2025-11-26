@@ -1,0 +1,1280 @@
+{
+	"info": {
+		"_postman_id": "gc-consumer-2025-001",
+		"name": "GreenCup Consumer API Collection",
+		"description": "Complete API collection for GreenCup Consumer web application with all routes and endpoints",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "greencup-team"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Login Page",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/login",
+							"host": ["{{base_url}}"],
+							"path": ["login"]
+						},
+						"description": "Display login form for consumers"
+					}
+				},
+				{
+					"name": "Login Submit",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "email",
+									"value": "john.doe@example.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "Password123!",
+									"type": "text"
+								},
+								{
+									"key": "remember_me",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/login",
+							"host": ["{{base_url}}"],
+							"path": ["login"]
+						},
+						"description": "Authenticate consumer with email and password"
+					}
+				},
+				{
+					"name": "Register Page",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/register",
+							"host": ["{{base_url}}"],
+							"path": ["register"]
+						},
+						"description": "Display registration form for new consumers"
+					}
+				},
+				{
+					"name": "Register Submit",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "first_name",
+									"value": "John",
+									"type": "text"
+								},
+								{
+									"key": "last_name",
+									"value": "Doe",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "john.doe@example.com",
+									"type": "text"
+								},
+								{
+									"key": "phone_number",
+									"value": "+1234567890",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "Password123!",
+									"type": "text"
+								},
+								{
+									"key": "password_confirmation",
+									"value": "Password123!",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/register",
+							"host": ["{{base_url}}"],
+							"path": ["register"]
+						},
+						"description": "Create new consumer account"
+					}
+				},
+				{
+					"name": "Logout (POST)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/logout",
+							"host": ["{{base_url}}"],
+							"path": ["logout"]
+						},
+						"description": "Logout authenticated consumer"
+					}
+				},
+				{
+					"name": "Logout (GET)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/logout",
+							"host": ["{{base_url}}"],
+							"path": ["logout"]
+						},
+						"description": "Alternative logout endpoint via GET request"
+					}
+				}
+			]
+		},
+		{
+			"name": "Dashboard & Core Pages",
+			"item": [
+				{
+					"name": "Dashboard (Authenticated)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/dashboard",
+							"host": ["{{base_url}}"],
+							"path": ["dashboard"]
+						},
+						"description": "View consumer dashboard with points, recent transactions, and overview"
+					}
+				},
+				{
+					"name": "Guest Dashboard",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/guest/dashboard",
+							"host": ["{{base_url}}"],
+							"path": ["guest", "dashboard"]
+						},
+						"description": "Public dashboard view without authentication"
+					}
+				},
+				{
+					"name": "QR Code",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/qr-code",
+							"host": ["{{base_url}}"],
+							"path": ["qr-code"]
+						},
+						"description": "Display consumer QR code for scanning at stores"
+					}
+				},
+				{
+					"name": "Test Images",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/test-images",
+							"host": ["{{base_url}}"],
+							"path": ["test-images"]
+						},
+						"description": "Debug route for testing image display"
+					}
+				}
+			]
+		},
+		{
+			"name": "Account Management",
+			"item": [
+				{
+					"name": "Account Overview",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/account",
+							"host": ["{{base_url}}"],
+							"path": ["account"]
+						},
+						"description": "View account overview with wallets and transaction summary"
+					}
+				},
+				{
+					"name": "Account Edit Page",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/account/edit",
+							"host": ["{{base_url}}"],
+							"path": ["account", "edit"]
+						},
+						"description": "Display account edit form"
+					}
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "full_name",
+									"value": "John Alexander Doe",
+									"type": "text"
+								},
+								{
+									"key": "phone_number",
+									"value": "+1234567890",
+									"type": "text"
+								},
+								{
+									"key": "gender",
+									"value": "male",
+									"type": "text"
+								},
+								{
+									"key": "date_of_birth",
+									"value": "1990-05-15",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/account/profile",
+							"host": ["{{base_url}}"],
+							"path": ["account", "profile"]
+						},
+						"description": "Update consumer profile information"
+					}
+				},
+				{
+					"name": "Update Password",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "current_password",
+									"value": "OldPassword123!",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "NewPassword123!",
+									"type": "text"
+								},
+								{
+									"key": "password_confirmation",
+									"value": "NewPassword123!",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/account/password",
+							"host": ["{{base_url}}"],
+							"path": ["account", "password"]
+						},
+						"description": "Change consumer password"
+					}
+				},
+				{
+					"name": "Transaction History",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/account/transactions?type=earn&store=1&date_from=2025-01-01&date_to=2025-12-31",
+							"host": ["{{base_url}}"],
+							"path": ["account", "transactions"],
+							"query": [
+								{
+									"key": "type",
+									"value": "earn",
+									"description": "Filter by type: earn, spend"
+								},
+								{
+									"key": "store",
+									"value": "1",
+									"description": "Filter by store ID"
+								},
+								{
+									"key": "date_from",
+									"value": "2025-01-01",
+									"description": "Start date filter"
+								},
+								{
+									"key": "date_to",
+									"value": "2025-12-31",
+									"description": "End date filter"
+								}
+							]
+						},
+						"description": "View detailed transaction history with filters"
+					}
+				}
+			]
+		},
+		{
+			"name": "Stores & Gallery",
+			"item": [
+				{
+					"name": "Gallery (Authenticated)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/gallery",
+							"host": ["{{base_url}}"],
+							"path": ["gallery"]
+						},
+						"description": "View store gallery and product photos"
+					}
+				},
+				{
+					"name": "Guest Gallery",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/guest/gallery",
+							"host": ["{{base_url}}"],
+							"path": ["guest", "gallery"]
+						},
+						"description": "Public gallery view without authentication"
+					}
+				},
+				{
+					"name": "Store Map (Authenticated)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/map",
+							"host": ["{{base_url}}"],
+							"path": ["map"]
+						},
+						"description": "View interactive map of stores"
+					}
+				},
+				{
+					"name": "Guest Store Map",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/guest/map",
+							"host": ["{{base_url}}"],
+							"path": ["guest", "map"]
+						},
+						"description": "Public map view without authentication"
+					}
+				},
+				{
+					"name": "Store Profile by Seller ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/seller/1",
+							"host": ["{{base_url}}"],
+							"path": ["seller", "1"]
+						},
+						"description": "View individual store profile"
+					}
+				},
+				{
+					"name": "Store Profile by Store ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/store/1",
+							"host": ["{{base_url}}"],
+							"path": ["store", "1"]
+						},
+						"description": "View individual store profile (alternative route)"
+					}
+				}
+			]
+		},
+		{
+			"name": "Receipt Scanning",
+			"item": [
+				{
+					"name": "Scan Receipt Page",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/scan-receipt",
+							"host": ["{{base_url}}"],
+							"path": ["scan-receipt"]
+						},
+						"description": "Display receipt scanning page"
+					}
+				},
+				{
+					"name": "Check Receipt",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"receipt_code\": \"TEST-ABC12345\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/receipt/check",
+							"host": ["{{base_url}}"],
+							"path": ["api", "receipt", "check"]
+						},
+						"description": "Check if receipt code is valid and available"
+					}
+				},
+				{
+					"name": "Claim Receipt",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"receipt_code\": \"TEST-ABC12345\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/receipt/claim",
+							"host": ["{{base_url}}"],
+							"path": ["api", "receipt", "claim"]
+						},
+						"description": "Claim points from a receipt"
+					}
+				},
+				{
+					"name": "Receipt History",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/receipt/history",
+							"host": ["{{base_url}}"],
+							"path": ["api", "receipt", "history"]
+						},
+						"description": "Get consumer's receipt claim history"
+					}
+				},
+				{
+					"name": "Test Create Receipt",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/test-receipt",
+							"host": ["{{base_url}}"],
+							"path": ["test-receipt"]
+						},
+						"description": "Create a test receipt for testing (development only)"
+					}
+				},
+				{
+					"name": "Test Approve Receipt",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/test-approve/TEST-ABC12345",
+							"host": ["{{base_url}}"],
+							"path": ["test-approve", "TEST-ABC12345"]
+						},
+						"description": "Approve a test receipt (development only)"
+					}
+				},
+				{
+					"name": "Test Reject Receipt",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/test-reject/TEST-ABC12345",
+							"host": ["{{base_url}}"],
+							"path": ["test-reject", "TEST-ABC12345"]
+						},
+						"description": "Reject a test receipt (development only)"
+					}
+				},
+				{
+					"name": "Admin Receipts View",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/receipts",
+							"host": ["{{base_url}}"],
+							"path": ["admin", "receipts"]
+						},
+						"description": "View all pending receipts for approval (testing)"
+					}
+				}
+			]
+		},
+		{
+			"name": "Rewards",
+			"item": [
+				{
+					"name": "Rewards List",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/rewards",
+							"host": ["{{base_url}}"],
+							"path": ["rewards"]
+						},
+						"description": "View all available rewards"
+					}
+				},
+				{
+					"name": "My Rewards",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/rewards/my",
+							"host": ["{{base_url}}"],
+							"path": ["rewards", "my"]
+						},
+						"description": "View consumer's claimed rewards"
+					}
+				},
+				{
+					"name": "Redeem Reward",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reward_id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/rewards/1/redeem",
+							"host": ["{{base_url}}"],
+							"path": ["rewards", "1", "redeem"]
+						},
+						"description": "Redeem a reward with points"
+					}
+				},
+				{
+					"name": "Process Reward",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"action\": \"collect\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/rewards/1/process",
+							"host": ["{{base_url}}"],
+							"path": ["rewards", "1", "process"]
+						},
+						"description": "Process reward collection or cancellation"
+					}
+				},
+				{
+					"name": "Redemption History",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/rewards/history",
+							"host": ["{{base_url}}"],
+							"path": ["rewards", "history"]
+						},
+						"description": "View reward redemption history"
+					}
+				},
+				{
+					"name": "Redemption Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/rewards/redemption/1",
+							"host": ["{{base_url}}"],
+							"path": ["rewards", "redemption", "1"]
+						},
+						"description": "View specific redemption details"
+					}
+				},
+				{
+					"name": "Search Rewards",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/rewards/search?query=coffee",
+							"host": ["{{base_url}}"],
+							"path": ["api", "rewards", "search"],
+							"query": [
+								{
+									"key": "query",
+									"value": "coffee"
+								}
+							]
+						},
+						"description": "Search rewards by keyword"
+					}
+				},
+				{
+					"name": "Filter Rewards",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/rewards/filter?type=discount&min_points=100&max_points=500",
+							"host": ["{{base_url}}"],
+							"path": ["api", "rewards", "filter"],
+							"query": [
+								{
+									"key": "type",
+									"value": "discount"
+								},
+								{
+									"key": "min_points",
+									"value": "100"
+								},
+								{
+									"key": "max_points",
+									"value": "500"
+								}
+							]
+						},
+						"description": "Filter rewards by criteria"
+					}
+				},
+				{
+					"name": "Check Reward Availability",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/rewards/1/check-availability",
+							"host": ["{{base_url}}"],
+							"path": ["api", "rewards", "1", "check-availability"]
+						},
+						"description": "Check if reward is available to redeem"
+					}
+				}
+			]
+		},
+		{
+			"name": "Environmental Impact",
+			"item": [
+				{
+					"name": "Environmental Impact (Authenticated)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/environmental-impact",
+							"host": ["{{base_url}}"],
+							"path": ["environmental-impact"]
+						},
+						"description": "View environmental impact statistics and achievements"
+					}
+				},
+				{
+					"name": "Guest Environmental Impact",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/guest/environmental-impact",
+							"host": ["{{base_url}}"],
+							"path": ["guest", "environmental-impact"]
+						},
+						"description": "Public environmental impact view"
+					}
+				}
+			]
+		},
+		{
+			"name": "Reports",
+			"item": [
+				{
+					"name": "Reports List",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/reports",
+							"host": ["{{base_url}}"],
+							"path": ["reports"]
+						},
+						"description": "View all reports submitted by consumer"
+					}
+				},
+				{
+					"name": "Create Report Page",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/reports/create",
+							"host": ["{{base_url}}"],
+							"path": ["reports", "create"]
+						},
+						"description": "Display report creation form"
+					}
+				},
+				{
+					"name": "Submit Report",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "title",
+									"value": "Store Issue Report",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "The store was out of reusable cups",
+									"type": "text"
+								},
+								{
+									"key": "store_id",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "type",
+									"value": "issue",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/reports",
+							"host": ["{{base_url}}"],
+							"path": ["reports"]
+						},
+						"description": "Submit a new report"
+					}
+				}
+			]
+		},
+		{
+			"name": "Notifications",
+			"item": [
+				{
+					"name": "Get Notifications (AJAX)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/ajax/notifications",
+							"host": ["{{base_url}}"],
+							"path": ["ajax", "notifications"]
+						},
+						"description": "Get consumer notifications via AJAX"
+					}
+				}
+			]
+		},
+		{
+			"name": "API - Consumer",
+			"item": [
+				{
+					"name": "Get Consumer Points",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/consumer/points",
+							"host": ["{{base_url}}"],
+							"path": ["api", "consumer", "points"]
+						},
+						"description": "Get consumer's current point balance"
+					}
+				}
+			]
+		},
+		{
+			"name": "API - Stores",
+			"item": [
+				{
+					"name": "Get All Stores",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/stores",
+							"host": ["{{base_url}}"],
+							"path": ["api", "stores"]
+						},
+						"description": "Get list of all stores"
+					}
+				},
+				{
+					"name": "Get Store Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/store/1/details",
+							"host": ["{{base_url}}"],
+							"path": ["api", "store", "1", "details"]
+						},
+						"description": "Get detailed information about a specific store"
+					}
+				},
+				{
+					"name": "Get Store Transactions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/store/1/transactions",
+							"host": ["{{base_url}}"],
+							"path": ["api", "store", "1", "transactions"]
+						},
+						"description": "Get consumer's transactions with specific store"
+					}
+				},
+				{
+					"name": "Search Stores",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/stores/search?query=coffee&location=downtown",
+							"host": ["{{base_url}}"],
+							"path": ["api", "stores", "search"],
+							"query": [
+								{
+									"key": "query",
+									"value": "coffee"
+								},
+								{
+									"key": "location",
+									"value": "downtown"
+								}
+							]
+						},
+						"description": "Search stores by name or location"
+					}
+				},
+				{
+					"name": "Calculate Store Distance",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"store_id\": 1,\n  \"latitude\": 40.7128,\n  \"longitude\": -74.0060\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/stores/distance",
+							"host": ["{{base_url}}"],
+							"path": ["api", "stores", "distance"]
+						},
+						"description": "Calculate distance to store from user location"
+					}
+				}
+			]
+		},
+		{
+			"name": "API - Gallery",
+			"item": [
+				{
+					"name": "Get Gallery Feed",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/gallery/feed?page=1&limit=20",
+							"host": ["{{base_url}}"],
+							"path": ["api", "gallery", "feed"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								}
+							]
+						},
+						"description": "Get paginated gallery feed"
+					}
+				},
+				{
+					"name": "Search Gallery",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/gallery/search?query=eco&category=product",
+							"host": ["{{base_url}}"],
+							"path": ["api", "gallery", "search"],
+							"query": [
+								{
+									"key": "query",
+									"value": "eco"
+								},
+								{
+									"key": "category",
+									"value": "product"
+								}
+							]
+						},
+						"description": "Search gallery photos by keyword"
+					}
+				},
+				{
+					"name": "Get Photo Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/gallery/stats",
+							"host": ["{{base_url}}"],
+							"path": ["api", "gallery", "stats"]
+						},
+						"description": "Get gallery statistics"
+					}
+				}
+			]
+		},
+		{
+			"name": "Public API (No Auth)",
+			"item": [
+				{
+					"name": "Public - Get Stores",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/public-api/stores",
+							"host": ["{{base_url}}"],
+							"path": ["public-api", "stores"]
+						},
+						"description": "Get stores list (public access)"
+					}
+				},
+				{
+					"name": "Public - Get Store Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/public-api/store/1",
+							"host": ["{{base_url}}"],
+							"path": ["public-api", "store", "1"]
+						},
+						"description": "Get store details (public access)"
+					}
+				},
+				{
+					"name": "Public - Search Stores",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/public-api/stores/search?query=green",
+							"host": ["{{base_url}}"],
+							"path": ["public-api", "stores", "search"],
+							"query": [
+								{
+									"key": "query",
+									"value": "green"
+								}
+							]
+						},
+						"description": "Search stores (public access)"
+					}
+				},
+				{
+					"name": "Public - Calculate Distance",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"store_id\": 1,\n  \"latitude\": 40.7128,\n  \"longitude\": -74.0060\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/public-api/stores/distance",
+							"host": ["{{base_url}}"],
+							"path": ["public-api", "stores", "distance"]
+						},
+						"description": "Calculate store distance (public access)"
+					}
+				},
+				{
+					"name": "Public - Gallery Feed",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/public-api/gallery/feed",
+							"host": ["{{base_url}}"],
+							"path": ["public-api", "gallery", "feed"]
+						},
+						"description": "Get gallery feed (public access)"
+					}
+				},
+				{
+					"name": "Public - Gallery Search",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/public-api/gallery/search?query=sustainable",
+							"host": ["{{base_url}}"],
+							"path": ["public-api", "gallery", "search"],
+							"query": [
+								{
+									"key": "query",
+									"value": "sustainable"
+								}
+							]
+						},
+						"description": "Search gallery (public access)"
+					}
+				},
+				{
+					"name": "Public - Gallery Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/public-api/gallery/stats",
+							"host": ["{{base_url}}"],
+							"path": ["public-api", "gallery", "stats"]
+						},
+						"description": "Get gallery stats (public access)"
+					}
+				},
+				{
+					"name": "Public - Seller Profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/public-api/seller/1",
+							"host": ["{{base_url}}"],
+							"path": ["public-api", "seller", "1"]
+						},
+						"description": "View seller profile (public access)"
+					}
+				},
+				{
+					"name": "Public - Store Profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/public-api/store/1",
+							"host": ["{{base_url}}"],
+							"path": ["public-api", "store", "1"]
+						},
+						"description": "View store profile (public access)"
+					}
+				},
+				{
+					"name": "Public - Store Items",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/public-api/store/1/items",
+							"host": ["{{base_url}}"],
+							"path": ["public-api", "store", "1", "items"]
+						},
+						"description": "Get store items (public access)"
+					}
+				}
+			]
+		},
+		{
+			"name": "File Proxy",
+			"item": [
+				{
+					"name": "Proxy File",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/files/images/stores/store-logo.jpg",
+							"host": ["{{base_url}}"],
+							"path": ["files", "images", "stores", "store-logo.jpg"]
+						},
+						"description": "Proxy file serving for remote assets over HTTPS"
+					}
+				}
+			]
+		},
+		{
+			"name": "Legacy Routes",
+			"item": [
+				{
+					"name": "Legacy - Create Consumer Page",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/consumers/create",
+							"host": ["{{base_url}}"],
+							"path": ["consumers", "create"]
+						},
+						"description": "Legacy registration route (redirects to /register)"
+					}
+				},
+				{
+					"name": "Legacy - Store Consumer",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "first_name",
+									"value": "Jane",
+									"type": "text"
+								},
+								{
+									"key": "last_name",
+									"value": "Smith",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "jane.smith@example.com",
+									"type": "text"
+								},
+								{
+									"key": "phone_number",
+									"value": "+9876543210",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "SecurePass123!",
+									"type": "text"
+								},
+								{
+									"key": "password_confirmation",
+									"value": "SecurePass123!",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/consumers",
+							"host": ["{{base_url}}"],
+							"path": ["consumers"]
+						},
+						"description": "Legacy registration submission route"
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		}
+	]
+}
